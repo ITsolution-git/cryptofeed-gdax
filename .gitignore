@@ -1,0 +1,7 @@
+#Ignore Folders
+dist/
+node_modules/
+
+#Ignore Files
+**/.DS_Store
+npm-debug.log
