@@ -1,3 +1,5 @@
+
+import GroupRouter from './routes/GroupRouter';
 import * as path from 'path';
 import * as express from 'express';
 import * as logger from 'morgan';
@@ -36,6 +38,8 @@ class App {
       });
     });
     this.express.use('/', router);
+//    this.express.use('/groups', GroupsRouter);
+    this.express.use('/api/v1/groups', GroupRouter);
   }
 
 }
