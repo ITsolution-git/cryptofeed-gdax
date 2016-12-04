@@ -1,12 +1,14 @@
 const bcrypt = require('bcryptjs');
 const knex = require('../db/connection');
-var util = require('util');
 
+/**
+* Inserts user data into database
+*/
 function createUser(req) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
 
-  var rtn = knex('user')
+  return knex('user')
   .insert({
     email: req.body.email,
     username: req.body.username,
@@ -19,10 +21,25 @@ function createUser(req) {
     longitude: req.body.longitude
   })
   .returning('*');
+}
 
-  return rtn;
+function getUserByUsername(username) {
+  return knex('user').where({username}).first();
+}
+
+function getUserByEmail(email) {
+  return knex('user').where({email}).first();
+}
+
+function comparePass(userPassword, databasePassword) {
+  const bool = bcrypt.compareSync(userPassword, databasePassword);
+  if (!bool) throw new Error('invalid password');
+  else return true;
 }
 
 module.exports = {
-  createUser
+  createUser,
+  getUserByUsername,
+  getUserByEmail,
+  comparePass
 };

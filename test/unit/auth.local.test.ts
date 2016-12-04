@@ -4,7 +4,6 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 
 const should = chai.should();
-
 const localAuth = require('../../src/auth/local');
 
 describe('auth : local', () => {
