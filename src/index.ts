@@ -1,3 +1,4 @@
+var dotenv = require('dotenv').load();
 import * as http from 'http';
 import * as debug from 'debug';
 

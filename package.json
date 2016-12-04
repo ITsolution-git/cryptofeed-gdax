@@ -1,5 +1,5 @@
 {
-  "name": "typescript-node-api",
+  "name": "actionnow-node-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -28,9 +28,19 @@
     "typescript": "^2.0.6"
   },
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.15.2",
+    "bookshelf": "^0.10.2",
     "debug": "^2.2.0",
+    "dotenv": "^2.0.0",
     "express": "^4.14.0",
-    "morgan": "^1.7.0"
+    "generator-galvanize-express": "^1.2.4",
+    "jwt-simple": "^0.5.1",
+    "knex": "^0.12.6",
+    "moment": "^2.15.2",
+    "morgan": "^1.7.0",
+    "mysql": "^2.12.0",
+    "node-env-file": "^0.1.8",
+    "yo": "^1.8.5"
   }
 }

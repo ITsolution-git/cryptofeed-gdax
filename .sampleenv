@@ -1,0 +1,6 @@
+NODE_ENV=environment
+TOKEN_SECRET=abc123
+DEV_DB_HOST=servers
+DEV_DB_NAME=database
+DEV_DB_USER=user
+DEV_DB_PASSWORD=abc123
