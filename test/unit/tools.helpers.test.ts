@@ -10,7 +10,7 @@ const should = chai.should();
 
 const salt = bcrypt.genSaltSync();
 const hash = bcrypt.hashSync('testpassword', salt);
-const helpers = require('../../src/auth/_helpers');
+const helpers = require('../../src/tools/_helpers');
 
 
 describe('auth : helpers', () => {

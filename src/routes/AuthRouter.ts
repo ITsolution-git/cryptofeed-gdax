@@ -1,7 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
 
-const localAuth = require('../auth/local');
-const authHelpers = require('../auth/_helpers');
+const tokenHelpers = require('../tools/tokens');
+const toolHelpers = require('../tools/_helpers');
 var util = require('util');
 
 export class AuthRouter {
@@ -20,11 +20,11 @@ export class AuthRouter {
  * @param  req Request object
  * @param  res Response object
  * @param  next NextFunction that is called
- * @return JSON of user object
+ * @return 200 JSON of user object
  */
   public register(req: Request, res: Response, next: NextFunction) {
-    return authHelpers.createUser(req)
-    .then((user) => {return localAuth.encodeToken(user[0]); })
+    return toolHelpers.createUser(req)
+    .then((user) => {return tokenHelpers.encodeToken(user[0]); })
     .then((token) => {
       res.status(200).json({
         status: 'success',
@@ -44,17 +44,17 @@ export class AuthRouter {
   * @param  req Request object
   * @param  res Response object
   * @param  next NextFunction that is called
-  * @return JSON of user object and auth token
+  * @return 200 JSON of user object and auth token
   */
   public login(req: Request, res: Response, next: NextFunction) {
     const username = req.body.username;
     const password = req.body.password;
-    return authHelpers.getUserByUsername(username)
+    return toolHelpers.getUserByUsername(username)
     .then((response) => {
-      authHelpers.comparePass(password, response.password);
+      toolHelpers.comparePass(password, response.password);
       return response;
     })
-    .then((response) => { return localAuth.encodeToken(response); })
+    .then((response) => { return tokenHelpers.encodeToken(response); })
     .then((token) => {
       res.status(200).json({
         status: 'success',

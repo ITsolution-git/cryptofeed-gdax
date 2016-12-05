@@ -4,13 +4,13 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 
 const should = chai.should();
-const localAuth = require('../../src/auth/local');
+const localAuth = require('../../src/tools/tokens');
 
 describe('auth : local', () => {
 
   describe('encodeToken()', () => {
     it('should return a token', (done) => {
-      const results = localAuth.encodeToken({id: 1});
+      const results = localAuth.encodeToken({user_id: 1});
       should.exist(results);
       results.should.be.a('string');
       done();
@@ -19,7 +19,7 @@ describe('auth : local', () => {
 
   describe('decodeToken()', () => {
     it('should return a payload', (done) => {
-      const token = localAuth.encodeToken({id: 1});
+      const token = localAuth.encodeToken({user_id: 1});
       should.exist(token);
       token.should.be.a('string');
       localAuth.decodeToken(token, (err, res) => {

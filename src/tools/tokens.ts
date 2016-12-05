@@ -1,12 +1,13 @@
 const moment = require('moment');
 const jwt = require('jwt-simple');
 var dotenv = require('dotenv').load();
+var util = require('util');
 
 function encodeToken(user) {
   const playload = {
     exp: moment().add(14, 'days').unix(),
     iat: moment().unix(),
-    sub: user.id
+    sub: user.user_id
   };
   return jwt.encode(playload, process.env.TOKEN_SECRET);
 }
@@ -21,5 +22,5 @@ function decodeToken(token, callback) {
 
 module.exports = {
   encodeToken,
-  decodeToken
+  decodeToken,
 };
