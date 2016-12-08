@@ -43,10 +43,22 @@ function getUserByEmail(email) {
 
 /**
 * Returns user data for the specified id
-* @param id of the account
+* @param id of the user
 */
 function getUserById(user_id) {
   return knex('user').where({user_id}).first();
+}
+
+/**
+* Returns all the groups the user belongs to
+* @param user_id id of the user
+*/
+function getGroups(user_id) {
+  //TODO: Need to return creator profile info with the group
+  //TODO: Need to return group setting info with the group
+  return knex('group')
+    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
+    .where('user_id', user_id);
 }
 
 /**
@@ -99,6 +111,7 @@ module.exports = {
   getUserByUsername,
   getUserByEmail,
   getUserById,
+  getGroups,
   comparePass,
   ensureAuthenticated,
 };

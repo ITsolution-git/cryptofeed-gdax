@@ -47,8 +47,38 @@ export class UserRouter {
       });
     }
 
+    /**
+    * Updates/Saves the current user's information
+    */
     public putUser(req, res, next) {
+      //needs to verify current user (token) is being updated
+    }
 
+    /**
+    * Gets list of groups user belongs to
+    */
+    public getGroups(req, res, next) {
+      var header = req.headers.authorization.split(' ');
+      var token = header[1];
+      tokenHelpers.decodeToken(token, (err, callback) => {
+        if(err) {
+            res.status(401).json({
+            status: 'Token has expired',
+            message: 'Your token has expired.'
+          });
+        } else {
+          let user_id = callback.sub;
+          var groups = toolHelpers.getGroups(user_id)
+          .asCallback((err, values) => {
+            res.status(200).json({
+              status: 'success',
+              token: token,
+              groups: values
+            });
+          });
+          //console.log('** groups ** ' + util.inspect(groups));
+        }
+      });
     }
 
   /**
@@ -57,6 +87,7 @@ export class UserRouter {
    */
   init() {
     this.router.get('/', this.getUser);
+    this.router.get('/groups', this.getGroups);
   }
 
 }
