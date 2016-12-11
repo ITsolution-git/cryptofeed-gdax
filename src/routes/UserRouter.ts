@@ -51,7 +51,28 @@ export class UserRouter {
     * Updates/Saves the current user's information
     */
     public putUser(req, res, next) {
-      //needs to verify current user (token) is being updated
+      var header = req.headers.authorization.split(' ');
+      var token = header[1];
+      tokenHelpers.decodeToken(token, (err, callback) => {
+        if(err) {
+            res.status(401).json({
+            status: 'Token has expired',
+            message: 'Your token has expired.'
+          });
+        } else {
+          let user_id = callback.sub;
+          toolHelpers.updateUser(user_id, req.body, function(err, count) {
+            var user = toolHelpers.getUserById(user_id)
+            .asCallback((err, values) => {
+              res.status(200).json({
+                status: 'success',
+                token: token,
+                user: values
+              });
+            });
+          });
+        }
+      });
     }
 
     /**
@@ -68,7 +89,7 @@ export class UserRouter {
           });
         } else {
           let user_id = callback.sub;
-          var groups = toolHelpers.getGroups(user_id)
+          var groups = toolHelpers.getUsersGroups(user_id)
           .asCallback((err, values) => {
             res.status(200).json({
               status: 'success',
@@ -76,7 +97,6 @@ export class UserRouter {
               groups: values
             });
           });
-          //console.log('** groups ** ' + util.inspect(groups));
         }
       });
     }
@@ -86,7 +106,9 @@ export class UserRouter {
    * endpoints.
    */
   init() {
+    // Routes for /api/v1/user
     this.router.get('/', this.getUser);
+    this.router.put('/', this.putUser);
     this.router.get('/groups', this.getGroups);
   }
 

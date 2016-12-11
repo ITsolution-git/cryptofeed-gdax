@@ -53,12 +53,25 @@ function getUserById(user_id) {
 * Returns all the groups the user belongs to
 * @param user_id id of the user
 */
-function getGroups(user_id) {
+function getUsersGroups(user_id) {
   //TODO: Need to return creator profile info with the group
   //TODO: Need to return group setting info with the group
   return knex('group')
     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
     .where('user_id', user_id);
+}
+
+/**
+* Updates the user record based on JSON array userBody
+* @param user_id int id of the user being updatedUser
+* @param userBody JSON array of user fields to update
+*/
+function updateUser(user_id, userBody, callback) {
+  knex('user').where({user_id})
+    .update(userBody)
+    .then(function(count) {
+      callback(null, count);
+    });
 }
 
 /**
@@ -111,7 +124,8 @@ module.exports = {
   getUserByUsername,
   getUserByEmail,
   getUserById,
-  getGroups,
+  getUsersGroups,
+  updateUser,
   comparePass,
   ensureAuthenticated,
 };

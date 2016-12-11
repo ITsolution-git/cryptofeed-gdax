@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 // Need to replace with database
-const Groups = require('../data.json');
+const Groups = "{}"; //require('../data.json');
 
 export class GroupRouter {
   router: Router
@@ -25,7 +25,7 @@ export class GroupRouter {
    */
   public getOne(req: Request, res: Response, next: NextFunction) {
     let query = parseInt(req.params.id);
-    let group = Groups.find(group => group.id === query);
+    let group = "{}"; //Groups.find(group => group.id === query);
     if (group) {
       res.status(200)
         .send({
