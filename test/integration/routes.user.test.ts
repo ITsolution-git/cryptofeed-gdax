@@ -10,7 +10,7 @@ const knex = require('../../src/db/connection');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe('routes : user', () => {
+describe('********* routes : user *********', () => {
   beforeEach(() => {
     return knex.migrate.rollback()
     .then(() => { return knex.migrate.latest(); })
@@ -22,7 +22,7 @@ describe('routes : user', () => {
   });
 
   describe('GET /api/v1/user', () => {
-    it('should return a success', (done) => {
+    it('should return a success and correct user object', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
@@ -39,6 +39,10 @@ describe('routes : user', () => {
           res.status.should.eql(200);
           res.type.should.eql('application/json');
           res.body.status.should.eql('success');
+          res.body.should.have.property('user');
+          res.body.user.should.have.property('username');
+          res.body.user.username.should.equal('seeder1');
+
           done();
         });
       });

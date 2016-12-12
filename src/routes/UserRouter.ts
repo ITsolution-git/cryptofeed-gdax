@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 
-const tokenHelpers = require('../tools/tokens');
+const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
 
@@ -24,26 +24,15 @@ export class UserRouter {
    * @return 200 JSON of user object
    */
     public getUser(req, res, next) {
-      // decode the token
-      var header = req.headers.authorization.split(' ');
-      var token = header[1];
-      tokenHelpers.decodeToken(token, (err, callback) => {
-        if(err) {
-            res.status(401).json({
-            status: 'Token has expired',
-            message: 'Your token has expired.'
+      tokenHelper.getUserIdFromRequest(req, (err, user_id) => {
+        return toolHelpers.getUserById(user_id)
+        .asCallback((err, user) => {
+          res.status(200).json({
+            status: 'success',
+            token: tokenHelper.encodeToken(user_id),
+            user: user
           });
-        } else {
-          let user_id = callback.sub;
-          var user = toolHelpers.getUserById(user_id)
-          .asCallback((err, values) => {
-            res.status(200).json({
-              status: 'success',
-              token: token,
-              user: values
-            });
-          });
-        }
+        });
       });
     }
 
@@ -53,7 +42,7 @@ export class UserRouter {
     public putUser(req, res, next) {
       var header = req.headers.authorization.split(' ');
       var token = header[1];
-      tokenHelpers.decodeToken(token, (err, callback) => {
+      tokenHelper.decodeToken(token, (err, callback) => {
         if(err) {
             res.status(401).json({
             status: 'Token has expired',
@@ -81,7 +70,7 @@ export class UserRouter {
     public getGroups(req, res, next) {
       var header = req.headers.authorization.split(' ');
       var token = header[1];
-      tokenHelpers.decodeToken(token, (err, callback) => {
+      tokenHelper.decodeToken(token, (err, callback) => {
         if(err) {
             res.status(401).json({
             status: 'Token has expired',

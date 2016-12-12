@@ -24,7 +24,7 @@ export class AuthRouter {
  */
   public register(req: Request, res: Response, next: NextFunction) {
     return toolHelpers.createUser(req)
-    .then((user) => {return tokenHelpers.encodeToken(user[0]); })
+    .then((user) => { return tokenHelpers.encodeToken(user[0].user_id); })
     .then((token) => {
       res.status(200).json({
         status: 'success',
@@ -54,7 +54,9 @@ export class AuthRouter {
       toolHelpers.comparePass(password, response.password);
       return response;
     })
-    .then((response) => { return tokenHelpers.encodeToken(response); })
+    .then((response) => {
+      return tokenHelpers.encodeToken(response.user_id);
+    })
     .then((token) => {
       res.status(200).json({
         status: 'success',
@@ -62,7 +64,7 @@ export class AuthRouter {
       });
     })
     .catch((err) => {
-      res.status(500).json({
+      res.status(401).json({
         status: 'error'
       });
     });

@@ -10,7 +10,7 @@ const knex = require('../../src/db/connection');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe('routes : root', () => {
+describe('********* routes : api root *********', () => {
 
   beforeEach(() => {
 

@@ -19,7 +19,7 @@ describe('auth : local', () => {
 
   describe('decodeToken()', () => {
     it('should return a payload', (done) => {
-      const token = localAuth.encodeToken({user_id: 1});
+      const token = localAuth.encodeToken(1);
       should.exist(token);
       token.should.be.a('string');
       localAuth.decodeToken(token, (err, res) => {

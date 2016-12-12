@@ -10,7 +10,7 @@ const knex = require('../../src/db/connection');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe('routes : auth', () => {
+describe('********* routes : auth *********', () => {
 
   beforeEach(() => {
     return knex.migrate.rollback()
@@ -78,7 +78,7 @@ describe('routes : auth', () => {
       })
       .end((err, res) => {
         should.exist(err);
-        res.status.should.eql(500);
+        res.status.should.eql(401);
         res.type.should.eql('application/json');
         res.body.status.should.eql('error');
         done();

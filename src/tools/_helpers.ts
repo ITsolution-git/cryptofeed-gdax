@@ -1,5 +1,5 @@
-const bcrypt = require('bcryptjs');
 const knex = require('../db/connection');
+const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
 var util = require('util');
 
@@ -10,6 +10,7 @@ function createUser(req) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
 
+  //TODO: Not returning correct user -- returning doesn't work for mysql
   return knex('user')
   .insert({
     email: req.body.email,
@@ -47,18 +48,6 @@ function getUserByEmail(email) {
 */
 function getUserById(user_id) {
   return knex('user').where({user_id}).first();
-}
-
-/**
-* Returns all the groups the user belongs to
-* @param user_id id of the user
-*/
-function getUsersGroups(user_id) {
-  //TODO: Need to return creator profile info with the group
-  //TODO: Need to return group setting info with the group
-  return knex('group')
-    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
-    .where('user_id', user_id);
 }
 
 /**
@@ -119,6 +108,60 @@ function ensureAuthenticated(req, res, next) {
   });
 }
 
+/**
+* Returns all the groups the user belongs to
+* @param user_id id of the user
+*/
+function getUsersGroups(user_id) {
+  //TODO: Need to return creator profile info with the group
+  //TODO: Need to return group setting info with the group
+  return knex('group')
+    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
+    .where('user_id', user_id);
+}
+
+/**
+* Returns all non-private and non-deleted groups (public call)
+*/
+function getAllGroups() {
+  return knex('group')
+    .where({'private':0, 'deleted_at':null});
+}
+
+function getOneGroup(group_id) {
+  return knex('group')
+    .where({group_id}).first();
+}
+
+function createGroupCode()
+{
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for( var i=0; i < 9; i++ )
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  //TODO: check that code doesn't already exist in database
+  return text;
+}
+
+function createGroup(ownerId, req) {
+  console.log('CREATE GROUP ************');
+  let groupCode = createGroupCode();
+  return knex('group')
+  .insert({
+    created_by_user_id: ownerId,
+    name: req.body.name,
+    description: req.body.description,
+    welcome: req.body.welcome,
+    latitude: req.body.latitude,
+    longitude: req.body.longitude,
+    private: req.body.private,
+    banner_image_url: req.body.banner_image_url,
+    group_code: groupCode
+  })
+  .returning('*');
+  //TODO: not returning correct group -- returning doesn't work with mysql
+}
+
 module.exports = {
   createUser,
   getUserByUsername,
@@ -128,4 +171,7 @@ module.exports = {
   updateUser,
   comparePass,
   ensureAuthenticated,
+  getAllGroups,
+  getOneGroup,
+  createGroup
 };

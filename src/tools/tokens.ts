@@ -3,11 +3,11 @@ const jwt = require('jwt-simple');
 var dotenv = require('dotenv').load();
 var util = require('util');
 
-function encodeToken(user) {
+function encodeToken(user_id) {
   const playload = {
     exp: moment().add(14, 'days').unix(),
     iat: moment().unix(),
-    sub: user.user_id
+    sub: user_id
   };
   return jwt.encode(playload, process.env.TOKEN_SECRET);
 }
@@ -20,7 +20,24 @@ function decodeToken(token, callback) {
   else callback(null, payload);
 }
 
+function getUserIdFromRequest(req, callback) {
+  if('authorization' in req.headers) {
+    var header = req.headers.authorization.split(' ');
+    var token = header[1];
+    this.decodeToken(token, (err, cb) => {
+      if(err) {
+        callback(err);
+      } else {
+        callback(null, cb.sub);
+      }
+    });
+  } else {
+    callback("AUTHORIZATION not found");
+  }
+}
+
 module.exports = {
   encodeToken,
   decodeToken,
+  getUserIdFromRequest
 };
