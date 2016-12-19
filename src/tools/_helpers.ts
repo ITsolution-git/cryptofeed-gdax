@@ -130,7 +130,7 @@ function getAllGroups() {
 
 function getOneGroup(group_id) {
   return knex('group')
-    .where({group_id}).first();
+    .select('*').where({group_id}).first();
 }
 
 function createGroupCode()
@@ -144,7 +144,6 @@ function createGroupCode()
 }
 
 function createGroup(ownerId, req) {
-  console.log('CREATE GROUP ************');
   let groupCode = createGroupCode();
   return knex('group')
   .insert({
@@ -158,7 +157,7 @@ function createGroup(ownerId, req) {
     banner_image_url: req.body.banner_image_url,
     group_code: groupCode
   })
-  .returning('*');
+  .returning('group_id');
   //TODO: not returning correct group -- returning doesn't work with mysql
 }
 

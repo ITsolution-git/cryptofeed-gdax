@@ -79,10 +79,10 @@ describe('********* routes : group *********', () => {
         .set('authorization', 'Bearer ' + response.body.token)
         .send({
           created_by_user_id: 1,
-          name: 'TEST GROUP',
+          name: 'TEST CREATE GROUP',
           private: 0,
-          description: 'TEST GROUP DESCRIPTION',
-          welcome: 'WELCOME TO THE TEST GROUP',
+          description: 'TEST CREATE GROUP DESCRIPTION',
+          welcome: 'WELCOME TO THE TEST CREATE GROUP',
           banner_image_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
           latitude: '51.5032520',
           longitude: '-0.1278990'
@@ -94,7 +94,8 @@ describe('********* routes : group *********', () => {
           res.body.status.should.eql('success');
           res.body.should.have.property('group');
           res.body.group.should.have.property('name');
-          res.body.group.name.should.equal('TEST GROUP');
+          res.body.group.name.should.equal('TEST CREATE GROUP');
+          res.body.group.created_by_user_id.should.equal(1);
           done();
         });
       });

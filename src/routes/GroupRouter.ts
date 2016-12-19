@@ -62,20 +62,19 @@ export class GroupRouter {
   }
 
   public createGroup(req: Request, res: Response, next: NextFunction) {
-    console.log('CREATEGROUP');
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
-      console.log('USER_ID: ' + userId);
       return toolHelpers.createGroup(userId, req)
-      .then((group) => {
-        console.log('RAN IT: ' + util.inspect(group));
-        res.status(200).json({
-          status: 'success',
-          token: tokenHelper.encodeToken(userId),
-          group: group
+      .then((groupId) => {
+        toolHelpers.getOneGroup(groupId[0])
+          .then((group) => {
+            res.status(200).json({
+              status: 'success',
+              token: tokenHelper.encodeToken(userId),
+              group: group
+            });
         });
       })
       .catch((err) => {
-        console.log('ERROR');
         res.status(500).json({
           status: 'error',
           message: 'Something went wrong, and we didn\'t create a user. :('
