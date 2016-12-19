@@ -3,6 +3,10 @@ const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
 var util = require('util');
 
+
+/***************************************************************/
+/**  User Functions **/
+/***************************************************************/
 /**
 * Inserts user data into database
 */
@@ -108,6 +112,10 @@ function ensureAuthenticated(req, res, next) {
   });
 }
 
+/***************************************************************/
+/**  Group Functions **/
+/***************************************************************/
+
 /**
 * Returns all the groups the user belongs to
 * @param user_id id of the user
@@ -132,7 +140,7 @@ function getAllGroups() {
 * Returns a single group as specified by group_id
 @param group_id ID of the group to return
 */
-function getOneGroup(group_id) {
+function getGroupById(group_id) {
   return knex('group')
     .select('*').where({group_id}).first();
 }
@@ -171,7 +179,16 @@ function createGroup(ownerId, req) {
   .returning('group_id');
 }
 
+function updateGroup(group_id, groupBody, callback) {
+  knex('group').where({group_id})
+    .update(groupBody)
+    .then(function(count) {
+      callback(null, count);
+    });
+}
+
 module.exports = {
+  // User Functions
   createUser,
   getUserByUsername,
   getUserByEmail,
@@ -180,7 +197,9 @@ module.exports = {
   updateUser,
   comparePass,
   ensureAuthenticated,
+  // Group Functions
   getAllGroups,
-  getOneGroup,
-  createGroup
+  getGroupById,
+  createGroup,
+  updateGroup,
 };

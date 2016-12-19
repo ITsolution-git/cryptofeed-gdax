@@ -101,4 +101,67 @@ describe('********* routes : group *********', () => {
       });
     });
   });
+
+  describe('POST /api/v1/groups', () => {
+    it('return 401 unauthorized', (done) => {
+      chai.request(app)
+      .post('/api/v1/groups')
+      .send({
+        created_by_user_id: 1,
+        name: 'TEST CREATE GROUP',
+        private: 0,
+        description: 'TEST CREATE GROUP DESCRIPTION',
+        welcome: 'WELCOME TO THE TEST CREATE GROUP',
+        banner_image_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
+        latitude: '51.5032520',
+        longitude: '-0.1278990'
+      })
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(401);
+        done();
+      });
+    });
+  });
+
+  describe('PUT /api/v1/groups/:id', () => {
+    it('should update group info and return updated group', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .put('/api/v1/groups/1')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .send({'name':'NEWLY UPDATED NAME','private':1})
+        .end((err, resp) => {
+          should.not.exist(err);
+          resp.status.should.eql(200);
+          resp.should.be.json;
+          resp.body.should.be.a('object');
+          resp.body.should.have.property('group');
+          resp.body.group.should.have.property('group_id');
+          resp.body.group.group_id.should.equal(1);
+          resp.body.group.name.should.equal('NEWLY UPDATED NAME');
+          resp.body.group.name.should.not.equal('Test Group 1');
+          resp.body.group.private.should.equal(1);
+          done();
+        });
+      });
+    });
+    it('should return an error when not logged in', (done) => {
+      chai.request(app)
+      .put('/api/v1/groups/1')
+      .send({'name':'NEW','private':1})
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(401);
+        done();
+      });
+    });
+  });
 });

@@ -42,7 +42,7 @@ export class GroupRouter {
    */
   public getOne(req: Request, res: Response, next: NextFunction) {
     let groupId = parseInt(req.params.id);
-    return toolHelpers.getOneGroup(groupId)
+    return toolHelpers.getGroupById(groupId)
     .asCallback((err, values) => {
       if(err) {
         res.status(404)
@@ -65,7 +65,7 @@ export class GroupRouter {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
       return toolHelpers.createGroup(userId, req)
       .then((groupId) => {
-        toolHelpers.getOneGroup(groupId[0])
+        toolHelpers.getGroupById(groupId[0])
           .then((group) => {
             res.status(200).json({
               status: 'success',
@@ -75,12 +75,35 @@ export class GroupRouter {
         });
       })
       .catch((err) => {
-        res.status(500).json({
+        res.status(401).json({
           status: 'error',
-          message: 'Something went wrong, and we didn\'t create a user. :('
+          message: 'Something went wrong, and we didn\'t create a group. :('
         });
       });
 
+    });
+  }
+
+  public putGroup(req, res, next) {
+    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+      if(err) {
+          res.status(401).json({
+          status: 'Token has expired',
+          message: 'Your token has expired.'
+        });
+      } else {
+        let group_id = parseInt(req.params.id);
+        toolHelpers.updateGroup(group_id, req.body, function(err, count) {
+          toolHelpers.getGroupById(group_id)
+            .then((group) => {
+              res.status(200).json({
+                status: 'success',
+                token: tokenHelper.encodeToken(user_id),
+                group: group
+              });
+          });
+        });
+      }
     });
   }
 
@@ -92,6 +115,7 @@ export class GroupRouter {
     this.router.get('/', this.getAll);
     this.router.post('/', this.createGroup);
     this.router.get('/:id', this.getOne);
+    this.router.put('/:id', this.putGroup);
   }
 
 }
