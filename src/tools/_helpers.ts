@@ -128,13 +128,19 @@ function getAllGroups() {
     .where({'private':0, 'deleted_at':null});
 }
 
+/**
+* Returns a single group as specified by group_id
+@param group_id ID of the group to return
+*/
 function getOneGroup(group_id) {
   return knex('group')
     .select('*').where({group_id}).first();
 }
 
-function createGroupCode()
-{
+/**
+* Creates a unique group code and returns it
+*/
+function createGroupCode() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for( var i=0; i < 9; i++ )
@@ -143,6 +149,11 @@ function createGroupCode()
   return text;
 }
 
+/**
+* Creates a new group based on owner and request params
+* @param ownerId user_id of person creating group
+* @param req Request object
+*/
 function createGroup(ownerId, req) {
   let groupCode = createGroupCode();
   return knex('group')
@@ -158,7 +169,6 @@ function createGroup(ownerId, req) {
     group_code: groupCode
   })
   .returning('group_id');
-  //TODO: not returning correct group -- returning doesn't work with mysql
 }
 
 module.exports = {
