@@ -187,6 +187,21 @@ function updateGroup(group_id, groupBody, callback) {
     });
 }
 
+function joinGroup(group_id, user_id, callback) {
+  knex('group_user')
+  .insert({
+    group_id: group_id,
+    user_id: user_id,
+    admin_settings: 0,
+    admin_members: 0,
+    mod_actions: 0,
+    mod_comments: 0,
+    submit_action: 0,
+    banned: 0
+  })
+  .then(callback());
+}
+
 module.exports = {
   // User Functions
   createUser,
@@ -202,4 +217,5 @@ module.exports = {
   getGroupById,
   createGroup,
   updateGroup,
+  joinGroup,
 };

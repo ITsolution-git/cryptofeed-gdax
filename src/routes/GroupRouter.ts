@@ -93,7 +93,33 @@ export class GroupRouter {
         });
       } else {
         let group_id = parseInt(req.params.id);
+        // TODO: need to remove any data that shouldn't be updateable
+        // TODO: need to ensure user has proper permissions to udpate group
         toolHelpers.updateGroup(group_id, req.body, function(err, count) {
+          toolHelpers.getGroupById(group_id)
+            .then((group) => {
+              res.status(200).json({
+                status: 'success',
+                token: tokenHelper.encodeToken(user_id),
+                group: group
+              });
+          });
+        });
+      }
+    });
+  }
+
+  public joinGroup(req, res, next) {
+    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+      if(err) {
+          res.status(401).json({
+          status: 'Token has expired',
+          message: 'Your token has expired.'
+        });
+      } else {
+        let group_id = parseInt(req.params.id);
+        // TODO: ensure user is not a current member of the group
+        toolHelpers.joinGroup(group_id, user_id, function() {
           toolHelpers.getGroupById(group_id)
             .then((group) => {
               res.status(200).json({
@@ -116,6 +142,7 @@ export class GroupRouter {
     this.router.post('/', this.createGroup);
     this.router.get('/:id', this.getOne);
     this.router.put('/:id', this.putGroup);
+    this.router.post('/:id/members', this.joinGroup);
   }
 
 }

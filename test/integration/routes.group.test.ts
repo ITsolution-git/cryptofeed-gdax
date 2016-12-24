@@ -164,4 +164,27 @@ describe('********* routes : group *********', () => {
       });
     });
   });
+
+  describe('POST /api/v1/groups/:id/members', () => {
+    it('should add user to the group', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .post('/api/v1/groups/4/members')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          done();
+        });
+      });
+    });
+  });
+
 });
