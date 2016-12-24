@@ -7,8 +7,9 @@ var util = require('util');
 /***************************************************************/
 /**  User Functions **/
 /***************************************************************/
+
 /**
-* Inserts user data into database
+* @description Inserts user data into database
 */
 function createUser(req) {
   const salt = bcrypt.genSaltSync();
@@ -31,7 +32,7 @@ function createUser(req) {
 }
 
 /**
-* Returns user data for the specified username
+* @description Returns user data for the specified username
 * @param username the username for the account
 */
 function getUserByUsername(username) {
@@ -39,7 +40,7 @@ function getUserByUsername(username) {
 }
 
 /**
-* Returns user data for the specified email
+* @description Returns user data for the specified email
 * @param email the email address for the account
 */
 function getUserByEmail(email) {
@@ -47,7 +48,7 @@ function getUserByEmail(email) {
 }
 
 /**
-* Returns user data for the specified id
+* @description Returns user data for the specified id
 * @param id of the user
 */
 function getUserById(user_id) {
@@ -55,7 +56,7 @@ function getUserById(user_id) {
 }
 
 /**
-* Updates the user record based on JSON array userBody
+* @description Updates the user record based on JSON array userBody
 * @param user_id int id of the user being updatedUser
 * @param userBody JSON array of user fields to update
 */
@@ -68,7 +69,7 @@ function updateUser(user_id, userBody, callback) {
 }
 
 /**
-* Compares the given (plain text) password and encrypted password
+* @description Compares the given (plain text) password and encrypted password
 * @param userPassword plain text password being tested
 * @param databasePassword encrypted password to test against
 */
@@ -79,7 +80,7 @@ function comparePass(userPassword, databasePassword) {
 }
 
 /**
-* Throws an error if the user is not authenticated
+* @description Throws an error if the user is not authenticated
 */
 function ensureAuthenticated(req, res, next) {
   if (!(req.headers && req.headers.authorization)) {
@@ -117,7 +118,7 @@ function ensureAuthenticated(req, res, next) {
 /***************************************************************/
 
 /**
-* Returns all the groups the user belongs to
+* @description Returns all the groups the user belongs to
 * @param user_id id of the user
 */
 function getUsersGroups(user_id) {
@@ -137,8 +138,8 @@ function getAllGroups() {
 }
 
 /**
-* Returns a single group as specified by group_id
-@param group_id ID of the group to return
+* @description Returns a single group as specified by group_id
+* @param group_id ID of the group to return
 */
 function getGroupById(group_id) {
   return knex('group')
@@ -146,7 +147,7 @@ function getGroupById(group_id) {
 }
 
 /**
-* Creates a unique group code and returns it
+* @description Creates a unique group code and returns it
 */
 function createGroupCode() {
   var text = "";
@@ -158,7 +159,7 @@ function createGroupCode() {
 }
 
 /**
-* Creates a new group based on owner and request params
+* @description Creates a new group based on owner and request params
 * @param ownerId user_id of person creating group
 * @param req Request object
 */
@@ -179,6 +180,9 @@ function createGroup(ownerId, req) {
   .returning('group_id');
 }
 
+/**
+* @description Updates group details
+*/
 function updateGroup(group_id, groupBody, callback) {
   knex('group').where({group_id})
     .update(groupBody)
@@ -187,6 +191,9 @@ function updateGroup(group_id, groupBody, callback) {
     });
 }
 
+/**
+* @description Allows user to join group
+*/
 function joinGroup(group_id, user_id, callback) {
   knex('group_user')
   .insert({
@@ -200,6 +207,18 @@ function joinGroup(group_id, user_id, callback) {
     banned: 0
   })
   .then(callback());
+}
+
+/**
+* @description Returns array of group members
+*/
+function getGroupMembers(group_id, callback) {
+  knex.select('user.user_id', 'user.username', 'user.avatar_url').from('user')
+  .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
+  .where('group_id', group_id)
+  .asCallback(function(err, values) {
+    callback(err, values);
+  });
 }
 
 module.exports = {
@@ -218,4 +237,5 @@ module.exports = {
   createGroup,
   updateGroup,
   joinGroup,
+  getGroupMembers,
 };

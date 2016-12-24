@@ -61,6 +61,9 @@ export class GroupRouter {
     });
   }
 
+  /**
+  * @description Creates a new group
+  */
   public createGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
       return toolHelpers.createGroup(userId, req)
@@ -84,6 +87,9 @@ export class GroupRouter {
     });
   }
 
+  /**
+  * @description updates details of a group
+  */
   public putGroup(req, res, next) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(err) {
@@ -109,6 +115,9 @@ export class GroupRouter {
     });
   }
 
+  /**
+  * @description Allows user to join a group
+  */
   public joinGroup(req, res, next) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(err) {
@@ -134,6 +143,36 @@ export class GroupRouter {
   }
 
   /**
+  * @description Allows user to join a group
+  */
+  public getGroupMembers(req, res, next) {
+    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+      if(err) {
+          res.status(401).json({
+            status: 'Token has expired',
+            message: 'Your token has expired.'
+          });
+      } else {
+        let group_id = parseInt(req.params.id);
+        var members = toolHelpers.getGroupMembers(group_id, function(err, members) {
+          if(err) {
+            res.status(400).json({
+              status: 'error',
+              message: 'Something went wrong.'
+            });
+          } else {
+            res.status(200).json({
+              status: 'success',
+              token: tokenHelper.encodeToken(user_id),
+              members: members
+            });
+          }
+        });
+      }
+    });
+  }
+
+  /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
    */
@@ -143,6 +182,7 @@ export class GroupRouter {
     this.router.get('/:id', this.getOne);
     this.router.put('/:id', this.putGroup);
     this.router.post('/:id/members', this.joinGroup);
+    this.router.get('/:id/members', this.getGroupMembers);
   }
 
 }

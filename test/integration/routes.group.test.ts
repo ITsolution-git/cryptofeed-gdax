@@ -187,4 +187,30 @@ describe('********* routes : group *********', () => {
     });
   });
 
+  describe('GET /api/v1/groups/:id/members', () => {
+    it('should return list of group members', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .get('/api/v1/groups/1/members')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.have.property('members');
+          res.body.members[0].username.should.equal('seeder1');
+          done();
+        });
+      });
+    });
+  });
+
 });
