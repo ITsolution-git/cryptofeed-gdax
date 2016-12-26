@@ -1,3 +1,4 @@
+import {Router, Request, Response, NextFunction} from 'express';
 const knex = require('../db/connection');
 const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
@@ -10,8 +11,9 @@ var util = require('util');
 
 /**
 * @description Inserts user data into database
+* @param Request
 */
-function createUser(req) {
+function createUser(req: Request) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
 
@@ -33,34 +35,34 @@ function createUser(req) {
 
 /**
 * @description Returns user data for the specified username
-* @param username the username for the account
+* @param String the username for the account
 */
-function getUserByUsername(username) {
+function getUserByUsername(username: String) {
   return knex('user').where({username}).first();
 }
 
 /**
 * @description Returns user data for the specified email
-* @param email the email address for the account
+* @param String the email address for the account
 */
-function getUserByEmail(email) {
+function getUserByEmail(email: String) {
   return knex('user').where({email}).first();
 }
 
 /**
 * @description Returns user data for the specified id
-* @param id of the user
+* @param Int id of the user
 */
-function getUserById(user_id) {
+function getUserById(user_id: String) {
   return knex('user').where({user_id}).first();
 }
 
 /**
 * @description Updates the user record based on JSON array userBody
-* @param user_id int id of the user being updatedUser
-* @param userBody JSON array of user fields to update
+* @param Int id of the user being updatedUser
+* @param JSON array of user fields to update
 */
-function updateUser(user_id, userBody, callback) {
+function updateUser(user_id: Number, userBody: JSON, callback) {
   knex('user').where({user_id})
     .update(userBody)
     .then(function(count) {
@@ -73,7 +75,7 @@ function updateUser(user_id, userBody, callback) {
 * @param userPassword plain text password being tested
 * @param databasePassword encrypted password to test against
 */
-function comparePass(userPassword, databasePassword) {
+function comparePass(userPassword: String, databasePassword: String) {
   const bool = bcrypt.compareSync(userPassword, databasePassword);
   if (!bool) throw new Error('invalid password');
   else return true;
@@ -81,26 +83,20 @@ function comparePass(userPassword, databasePassword) {
 
 /**
 * @description Throws an error if the user is not authenticated
+* @param Request
+* @param Response
+* @param Callback function (NextFunction)
 */
-function ensureAuthenticated(req, res, next) {
-  if (!(req.headers && req.headers.authorization)) {
-    return res.status(400).json({
-      status: 'Authentication required'
-    });
-  }
-  // decode the token
-  var header = req.headers.authorization.split(' ');
-  var token = header[1];
-
-  tokenHelper.decodeToken(token, (err, payload) => {
-    if (err) {
-      return res.status(401).json({
-        status: 'Token has expired'
+function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
+  tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+    if(err) {
+        res.status(400).json({
+        status: 'Authentication required',
+        message: 'Your token has expired.'
       });
     } else {
-
       // check if the user still exists in the db
-      return knex('user').where({user_id: parseInt(payload.sub)}).first()
+      return knex('user').where({user_id: user_id}).first()
       .then((user) => {
         next();
       })
@@ -119,9 +115,9 @@ function ensureAuthenticated(req, res, next) {
 
 /**
 * @description Returns all the groups the user belongs to
-* @param user_id id of the user
+* @param Number id of the user
 */
-function getUsersGroups(user_id) {
+function getUsersGroups(user_id: Number) {
   //TODO: Need to return creator profile info with the group
   //TODO: Need to return group setting info with the group
   return knex('group')
@@ -139,9 +135,9 @@ function getAllGroups() {
 
 /**
 * @description Returns a single group as specified by group_id
-* @param group_id ID of the group to return
+* @param Number ID of the group to return
 */
-function getGroupById(group_id) {
+function getGroupById(group_id: Number) {
   return knex('group')
     .select('*').where({group_id}).first();
 }
@@ -160,10 +156,10 @@ function createGroupCode() {
 
 /**
 * @description Creates a new group based on owner and request params
-* @param ownerId user_id of person creating group
-* @param req Request object
+* @param Number user_id of person creating group
+* @param Request object
 */
-function createGroup(ownerId, req) {
+function createGroup(ownerId: Number, req: Request) {
   let groupCode = createGroupCode();
   return knex('group')
   .insert({
@@ -182,8 +178,11 @@ function createGroup(ownerId, req) {
 
 /**
 * @description Updates group details
+* @param Number ID of the group
+* @param JSON array of group data being updated
+* @param callback function
 */
-function updateGroup(group_id, groupBody, callback) {
+function updateGroup(group_id: Number, groupBody: JSON, callback) {
   knex('group').where({group_id})
     .update(groupBody)
     .then(function(count) {
@@ -193,8 +192,11 @@ function updateGroup(group_id, groupBody, callback) {
 
 /**
 * @description Allows user to join group
+* @param Number ID of the group
+* @param Number ID of the user joining the group
+* @param callback function
 */
-function joinGroup(group_id, user_id, callback) {
+function joinGroup(group_id: Number, user_id: Number, callback) {
   knex('group_user')
   .insert({
     group_id: group_id,
@@ -211,8 +213,10 @@ function joinGroup(group_id, user_id, callback) {
 
 /**
 * @description Returns array of group members
+* @param Number ID of the group
+* @param callback function
 */
-function getGroupMembers(group_id, callback) {
+function getGroupMembers(group_id: Number, callback) {
   knex.select('user.user_id', 'user.username', 'user.avatar_url').from('user')
   .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
   .where('group_id', group_id)

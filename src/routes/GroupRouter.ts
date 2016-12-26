@@ -17,9 +17,12 @@ export class GroupRouter {
   }
 
   /**
-   * GET all public and non-deleted groups.
+   * @description GET all public and non-deleted groups.
+   * @param Request
+   * @param Response
+   * @param Callback (NextFunction)
    */
-  public getAll(req: Request, res: Response, next: NextFunction) {
+  public getPublicGroups(req: Request, res: Response, next: NextFunction) {
     let groupData = toolHelpers.getAllGroups()
     .asCallback((err, values) => {
       if(err) {
@@ -38,9 +41,12 @@ export class GroupRouter {
   }
 
   /**
-   * GET one group by id
+   * @description GET group by id in request object
+   * @param Request
+   * @param Response
+   * @param Callback function (NextFunction)
    */
-  public getOne(req: Request, res: Response, next: NextFunction) {
+  public getGroup(req: Request, res: Response, next: NextFunction) {
     let groupId = parseInt(req.params.id);
     return toolHelpers.getGroupById(groupId)
     .asCallback((err, values) => {
@@ -63,6 +69,9 @@ export class GroupRouter {
 
   /**
   * @description Creates a new group
+  * @param Request
+  * @param Response
+  * @param Callback Function
   */
   public createGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
@@ -89,8 +98,11 @@ export class GroupRouter {
 
   /**
   * @description updates details of a group
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
   */
-  public putGroup(req, res, next) {
+  public putGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(err) {
           res.status(401).json({
@@ -117,8 +129,11 @@ export class GroupRouter {
 
   /**
   * @description Allows user to join a group
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
   */
-  public joinGroup(req, res, next) {
+  public joinGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(err) {
           res.status(401).json({
@@ -144,8 +159,11 @@ export class GroupRouter {
 
   /**
   * @description Allows user to join a group
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
   */
-  public getGroupMembers(req, res, next) {
+  public getGroupMembers(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(err) {
           res.status(401).json({
@@ -177,14 +195,13 @@ export class GroupRouter {
    * endpoints.
    */
   init() {
-    this.router.get('/', this.getAll);
+    this.router.get('/', this.getPublicGroups);
     this.router.post('/', this.createGroup);
-    this.router.get('/:id', this.getOne);
+    this.router.get('/:id', this.getGroup);
     this.router.put('/:id', this.putGroup);
     this.router.post('/:id/members', this.joinGroup);
     this.router.get('/:id/members', this.getGroupMembers);
   }
-
 }
 
 

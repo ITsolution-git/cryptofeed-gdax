@@ -17,13 +17,13 @@ export class UserRouter {
   }
 
   /**
-   * Gets a user object for logged in user
+   * @description Gets a user object for logged in user
    * @param  req Request object
    * @param  res Response object
    * @param  next NextFunction that is called
    * @return 200 JSON of user object
    */
-    public getUser(req, res, next) {
+    public getUser(req: Request, res: Response, next: NextFunction) {
       tokenHelper.getUserIdFromRequest(req, (err, user_id) => {
         return toolHelpers.getUserById(user_id)
         .asCallback((err, user) => {
@@ -37,19 +37,19 @@ export class UserRouter {
     }
 
     /**
-    * Updates/Saves the current user's information
+    * @description Updates/Saves the current user's information
+    * @param Request
+    * @param Response
+    * @param Callback function (NextFunction)
     */
-    public putUser(req, res, next) {
-      var header = req.headers.authorization.split(' ');
-      var token = header[1];
-      tokenHelper.decodeToken(token, (err, callback) => {
+    public putUser(req: Request, res: Response, next: NextFunction) {
+      tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
         if(err) {
             res.status(401).json({
             status: 'Token has expired',
             message: 'Your token has expired.'
           });
         } else {
-          let user_id = callback.sub;
           toolHelpers.updateUser(user_id, req.body, function(err, count) {
             var user = toolHelpers.getUserById(user_id)
             .asCallback((err, values) => {
@@ -65,19 +65,19 @@ export class UserRouter {
     }
 
     /**
-    * Gets list of groups user belongs to
+    * @description Gets list of groups user belongs to
+    * @param Request
+    * @param Response
+    * @param Callback function (NextFunction)
     */
-    public getGroups(req, res, next) {
-      var header = req.headers.authorization.split(' ');
-      var token = header[1];
-      tokenHelper.decodeToken(token, (err, callback) => {
+    public getGroups(req: Request, res: Response, next: NextFunction) {
+      tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
         if(err) {
             res.status(401).json({
             status: 'Token has expired',
             message: 'Your token has expired.'
           });
         } else {
-          let user_id = callback.sub;
           var groups = toolHelpers.getUsersGroups(user_id)
           .asCallback((err, values) => {
             res.status(200).json({
