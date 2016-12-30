@@ -225,6 +225,19 @@ function getGroupMembers(group_id: Number, callback) {
   });
 }
 
+/***************************************************************/
+/**  Group Action Functions **/
+/***************************************************************/
+
+/**
+* @description returns all non-deleted actions for specified group_id
+* @param group_id int id of group
+*/
+function getGroupActions(group_id) {
+  return knex('action')
+    .where({'group_id':group_id, 'deleted_at':null});
+}
+
 module.exports = {
   // User Functions
   createUser,
@@ -242,4 +255,6 @@ module.exports = {
   updateGroup,
   joinGroup,
   getGroupMembers,
+  // Group Action Functions
+  getGroupActions,
 };

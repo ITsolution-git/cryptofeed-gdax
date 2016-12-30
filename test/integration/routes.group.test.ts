@@ -48,7 +48,7 @@ describe('********* routes : group *********', () => {
     });
   });
 
-  describe('GET /api/v1/groups/:id', () => {
+  describe('GET /api/v1/groups/3', () => {
     it('should return expected group', (done) => {
       chai.request(app)
       .get('/api/v1/groups/3')
@@ -124,7 +124,7 @@ describe('********* routes : group *********', () => {
     });
   });
 
-  describe('PUT /api/v1/groups/:id', () => {
+  describe('PUT /api/v1/groups/1', () => {
     it('should update group info and return updated group', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
@@ -165,7 +165,7 @@ describe('********* routes : group *********', () => {
     });
   });
 
-  describe('POST /api/v1/groups/:id/members', () => {
+  describe('POST /api/v1/groups/4/members', () => {
     it('should add user to the group', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
@@ -187,7 +187,7 @@ describe('********* routes : group *********', () => {
     });
   });
 
-  describe('GET /api/v1/groups/:id/members', () => {
+  describe('GET /api/v1/groups/1/members', () => {
     it('should return list of group members', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')

@@ -3,6 +3,7 @@ import {Router, Request, Response, NextFunction} from 'express';
 const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 
+
 var util = require('util');
 
 export class GroupRouter {
@@ -23,7 +24,7 @@ export class GroupRouter {
    * @param Callback (NextFunction)
    */
   public getPublicGroups(req: Request, res: Response, next: NextFunction) {
-    let groupData = toolHelpers.getAllGroups()
+    toolHelpers.getAllGroups()
     .asCallback((err, values) => {
       if(err) {
           res.status(404).json({
@@ -191,6 +192,32 @@ export class GroupRouter {
   }
 
   /**
+  * @description returns array of non-deleted actions for the group
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  public getGroupActions(req: Request, res: Response, next: NextFunction) {
+    tokenHelper.getUserIdFromRequest(req, (err, userId) => {
+      let group_id = parseInt(req.params.id);
+      toolHelpers.getGroupActions(group_id)
+      .asCallback((err, actions) => {
+        if(err) {
+          res.status(404).json({
+            status: 'Error retrieving groups',
+            message: 'Error retrieving groups.'
+          });
+        } else {
+          res.status(200).json({
+            status: 'success',
+            actions: actions
+          });
+        }
+      });
+    });
+  }
+
+  /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
    */
@@ -201,6 +228,7 @@ export class GroupRouter {
     this.router.put('/:id', this.putGroup);
     this.router.post('/:id/members', this.joinGroup);
     this.router.get('/:id/members', this.getGroupMembers);
+    this.router.get('/:id/actions', this.getGroupActions);
   }
 }
 
