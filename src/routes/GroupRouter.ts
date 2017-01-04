@@ -231,9 +231,10 @@ export class GroupRouter {
           message: 'Something went wrong.'
         });
       } else {
+        let group_id = parseInt(req.params.id);
         toolHelpers.createGroupAction(userId, req)
         .then((actionId) => {
-          toolHelpers.getActionById(actionId[0])
+          toolHelpers.getActionById(actionId[0], group_id)
             .then((action) => {
               res.status(200).json({
                 status: 'success',
@@ -253,6 +254,35 @@ export class GroupRouter {
     });
   }
 
+  public getGroupAction(req: Request, res: Response, next: NextFunction) {
+    tokenHelper.getUserIdFromRequest(req, (err, userId) => {
+      if(err) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Something went wrong.'
+        });
+      } else {
+        let group_id = parseInt(req.params.id);
+        let action_id = parseInt(req.params.action_id);
+        toolHelpers.getActionById(action_id, group_id)
+        .then((action) => {
+          res.status(200).json({
+            status: 'success',
+            token: tokenHelper.encodeToken(userId),
+            action: action
+          });
+        })
+        .catch((err) => {
+          console.log(util.inspect(err));
+          res.status(401).json({
+            status: 'error',
+            message: 'Something went wrong, and we didn\'t retreive the action. :('
+          });
+        });
+      }
+    });
+  }
+
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -266,6 +296,7 @@ export class GroupRouter {
     this.router.get('/:id/members', this.getGroupMembers);
     this.router.get('/:id/actions', this.getGroupActions);
     this.router.post('/:id/actions', this.createGroupAction);
+    this.router.get('/:id/actions/:action_id', this.getGroupAction);
   }
 }
 

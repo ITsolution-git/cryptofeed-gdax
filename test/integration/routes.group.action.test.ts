@@ -91,4 +91,34 @@ describe('********* routes : group actions *********', () => {
       });
     });
   });
+
+  describe('GET /api/v1/groups/1/actions/1', () => {
+    it('should get the action for id 1', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .get('/api/v1/groups/1/actions/1')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.status.should.eql('success');
+          res.body.should.have.property('action');
+          res.body.action.should.have.property('group_id');
+          res.body.action.group_id.should.eql(1);
+          res.body.action.should.have.property('action_id');
+          res.body.action.action_id.should.eql(1);
+          done();
+        });
+      });
+    });
+  });
+
 });
