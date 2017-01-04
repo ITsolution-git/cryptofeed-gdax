@@ -217,7 +217,7 @@ function joinGroup(group_id: Number, user_id: Number, callback) {
 * @param callback function
 */
 function getGroupMembers(group_id: Number, callback) {
-  knex.select('user.user_id', 'user.username', 'user.avatar_url').from('user')
+  knex('user').select('user.user_id', 'user.username', 'user.avatar_url').from('user')
   .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
   .where('group_id', group_id)
   .asCallback(function(err, values) {
@@ -234,8 +234,28 @@ function getGroupMembers(group_id: Number, callback) {
 * @param group_id int id of group
 */
 function getGroupActions(group_id) {
-  return knex('action')
-    .where({'group_id':group_id, 'deleted_at':null});
+  knex('action')
+    .innerJoin('action_type', 'action.action_type_id', 'action_type.action_type_id')
+    .where({'action.group_id':group_id, 'action.deleted_at':null}).then(function(curAction) {
+      var actionArray = [];
+      for(var i = 0, len = curAction.length; i < len; i++) {
+        var action = [{action:curAction[i]}];
+        knex(curAction[i].table_name).where({action_id: curAction[i].action_id}).then(function(curActionType) {
+          var action_type = [{action_type:curActionType}];
+          actionArray.push({action,action_type});
+          //console.log('=====> action: ' + util.inspect(action[i]));
+          //console.log('=====> action_type: ' + util.inspect(action_type));
+          //console.log('=====> ActionArray1: ' + util.inspect(actionArray));
+            console.log('======= ActionArray >> ' + util.inspect(actionArray));
+            console.log('======= ActionArray ActionType[0] >> ' + util.inspect(actionArray[0].action));
+            console.log('======= ActionArray Action[0] >> ' + util.inspect(actionArray[0].action_type));
+        });
+      }
+    });
+}
+
+function createGroupAction() {
+
 }
 
 module.exports = {
@@ -257,4 +277,5 @@ module.exports = {
   getGroupMembers,
   // Group Action Functions
   getGroupActions,
+  createGroupAction,
 };

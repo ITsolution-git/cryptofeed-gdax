@@ -199,21 +199,28 @@ export class GroupRouter {
   */
   public getGroupActions(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
-      let group_id = parseInt(req.params.id);
-      toolHelpers.getGroupActions(group_id)
-      .asCallback((err, actions) => {
-        if(err) {
-          res.status(404).json({
-            status: 'Error retrieving groups',
-            message: 'Error retrieving groups.'
-          });
-        } else {
-          res.status(200).json({
-            status: 'success',
-            actions: actions
-          });
-        }
-      });
+      if(err) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Something went wrong.'
+        });
+      } else {
+        let group_id = parseInt(req.params.id);
+        toolHelpers.getGroupActions(group_id)
+        .asCallback((err, actions) => {
+          if(err) {
+            res.status(404).json({
+              status: 'Error retrieving groups',
+              message: 'Error retrieving groups.'
+            });
+          } else {
+            res.status(200).json({
+              status: 'success',
+              actions: actions
+            });
+          }
+        });
+      }
     });
   }
 
