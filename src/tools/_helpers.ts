@@ -271,6 +271,7 @@ function createGroupAction(owner_id: Number, req: Request) {
 /**
 * @description Returns a single action by its action_id
 * @param action_id Number ID of the action to return
+* @param group_id: Number ID of group action belongs to
 */
 function getActionById(action_id: Number, group_id: Number) {
   return knex('action').where({action_id, group_id}).first();

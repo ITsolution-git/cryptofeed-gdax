@@ -46,6 +46,7 @@ export class GroupRouter {
    * @param Request
    * @param Response
    * @param Callback function (NextFunction)
+   * TODO: Need to make sure user is member of group, or group is public
    */
   public getGroup(req: Request, res: Response, next: NextFunction) {
     let groupId = parseInt(req.params.id);
@@ -102,6 +103,8 @@ export class GroupRouter {
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
+  * TODO: need to remove any data that shouldn't be updateable
+  * TODO: need to ensure user has proper permissions to udpate group
   */
   public putGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
@@ -112,8 +115,6 @@ export class GroupRouter {
         });
       } else {
         let group_id = parseInt(req.params.id);
-        // TODO: need to remove any data that shouldn't be updateable
-        // TODO: need to ensure user has proper permissions to udpate group
         toolHelpers.updateGroup(group_id, req.body, function(err, count) {
           toolHelpers.getGroupById(group_id)
             .then((group) => {
@@ -133,6 +134,7 @@ export class GroupRouter {
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
+  * TODO: need to ensure group is public, or member has group add code
   */
   public joinGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
@@ -163,6 +165,7 @@ export class GroupRouter {
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
+  * TODO: Need to ensure user is member of group, or group is public
   */
   public getGroupMembers(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
@@ -196,6 +199,7 @@ export class GroupRouter {
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
+  * TODO: Need to ensure user is member of group, or group is public
   */
   public getGroupActions(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
@@ -223,6 +227,10 @@ export class GroupRouter {
     });
   }
 
+  /**
+  * @description creates a group action
+  * TODO: Need to ensure user has permission to add action
+  */
   public createGroupAction(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
       if(err) {
@@ -254,6 +262,10 @@ export class GroupRouter {
     });
   }
 
+  /**
+  * @description Gets a specific group action (by ID)
+  * TODO: Need to ensure user is member of group, or group is public
+  */
   public getGroupAction(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, userId) => {
       if(err) {
