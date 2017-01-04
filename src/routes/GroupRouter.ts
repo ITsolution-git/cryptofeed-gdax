@@ -206,8 +206,7 @@ export class GroupRouter {
         });
       } else {
         let group_id = parseInt(req.params.id);
-        toolHelpers.getGroupActions(group_id)
-        .asCallback((err, actions) => {
+        toolHelpers.getGroupActions(group_id, function(err, actions) {
           if(err) {
             res.status(404).json({
               status: 'Error retrieving groups',
@@ -219,6 +218,36 @@ export class GroupRouter {
               actions: actions
             });
           }
+        });
+      }
+    });
+  }
+
+  public createGroupAction(req: Request, res: Response, next: NextFunction) {
+    tokenHelper.getUserIdFromRequest(req, (err, userId) => {
+      if(err) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Something went wrong.'
+        });
+      } else {
+        toolHelpers.createGroupAction(userId, req)
+        .then((actionId) => {
+          toolHelpers.getActionById(actionId[0])
+            .then((action) => {
+              res.status(200).json({
+                status: 'success',
+                token: tokenHelper.encodeToken(userId),
+                action: action
+              });
+          });
+        })
+        .catch((err) => {
+          console.log(util.inspect(err));
+          res.status(401).json({
+            status: 'error',
+            message: 'Something went wrong, and we didn\'t create an action. :('
+          });
         });
       }
     });
@@ -236,6 +265,7 @@ export class GroupRouter {
     this.router.post('/:id/members', this.joinGroup);
     this.router.get('/:id/members', this.getGroupMembers);
     this.router.get('/:id/actions', this.getGroupActions);
+    this.router.post('/:id/actions', this.createGroupAction);
   }
 }
 

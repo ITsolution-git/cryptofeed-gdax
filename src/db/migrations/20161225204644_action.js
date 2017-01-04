@@ -15,6 +15,10 @@ exports.up = function(knex, Promise) {
     table.dateTime('end_at');
     table.dateTime('deleted_at');
     table.integer('deleted_by_user_id');
+    table.string('param1');
+    table.string('param2');
+    table.string('param3');
+    table.string('param4');
   });
 };
 

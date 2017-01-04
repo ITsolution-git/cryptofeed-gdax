@@ -41,6 +41,7 @@ describe('********* routes : group actions *********', () => {
           res.type.should.eql('application/json');
           res.body.status.should.eql('success');
           res.body.should.have.property('actions');
+          res.body.actions.length.should.eql(2);
           res.body.actions[0].should.have.property('group_id');
           res.body.actions[0].group_id.should.eql(1);
           done();
@@ -61,16 +62,18 @@ describe('********* routes : group actions *********', () => {
         should.not.exist(error);
         chai.request(app)
         .post('/api/v1/groups/1/actions')
+        .set('authorization', 'Bearer ' + response.body.token)
         .send({
-          action: {
-            title: 'TEST CREATE GROUP 1 ACTION EMAIL',
             action_type_id: 1,
-          },
-          action_type: {
-            to_email: 'test@test.net',
-            subject: 'Test Subject',
-            body: 'Test Body'
-          }
+            title: 'TEST CREATE GROUP 1 ACTION EMAIL',
+            description: 'TEST CREATE GROUP 1 DESCRIPTION',
+            thanks_msg: 'TEST CREATE GROUP 1 THANKS MESSAGE',
+            points: 100,
+            start_at: '2017-03-01 10:00:00',
+            end_at: '2017-03-01 18:00:00',
+            param1: 'test@test.net',
+            param2: 'Test Subject',
+            param3: 'Test Body'
         })
         .end((err, res) => {
           should.not.exist(err);
@@ -81,6 +84,7 @@ describe('********* routes : group actions *********', () => {
           res.body.action.should.have.property('group_id');
           res.body.action.group_id.should.eql(1);
           res.body.action.title.should.eql('TEST CREATE GROUP 1 ACTION EMAIL');
+          res.body.action.points.should.eql(100);
           res.body.action.action_type_id.should.eql(1);
           done();
         });

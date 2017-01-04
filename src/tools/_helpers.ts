@@ -233,29 +233,47 @@ function getGroupMembers(group_id: Number, callback) {
 * @description returns all non-deleted actions for specified group_id
 * @param group_id int id of group
 */
-function getGroupActions(group_id) {
+function getGroupActions(group_id, callback) {
   knex('action')
     .innerJoin('action_type', 'action.action_type_id', 'action_type.action_type_id')
-    .where({'action.group_id':group_id, 'action.deleted_at':null}).then(function(curAction) {
-      var actionArray = [];
-      for(var i = 0, len = curAction.length; i < len; i++) {
-        var action = [{action:curAction[i]}];
-        knex(curAction[i].table_name).where({action_id: curAction[i].action_id}).then(function(curActionType) {
-          var action_type = [{action_type:curActionType}];
-          actionArray.push({action,action_type});
-          //console.log('=====> action: ' + util.inspect(action[i]));
-          //console.log('=====> action_type: ' + util.inspect(action_type));
-          //console.log('=====> ActionArray1: ' + util.inspect(actionArray));
-            console.log('======= ActionArray >> ' + util.inspect(actionArray));
-            console.log('======= ActionArray ActionType[0] >> ' + util.inspect(actionArray[0].action));
-            console.log('======= ActionArray Action[0] >> ' + util.inspect(actionArray[0].action_type));
-        });
-      }
+    .where({'action.group_id':group_id, 'action.deleted_at':null})
+    .asCallback(function(err, actions) {
+      callback(err, actions);
     });
 }
 
-function createGroupAction() {
+/**
+* @description creates a new group action
+* @param owner_id: Number user_id of the person creating the action
+* @param req: Request object containing action information
+*/
+function createGroupAction(owner_id: Number, req: Request) {
+  let group_id = parseInt(req.params.id);
+  return knex('action')
+  .insert({
+    group_id: group_id,
+    created_by_user_id: owner_id,
+    action_type_id: req.body.action_type_id,
+    title: req.body.title,
+    description: req.body.description,
+    thanks_msg: req.body.thanks_msg,
+    points: req.body.points,
+    start_at: req.body.start_at,
+    end_at: req.body.end_at,
+    param1: req.body.param1,
+    param2: req.body.param2,
+    param3: req.body.param3,
+    param4: req.body.param4
+  })
+  .returning('action_id');
+}
 
+/**
+* @description Returns a single action by its action_id
+* @param action_id Number ID of the action to return
+*/
+function getActionById(action_id: Number) {
+  return knex('action').where({action_id}).first();
 }
 
 module.exports = {
@@ -278,4 +296,5 @@ module.exports = {
   // Group Action Functions
   getGroupActions,
   createGroupAction,
+  getActionById
 };
