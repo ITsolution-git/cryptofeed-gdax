@@ -229,6 +229,9 @@ export class GroupRouter {
 
   /**
   * @description creates a group action
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
   * TODO: Need to ensure user has permission to add action
   */
   public createGroupAction(req: Request, res: Response, next: NextFunction) {
@@ -264,6 +267,9 @@ export class GroupRouter {
 
   /**
   * @description Gets a specific group action (by ID)
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
   * TODO: Need to ensure user is member of group, or group is public
   */
   public getGroupAction(req: Request, res: Response, next: NextFunction) {
@@ -296,6 +302,41 @@ export class GroupRouter {
   }
 
   /**
+  * @description adds record to mark an action as complete
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  * TODO: Make sure user is member of the group
+  */
+  public markGroupActionComplete(req: Request, res: Response, next: NextFunction) {
+    tokenHelper.getUserIdFromRequest(req, (err, userId) => {
+      if(err) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Something went wrong.'
+        });
+      } else {
+        let group_id = parseInt(req.params.id);
+        let action_id = parseInt(req.params.action_id);
+        toolHelpers.createActionUser(action_id, userId)
+        .then((action) => {
+          res.status(200).json({
+            status: 'success',
+            token: tokenHelper.encodeToken(userId)
+          });
+        })
+        .catch((err) => {
+          console.log(util.inspect(err));
+          res.status(401).json({
+            status: 'error',
+            message: 'Something went wrong, and we didn\'t retreive the action. :('
+          });
+        });
+      }
+    });
+  }
+
+  /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
    */
@@ -309,6 +350,7 @@ export class GroupRouter {
     this.router.get('/:id/actions', this.getGroupActions);
     this.router.post('/:id/actions', this.createGroupAction);
     this.router.get('/:id/actions/:action_id', this.getGroupAction);
+    this.router.post('/:id/actions/:action_id/complete', this.markGroupActionComplete);
   }
 }
 

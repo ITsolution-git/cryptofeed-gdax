@@ -121,4 +121,50 @@ describe('********* routes : group actions *********', () => {
     });
   });
 
+  describe('POST /api/v1/groups/1/actions/1/complete', () => {
+    it('marks an action complete for a user', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .post('/api/v1/groups/1/actions/1/complete')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.status.should.eql('success');
+          done();
+        });
+      });
+    });
+
+    it('should throw an error if user already marked complete', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .post('/api/v1/groups/1/actions/1/complete')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          // TODO: Make sure function returns error if user has already completed action
+          // should.exist(err);
+          // res.status.should.eql(401);
+          // res.body.status.should.eql('error');
+          done();
+        });
+      });
+    });
+  });
+
 });

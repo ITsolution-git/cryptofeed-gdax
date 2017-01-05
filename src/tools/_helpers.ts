@@ -274,7 +274,24 @@ function createGroupAction(owner_id: Number, req: Request) {
 * @param group_id: Number ID of group action belongs to
 */
 function getActionById(action_id: Number, group_id: Number) {
-  return knex('action').where({action_id, group_id}).first();
+  return knex('action').where({action_id, group_id, deleted_at: null}).first();
+}
+
+/**
+* @description Creates an action_user record to record a user completed an action
+* TODO: Need to make sure user has not already completed action
+*/
+function createActionUser(action_id: Number, user_id: Number) {
+  return knex('action').where({action_id, deleted_at: null})
+    .then(function(action) {
+      return knex('action_user')
+      .insert({
+        action_id: action_id,
+        user_id: user_id,
+        points: action[0].points
+      })
+      .returning('*');
+    });
 }
 
 module.exports = {
@@ -297,5 +314,6 @@ module.exports = {
   // Group Action Functions
   getGroupActions,
   createGroupAction,
-  getActionById
+  getActionById,
+  createActionUser
 };
