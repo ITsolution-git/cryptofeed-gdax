@@ -213,4 +213,57 @@ describe('********* routes : group *********', () => {
     });
   });
 
+  describe('PUT /api/v1/groups/1/members/2', () => {
+    it('should update the specified member\'s group permissions ', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder1',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .put('/api/v1/groups/1/members/2')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .send({'mod_actions':1,'submit_action':1})
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.have.property('members');
+          res.body.members[1].username.should.eql('seeder2');
+          res.body.members[1].mod_actions.should.eql(1);
+          res.body.members[1].submit_action.should.eql(1);
+          res.body.members[1].admin_settings.should.eql(0);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('PUT /api/v1/groups/1/members/2', () => {
+    it('should return 401 unauthorized', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        username: 'seeder2',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .put('/api/v1/groups/1/members/1')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .send({'mod_actions':0,'submit_action':0})
+        .end((err, res) => {
+          should.exist(err);
+          res.status.should.eql(401);
+          done();
+        });
+      });
+    });
+  });
+
 });

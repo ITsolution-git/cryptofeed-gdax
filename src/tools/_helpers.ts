@@ -11,7 +11,7 @@ var util = require('util');
 
 /**
 * @description Inserts user data into database
-* @param Request
+* @param req: Request request object containing the user form data
 */
 function createUser(req: Request) {
   const salt = bcrypt.genSaltSync();
@@ -35,7 +35,7 @@ function createUser(req: Request) {
 
 /**
 * @description Returns user data for the specified username
-* @param String the username for the account
+* @param username: String the username for the account
 */
 function getUserByUsername(username: String) {
   return knex('user').where({username}).first();
@@ -43,7 +43,7 @@ function getUserByUsername(username: String) {
 
 /**
 * @description Returns user data for the specified email
-* @param String the email address for the account
+* @param email: String the email address for the account
 */
 function getUserByEmail(email: String) {
   return knex('user').where({email}).first();
@@ -51,20 +51,20 @@ function getUserByEmail(email: String) {
 
 /**
 * @description Returns user data for the specified id
-* @param Int id of the user
+* @param user_id: Number id of the user
 */
-function getUserById(user_id: String) {
+function getUserById(user_id: Number) {
   return knex('user').where({user_id}).first();
 }
 
 /**
 * @description Updates the user record based on JSON array userBody
-* @param Int id of the user being updatedUser
-* @param JSON array of user fields to update
+* @param user_id: Number id of the user being updatedUser
+* @param user_body: JSON array of user fields to update
 */
-function updateUser(user_id: Number, userBody: JSON, callback) {
+function updateUser(user_id: Number, user_body: JSON, callback) {
   knex('user').where({user_id})
-    .update(userBody)
+    .update(user_body)
     .then(function(count) {
       callback(null, count);
     });
@@ -72,8 +72,8 @@ function updateUser(user_id: Number, userBody: JSON, callback) {
 
 /**
 * @description Compares the given (plain text) password and encrypted password
-* @param userPassword plain text password being tested
-* @param databasePassword encrypted password to test against
+* @param userPassword: String plain text password being tested
+* @param databasePassword: String encrypted password to test against
 */
 function comparePass(userPassword: String, databasePassword: String) {
   const bool = bcrypt.compareSync(userPassword, databasePassword);
@@ -83,9 +83,9 @@ function comparePass(userPassword: String, databasePassword: String) {
 
 /**
 * @description Throws an error if the user is not authenticated
-* @param Request
-* @param Response
-* @param Callback function (NextFunction)
+* @param req: Request
+* @param res: Response
+* @param next: Callback function (NextFunction)
 */
 function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
@@ -115,7 +115,7 @@ function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
 
 /**
 * @description Returns all the groups the user belongs to
-* @param Number id of the user
+* @param user_id: Number id of the user
 */
 function getUsersGroups(user_id: Number) {
   //TODO: Need to return creator profile info with the group
@@ -126,7 +126,7 @@ function getUsersGroups(user_id: Number) {
 }
 
 /**
-* Returns all non-private and non-deleted groups (public call)
+* @description Returns all non-private and non-deleted groups (public call)
 */
 function getAllGroups() {
   return knex('group')
@@ -135,7 +135,7 @@ function getAllGroups() {
 
 /**
 * @description Returns a single group as specified by group_id
-* @param Number ID of the group to return
+* @param group_id: Number ID of the group to return
 */
 function getGroupById(group_id: Number) {
   return knex('group')
@@ -156,14 +156,14 @@ function createGroupCode() {
 
 /**
 * @description Creates a new group based on owner and request params
-* @param Number user_id of person creating group
-* @param Request object
+* @param owner_id: Number user_id of person creating group
+* @param req: Request object
 */
-function createGroup(ownerId: Number, req: Request) {
+function createGroup(owner_id: Number, req: Request) {
   let groupCode = createGroupCode();
   return knex('group')
   .insert({
-    created_by_user_id: ownerId,
+    created_by_user_id: owner_id,
     name: req.body.name,
     description: req.body.description,
     welcome: req.body.welcome,
@@ -178,13 +178,13 @@ function createGroup(ownerId: Number, req: Request) {
 
 /**
 * @description Updates group details
-* @param Number ID of the group
-* @param JSON array of group data being updated
+* @param group_id: Number ID of the group
+* @param group_body: JSON array of group data being updated
 * @param callback function
 */
-function updateGroup(group_id: Number, groupBody: JSON, callback) {
+function updateGroup(group_id: Number, group_body: JSON, callback) {
   knex('group').where({group_id})
-    .update(groupBody)
+    .update(group_body)
     .then(function(count) {
       callback(null, count);
     });
@@ -212,17 +212,44 @@ function joinGroup(group_id: Number, user_id: Number, callback) {
 }
 
 /**
-* @description Returns array of group members
+* @description Returns array of group members (excludes banned)
 * @param Number ID of the group
 * @param callback function
 */
 function getGroupMembers(group_id: Number, callback) {
-  knex('user').select('user.user_id', 'user.username', 'user.avatar_url').from('user')
-  .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
-  .where('group_id', group_id)
-  .asCallback(function(err, values) {
-    callback(err, values);
-  });
+  knex('user').select('user.user_id', 'user.username', 'user.avatar_url',
+                      'group_user.admin_settings', 'group_user.admin_members',
+                      'group_user.mod_actions', 'group_user.mod_comments',
+                      'group_user.submit_action')
+    .from('user')
+    .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
+    .where({ group_id:group_id, banned:0 })
+    .asCallback(function(err, values) {
+      callback(err, values);
+    });
+}
+
+/**
+* @description Updates settings for a group user
+* @param group_id: Number ID of the group
+* @param user_id: Number ID of the user being edited
+* @param perm_body: JSON array of settings being updated
+*/
+function updateGroupUser(group_id: Number, user_id: Number, perm_body: JSON) {
+  return knex('group_user')
+    .update(perm_body)
+    .where({group_id, user_id})
+    .returning('*');
+}
+
+/**
+* @description gets specific group_user record for user
+* @param group_id: Number ID of the group
+* @param user_id: Number ID of the user
+*/
+function getGroupMemberById(group_id: Number, user_id: Number) {
+  return knex('group_user')
+    .where({group_id, user_id}).first();
 }
 
 /***************************************************************/
@@ -279,6 +306,8 @@ function getActionById(action_id: Number, group_id: Number) {
 
 /**
 * @description Creates an action_user record to record a user completed an action
+* @param action_id: Number ID of the action
+* @param user_id: Number ID of the user performing the action
 * TODO: Need to make sure user has not already completed action
 */
 function createActionUser(action_id: Number, user_id: Number) {
@@ -292,6 +321,29 @@ function createActionUser(action_id: Number, user_id: Number) {
       })
       .returning('*');
     });
+}
+
+/**
+* @description Returns all supported action types
+*/
+function getActionTypes() {
+  return knex('action_type').select('*')
+    .returning('*');
+}
+
+/**
+* @description Marks the specified action deleted by setting the deleted_at flag
+* @param action_id: Number ID of action to be marked deleted
+* @param user_id: ID of the user marking the action as deleted
+*/
+function deleteAction(action_id: Number, user_id: Number) {
+  return knex('action').where({action_id})
+    .update({deleted_at: knex.fn.now(), deleted_by_user_id: user_id});
+}
+
+function updateAction(action_id: Number, action_body: JSON) {
+  return knex('action').where({action_id})
+    .update(action_body);
 }
 
 module.exports = {
@@ -311,9 +363,14 @@ module.exports = {
   updateGroup,
   joinGroup,
   getGroupMembers,
+  updateGroupUser,
+  getGroupMemberById,
   // Group Action Functions
   getGroupActions,
   createGroupAction,
   getActionById,
-  createActionUser
+  createActionUser,
+  getActionTypes,
+  deleteAction,
+  updateAction,
 };
