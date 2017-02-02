@@ -3,7 +3,7 @@ exports.up = function(knex, Promise) {
   return knex.schema.createTable('group_user', (table) => {
     table.increments('group_user_id');
     table.timestamp('created_at', true).defaultTo(knex.fn.now());
-    table.dateTime('updated_at', true).defaultTo(knex.fn.now());
+    table.dateTime('updated_at', true).defaultTo();
     table.integer('group_id').notNullable();
     table.integer('user_id').notNullable();
     table.boolean('admin_settings').notNullable().default(0);

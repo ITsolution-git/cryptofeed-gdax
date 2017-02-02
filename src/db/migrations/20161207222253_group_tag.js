@@ -3,7 +3,7 @@ exports.up = function(knex, Promise) {
   return knex.schema.createTable('group_tag', (table) => {
     table.increments('group_tag_id');
     table.timestamp('created_at', true).defaultTo(knex.fn.now());
-    table.dateTime('updated_at', true).defaultTo(knex.fn.now());
+    table.dateTime('updated_at', true).defaultTo();
     table.integer('group_id').notNullable();
     table.string('tag').notNullable();
     table.unique(['group_id', 'tag']);
