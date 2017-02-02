@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => {
   return knex.schema.createTable('group', (table) => {
     table.increments('group_id');
     table.timestamp('created_at', true).defaultTo(knex.fn.now());
-    table.timestamp('updated_at', true).defaultTo(knex.fn.now());
+    table.dateTime('updated_at', true).defaultTo(knex.fn.now());
     table.integer('created_by_user_id').notNullable();
     table.string('name').notNullable();
     table.text('description');

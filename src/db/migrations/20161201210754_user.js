@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => {
   return knex.schema.createTable('user', (table) => {
     table.increments('user_id');
     table.timestamp('created_at', true).defaultTo(knex.fn.now());
-    table.timestamp('updated_at', true).defaultTo(knex.fn.now());
+    table.dateTime('updated_at', true).defaultTo(knex.fn.now());
     table.string('email').notNullable();
     table.string('username').unique().notNullable();
     table.string('password').notNullable();
