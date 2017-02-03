@@ -23,6 +23,19 @@ export class AuthRouter {
  * @return 200 JSON of user object
  */
   public register(req: Request, res: Response, next: NextFunction) {
+    if(!toolHelpers.validateEmail(req.body.email)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid email address'
+      });
+    }
+    if(req.body.password.length < 6) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Password must be 6 or more characters'
+      });
+    }
+  
     return toolHelpers.createUser(req)
     .then((user) => { return tokenHelpers.encodeToken(user[0].user_id); })
     .then((token) => {

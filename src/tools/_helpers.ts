@@ -17,7 +17,7 @@ function createUser(req: Request) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
 
-  //TODO: Not returning correct user -- returning doesn't work for mysql
+  //TODO: Validate the email doesn't exist in the system
   return knex('user')
   .insert({
     email: req.body.email,
@@ -34,6 +34,15 @@ function createUser(req: Request) {
 }
 
 /**
+* @description Validates the specified email is a valid format
+* @param email: String the email address for the account
+*/
+function validateEmail(email: string) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+/**
 * @description Returns user data for the specified username
 * @param username: String the username for the account
 */
@@ -47,6 +56,17 @@ function getUserByUsername(username: String) {
 */
 function getUserByEmail(email: String) {
   return knex('user').where({email}).first();
+}
+
+/**
+* @description Returns true if we have a user with the specified email
+* @param email: String the email address for the account
+*/
+function checkIfEmailExists(email: String) {
+  knex('user').where({email}).count('user_id as CNT').then(function(total) {
+    return (total[0].CNT > 0);
+  });
+  return true;
 }
 
 /**
@@ -349,6 +369,8 @@ function updateAction(action_id: Number, action_body: JSON) {
 module.exports = {
   // User Functions
   createUser,
+  validateEmail,
+  checkIfEmailExists,
   getUserByUsername,
   getUserByEmail,
   getUserById,
