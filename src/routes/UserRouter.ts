@@ -25,14 +25,26 @@ export class UserRouter {
    */
     public getUser(req: Request, res: Response, next: NextFunction) {
       tokenHelper.getUserIdFromRequest(req, (err, user_id) => {
-        return toolHelpers.getUserById(user_id)
-        .asCallback((err, user) => {
-          res.status(200).json({
-            status: 'success',
-            token: tokenHelper.encodeToken(user_id),
-            user: user
+        let uid = parseInt(req.params.id);
+        if(uid) {
+          return toolHelpers.getUserProfileById(uid)
+          .asCallback((err, user) => {
+            res.status(200).json({
+              status: 'success',
+              token: tokenHelper.encodeToken(user_id),
+              user: user
+            });
           });
-        });
+        } else {
+          return toolHelpers.getUserById(user_id)
+          .asCallback((err, user) => {
+            res.status(200).json({
+              status: 'success',
+              token: tokenHelper.encodeToken(user_id),
+              user: user
+            });
+          });
+        }
       });
     }
 
@@ -78,14 +90,27 @@ export class UserRouter {
             message: 'Your token has expired.'
           });
         } else {
-          var groups = toolHelpers.getUsersGroups(user_id)
-          .asCallback((err, values) => {
-            res.status(200).json({
-              status: 'success',
-              token: token,
-              groups: values
+          let uid = parseInt(req.params.id);
+          if(uid) {
+            var groups = toolHelpers.getUsersPublicGroups(uid)
+            .asCallback((err, values) => {
+              res.status(200).json({
+                status: 'success',
+                token: token,
+                groups: values
+              });
             });
-          });
+          } else {
+            var groups = toolHelpers.getUsersGroups(user_id)
+            .asCallback((err, values) => {
+              res.status(200).json({
+                status: 'success',
+                token: token,
+                groups: values
+              });
+            });
+          }
+
         }
       });
     }
@@ -99,6 +124,8 @@ export class UserRouter {
     this.router.get('/', this.getUser);
     this.router.put('/', this.putUser);
     this.router.get('/groups', this.getGroups);
+    this.router.get('/:id', this.getUser);
+    this.router.get('/:id/groups', this.getGroups);
   }
 
 }

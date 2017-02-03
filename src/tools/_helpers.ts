@@ -78,6 +78,14 @@ function getUserById(user_id: Number) {
 }
 
 /**
+* @description Returns user profile data for the specified id
+* @param user_id: Number id of the user
+*/
+function getUserProfileById(user_id: Number) {
+  return knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_url', 'bio','latitude', 'longitude').where({user_id}).first();
+}
+
+/**
 * @description Updates the user record based on JSON array userBody
 * @param user_id: Number id of the user being updatedUser
 * @param user_body: JSON array of user fields to update
@@ -143,6 +151,18 @@ function getUsersGroups(user_id: Number) {
   return knex('group')
     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
     .where('user_id', user_id);
+}
+
+/**
+* @description Returns all the groups the user belongs to
+* @param user_id: Number id of the user
+*/
+function getUsersPublicGroups(user_id: Number) {
+  //TODO: Need to return creator profile info with the group
+  //TODO: Need to return group setting info with the group
+  return knex('group')
+    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
+    .where({'user_id':user_id, 'private':0});
 }
 
 /**
@@ -374,7 +394,9 @@ module.exports = {
   getUserByUsername,
   getUserByEmail,
   getUserById,
+  getUserProfileById,
   getUsersGroups,
+  getUsersPublicGroups,
   updateUser,
   comparePass,
   ensureAuthenticated,
