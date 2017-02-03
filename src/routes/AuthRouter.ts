@@ -40,16 +40,16 @@ export class AuthRouter {
   }
 
  /**
-  * Logs the user in
+  * Logs the user in. Expects email and password in request object.
   * @param  req Request object
   * @param  res Response object
   * @param  next NextFunction that is called
   * @return 200 JSON of user object and auth token
   */
   public login(req: Request, res: Response, next: NextFunction) {
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
-    return toolHelpers.getUserByUsername(username)
+    return toolHelpers.getUserByEmail(email)
     .then((response) => {
       toolHelpers.comparePass(password, response.password);
       return response;
