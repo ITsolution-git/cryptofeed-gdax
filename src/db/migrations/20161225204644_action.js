@@ -8,6 +8,7 @@ exports.up = function(knex, Promise) {
     table.integer('created_by_user_id').notNullable();
     table.integer('action_type_id').notNullable();
     table.string('title').notNullable();
+    table.string('subtitle').notNullable();
     table.text('description');
     table.text('thanks_msg');
     table.integer('points');
