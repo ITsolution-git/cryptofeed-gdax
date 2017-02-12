@@ -26,7 +26,7 @@ describe('********* routes : user *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -65,7 +65,7 @@ describe('********* routes : user *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -100,7 +100,7 @@ describe('********* routes : user *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {

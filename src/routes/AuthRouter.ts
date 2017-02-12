@@ -21,21 +21,25 @@ export class AuthRouter {
  * @param  res Response object
  * @param  next NextFunction that is called
  * @return 200 JSON of user object
+ * TODO: throw error if email or username already exists
  */
   public register(req: Request, res: Response, next: NextFunction) {
-    if(!toolHelpers.validateEmail(req.body.email)) {
+
+    try {
+      if(!toolHelpers.validateEmail(req.body.email)) {
+        throw Error('Invalid email address');
+      }
+      if(req.body.password.length < 6) {
+        throw Error('Password must be 6 or more characters');
+      }
+    }
+    catch(err) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid email address'
+        message: err.message
       });
     }
-    if(req.body.password.length < 6) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password must be 6 or more characters'
-      });
-    }
-  
+
     return toolHelpers.createUser(req)
     .then((user) => { return tokenHelpers.encodeToken(user[0].user_id); })
     .then((token) => {
@@ -47,7 +51,7 @@ export class AuthRouter {
     .catch((err) => {
       res.status(500).json({
         status: 'error',
-        message: 'Something went wrong, and we didn\'t create a user. :('
+        message: 'An error prevented this call from completing.'
       });
     });
   }

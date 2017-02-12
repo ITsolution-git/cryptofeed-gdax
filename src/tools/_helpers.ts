@@ -17,7 +17,7 @@ function createUser(req: Request) {
   const salt = bcrypt.genSaltSync();
   const hash = bcrypt.hashSync(req.body.password, salt);
 
-  //TODO: Validate the email doesn't exist in the system
+  //TODO: Validate the email & username don't exist in the system
   return knex('user')
   .insert({
     email: req.body.email,
@@ -56,17 +56,6 @@ function getUserByUsername(username: String) {
 */
 function getUserByEmail(email: String) {
   return knex('user').where({email}).first();
-}
-
-/**
-* @description Returns true if we have a user with the specified email
-* @param email: String the email address for the account
-*/
-function checkIfEmailExists(email: String) {
-  knex('user').where({email}).count('user_id as CNT').then(function(total) {
-    return (total[0].CNT > 0);
-  });
-  return true;
 }
 
 /**
@@ -322,6 +311,7 @@ function createGroupAction(owner_id: Number, req: Request) {
     created_by_user_id: owner_id,
     action_type_id: req.body.action_type_id,
     title: req.body.title,
+    subtitle: req.body.subtitle,
     description: req.body.description,
     thanks_msg: req.body.thanks_msg,
     points: req.body.points,
@@ -390,7 +380,6 @@ module.exports = {
   // User Functions
   createUser,
   validateEmail,
-  checkIfEmailExists,
   getUserByUsername,
   getUserByEmail,
   getUserById,

@@ -27,7 +27,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -55,7 +55,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -66,6 +66,7 @@ describe('********* routes : group actions *********', () => {
         .send({
             action_type_id: 1,
             title: 'TEST CREATE GROUP 1 ACTION EMAIL',
+            subtitle: 'This is the subtitle G1',
             description: 'TEST CREATE GROUP 1 DESCRIPTION',
             thanks_msg: 'TEST CREATE GROUP 1 THANKS MESSAGE',
             points: 100,
@@ -97,7 +98,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -126,7 +127,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -148,7 +149,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -172,7 +173,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -199,7 +200,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {
@@ -227,7 +228,7 @@ describe('********* routes : group actions *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((error, response) => {

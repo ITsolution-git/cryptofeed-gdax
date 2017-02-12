@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "build": "tsc -p .",
+    "start": "tsc; node dist/index.js",
     "test": "mocha --reporter spec --compilers ts:ts-node/register test/**/*.test.ts"
   },
   "keywords": [],

@@ -27,8 +27,8 @@ describe('********* routes : auth *********', () => {
       chai.request(app)
       .post('/api/v1/auth/register')
       .send({
-        email: 'jason@test.net',
-        username: 'jasonh',
+        email: 'seed12@test.net',
+        username: 'jasonh3',
         password: 'password',
         first_name: 'jason',
         last_name: 'test',
@@ -39,7 +39,6 @@ describe('********* routes : auth *********', () => {
       })
       .end((err, res) => {
         should.not.exist(err);
-        // res.redirects.length.should.eql(0);
         res.status.should.eql(200);
         res.type.should.eql('application/json');
         res.body.should.include.keys('status', 'token');
@@ -54,7 +53,7 @@ describe('********* routes : auth *********', () => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        username: 'seeder1',
+        email: 'seed1@test.net',
         password: 'password'
       })
       .end((err, res) => {
