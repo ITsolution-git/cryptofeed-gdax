@@ -75,10 +75,14 @@ export class AuthRouter {
       return tokenHelpers.encodeToken(response.user_id);
     })
     .then((token) => {
-      res.status(200).json({
-        status: 'success',
-        token: token
-      });
+      toolHelpers.getUserByEmail(email)
+      .then((user) => {
+        res.status(200).json({
+          status: 'success',
+          token: token,
+          user: user
+        });
+      })
     })
     .catch((err) => {
       res.status(401).json({
