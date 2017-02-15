@@ -1,5 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
-
+import {IRequest} from '../classes/IRequest';
 const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
@@ -23,29 +23,24 @@ export class UserRouter {
    * @param  next NextFunction that is called
    * @return 200 JSON of user object
    */
-    public getUser(req: Request, res: Response, next: NextFunction) {
-      tokenHelper.getUserIdFromRequest(req, (err, user_id) => {
-        let uid = parseInt(req.params.id);
-        if(uid) {
-          return toolHelpers.getUserProfileById(uid)
-          .asCallback((err, user) => {
-            res.status(200).json({
-              status: 'success',
-              token: tokenHelper.encodeToken(user_id),
-              user: user
-            });
+    public getUser(req: IRequest, res: Response, next: NextFunction) {
+      let uid = parseInt(req.params.id);
+      if(uid) {
+        return User.where({user_id:uid}).fetch()
+        .asCallback((err, user) => {
+          res.status(200).json({
+            status: 'success',
+            token: tokenHelper.encodeToken(user.get('user_id')),
+            user: user
           });
-        } else {
-          return toolHelpers.getUserById(user_id)
-          .asCallback((err, user) => {
-            res.status(200).json({
-              status: 'success',
-              token: tokenHelper.encodeToken(user_id),
-              user: user
-            });
-          });
-        }
-      });
+        });
+      } else {
+        res.status(200).json({
+          status: 'success',
+          token: tokenHelper.encodeToken(req.user.id),
+          user: req.user
+        });
+      }
     }
 
     /**

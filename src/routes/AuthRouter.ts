@@ -1,8 +1,9 @@
 import {Router, Request, Response, NextFunction} from 'express';
-
+import {IRequest} from '../classes/IRequest'
 const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
+var User = require('../db/models/user');
 
 export class AuthRouter {
   router: Router
@@ -21,9 +22,9 @@ export class AuthRouter {
  * @param  res Response object
  * @param  next NextFunction that is called
  * @return 200 JSON of user object
- * TODO: throw error if email or username already exists
+ * TODO: throw error if email or username already exists : Done
  */
-  public register(req: Request, res: Response, next: NextFunction) {
+  public register(req: IRequest, res: Response, next: NextFunction) {
 
     try {
       if(!toolHelpers.validateEmail(req.body.email)) {
@@ -40,8 +41,11 @@ export class AuthRouter {
       });
     }
 
-    return toolHelpers.createUser(req)
-    .then((user) => { return tokenHelpers.encodeToken(user[0].user_id); })
+    return User.createUser(req.body)
+    .then((user) => {
+      req.user = user;
+      return tokenHelpers.encodeToken(user.get('user_id')); 
+    })
     .then((token) => {
       res.status(200).json({
         status: 'success',
@@ -51,7 +55,7 @@ export class AuthRouter {
     .catch((err) => {
       res.status(500).json({
         status: 'error',
-        message: 'An error prevented this call from completing.'
+        message: err
       });
     });
   }
@@ -63,26 +67,24 @@ export class AuthRouter {
   * @param  next NextFunction that is called
   * @return 200 JSON of user object and auth token
   */
-  public login(req: Request, res: Response, next: NextFunction) {
+  public login(req: IRequest, res: Response, next: NextFunction) {
     const email = req.body.email;
     const password = req.body.password;
-    return toolHelpers.getUserByEmail(email)
-    .then((response) => {
-      toolHelpers.comparePass(password, response.password);
-      return response;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      user.authenticate(password);
+      req.user = user;
+      return user;
     })
     .then((response) => {
       return tokenHelpers.encodeToken(response.user_id);
     })
     .then((token) => {
-      toolHelpers.getUserByEmail(email)
-      .then((user) => {
-        res.status(200).json({
-          status: 'success',
-          token: token,
-          user: user
-        });
-      })
+      res.status(200).json({
+        status: 'success',
+        token: token,
+        user: req.user
+      });
     })
     .catch((err) => {
       res.status(401).json({

@@ -1,5 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
-const knex = require('../db/connection');
+import {IRequest} from '../classes/IRequest';
+const bookshelf = require('../db/connection');
 const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
 var util = require('util');
@@ -13,25 +14,26 @@ var util = require('util');
 * @description Inserts user data into database
 * @param req: Request request object containing the user form data
 */
-function createUser(req: Request) {
-  const salt = bcrypt.genSaltSync();
-  const hash = bcrypt.hashSync(req.body.password, salt);
+// function createUser(req: Request) {
+//   const salt = bcrypt.genSaltSync();
+//   const hash = bcrypt.hashSync(req.body.password, salt);
 
-  //TODO: Validate the email & username don't exist in the system
-  return knex('user')
-  .insert({
-    email: req.body.email,
-    username: req.body.username,
-    password: hash,
-    first_name: req.body.first_name,
-    last_name: req.body.last_name,
-    avatar_url: req.body.avatar_url,
-    bio: req.body.bio,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude
-  })
-  .returning('*');
-}
+//   //TODO: Validate the email & username don't exist in the system
+//   const user = bookshelf.knex('user')
+//   .insert({
+//     email: req.body.email,
+//     username: req.body.username,
+//     password: hash,
+//     first_name: req.body.first_name,
+//     last_name: req.body.last_name,
+//     avatar_url: req.body.avatar_url,
+//     bio: req.body.bio,
+//     latitude: req.body.latitude,
+//     longitude: req.body.longitude
+//   })
+//   .returning('*');
+//   return user;
+// }
 
 /**
 * @description Validates the specified email is a valid format
@@ -47,7 +49,7 @@ function validateEmail(email: string) {
 * @param username: String the username for the account
 */
 function getUserByUsername(username: String) {
-  return knex('user').where({username}).first();
+  return bookshelf.knex('user').where({username}).first();
 }
 
 /**
@@ -55,7 +57,7 @@ function getUserByUsername(username: String) {
 * @param email: String the email address for the account
 */
 function getUserByEmail(email: String) {
-  return knex('user').where({email}).first();
+  return bookshelf.knex('user').where({email}).first();
 }
 
 /**
@@ -63,7 +65,7 @@ function getUserByEmail(email: String) {
 * @param user_id: Number id of the user
 */
 function getUserById(user_id: Number) {
-  return knex('user').where({user_id}).first();
+  return bookshelf.knex('user').where({user_id}).first();
 }
 
 /**
@@ -71,7 +73,7 @@ function getUserById(user_id: Number) {
 * @param user_id: Number id of the user
 */
 function getUserProfileById(user_id: Number) {
-  return knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_url', 'bio','latitude', 'longitude').where({user_id}).first();
+  return bookshelf.knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_url', 'bio','latitude', 'longitude').where({user_id}).first();
 }
 
 /**
@@ -80,7 +82,7 @@ function getUserProfileById(user_id: Number) {
 * @param user_body: JSON array of user fields to update
 */
 function updateUser(user_id: Number, user_body: JSON, callback) {
-  knex('user').where({user_id})
+  bookshelf.knex('user').where({user_id})
     .update(user_body)
     .then(function(count) {
       callback(null, count);
@@ -92,11 +94,11 @@ function updateUser(user_id: Number, user_body: JSON, callback) {
 * @param userPassword: String plain text password being tested
 * @param databasePassword: String encrypted password to test against
 */
-function comparePass(userPassword: String, databasePassword: String) {
-  const bool = bcrypt.compareSync(userPassword, databasePassword);
-  if (!bool) throw new Error('invalid password');
-  else return true;
-}
+// function comparePass(userPassword: String, databasePassword: String) {
+//   const bool = bcrypt.compareSync(userPassword, databasePassword);
+//   if (!bool) throw new Error('invalid password');
+//   else return true;
+// }
 
 /**
 * @description Throws an error if the user is not authenticated
@@ -104,7 +106,7 @@ function comparePass(userPassword: String, databasePassword: String) {
 * @param res: Response
 * @param next: Callback function (NextFunction)
 */
-function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
+function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
     if(err) {
         res.status(400).json({
@@ -113,13 +115,15 @@ function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
       });
     } else {
       // check if the user still exists in the db
-      return knex('user').where({user_id: user_id}).first()
+      return bookshelf.knex('user').where({user_id: user_id}).first()
       .then((user) => {
+        console.log(user);
+        req.user = user;
         next();
       })
       .catch((err) => {
         res.status(500).json({
-          status: 'error'
+          status: err
         });
       });
     }
@@ -137,7 +141,7 @@ function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
 function getUsersGroups(user_id: Number) {
   //TODO: Need to return creator profile info with the group
   //TODO: Need to return group setting info with the group
-  return knex('group')
+  return bookshelf.knex('group')
     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
     .where('user_id', user_id);
 }
@@ -149,7 +153,7 @@ function getUsersGroups(user_id: Number) {
 function getUsersPublicGroups(user_id: Number) {
   //TODO: Need to return creator profile info with the group
   //TODO: Need to return group setting info with the group
-  return knex('group')
+  return bookshelf.knex('group')
     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
     .where({'user_id':user_id, 'private':0});
 }
@@ -158,7 +162,7 @@ function getUsersPublicGroups(user_id: Number) {
 * @description Returns all non-private and non-deleted groups (public call)
 */
 function getAllGroups() {
-  return knex('group')
+  return bookshelf.knex('group')
     .where({'private':0, 'deleted_at':null});
 }
 
@@ -167,7 +171,7 @@ function getAllGroups() {
 * @param group_id: Number ID of the group to return
 */
 function getGroupById(group_id: Number) {
-  return knex('group')
+  return bookshelf.knex('group')
     .select('*').where({group_id}).first();
 }
 
@@ -190,7 +194,7 @@ function createGroupCode() {
 */
 function createGroup(owner_id: Number, req: Request) {
   let groupCode = createGroupCode();
-  return knex('group')
+  return bookshelf.knex('group')
   .insert({
     created_by_user_id: owner_id,
     name: req.body.name,
@@ -212,7 +216,7 @@ function createGroup(owner_id: Number, req: Request) {
 * @param callback function
 */
 function updateGroup(group_id: Number, group_body: JSON, callback) {
-  knex('group').where({group_id})
+  bookshelf.knex('group').where({group_id})
     .update(group_body)
     .then(function(count) {
       callback(null, count);
@@ -226,7 +230,7 @@ function updateGroup(group_id: Number, group_body: JSON, callback) {
 * @param callback function
 */
 function joinGroup(group_id: Number, user_id: Number, callback) {
-  knex('group_user')
+  bookshelf.knex('group_user')
   .insert({
     group_id: group_id,
     user_id: user_id,
@@ -246,7 +250,7 @@ function joinGroup(group_id: Number, user_id: Number, callback) {
 * @param callback function
 */
 function getGroupMembers(group_id: Number, callback) {
-  knex('user').select('user.user_id', 'user.username', 'user.avatar_url',
+  bookshelf.knex('user').select('user.user_id', 'user.username', 'user.avatar_url',
                       'group_user.admin_settings', 'group_user.admin_members',
                       'group_user.mod_actions', 'group_user.mod_comments',
                       'group_user.submit_action')
@@ -265,7 +269,7 @@ function getGroupMembers(group_id: Number, callback) {
 * @param perm_body: JSON array of settings being updated
 */
 function updateGroupUser(group_id: Number, user_id: Number, perm_body: JSON) {
-  return knex('group_user')
+  return bookshelf.knex('group_user')
     .update(perm_body)
     .where({group_id, user_id})
     .returning('*');
@@ -277,7 +281,7 @@ function updateGroupUser(group_id: Number, user_id: Number, perm_body: JSON) {
 * @param user_id: Number ID of the user
 */
 function getGroupMemberById(group_id: Number, user_id: Number) {
-  return knex('group_user')
+  return bookshelf.knex('group_user')
     .where({group_id, user_id}).first();
 }
 
@@ -290,7 +294,7 @@ function getGroupMemberById(group_id: Number, user_id: Number) {
 * @param group_id int id of group
 */
 function getGroupActions(group_id, callback) {
-  knex('action')
+  bookshelf.knex('action')
     .innerJoin('action_type', 'action.action_type_id', 'action_type.action_type_id')
     .where({'action.group_id':group_id, 'action.deleted_at':null})
     .asCallback(function(err, actions) {
@@ -305,7 +309,7 @@ function getGroupActions(group_id, callback) {
 */
 function createGroupAction(owner_id: Number, req: Request) {
   let group_id = parseInt(req.params.id);
-  return knex('action')
+  return bookshelf.knex('action')
   .insert({
     group_id: group_id,
     created_by_user_id: owner_id,
@@ -331,7 +335,7 @@ function createGroupAction(owner_id: Number, req: Request) {
 * @param group_id: Number ID of group action belongs to
 */
 function getActionById(action_id: Number, group_id: Number) {
-  return knex('action').where({action_id, group_id, deleted_at: null}).first();
+  return bookshelf.knex('action').where({action_id, group_id, deleted_at: null}).first();
 }
 
 /**
@@ -341,9 +345,9 @@ function getActionById(action_id: Number, group_id: Number) {
 * TODO: Need to make sure user has not already completed action
 */
 function createActionUser(action_id: Number, user_id: Number) {
-  return knex('action').where({action_id, deleted_at: null})
+  return bookshelf.knex('action').where({action_id, deleted_at: null})
     .then(function(action) {
-      return knex('action_user')
+      return bookshelf.knex('action_user')
       .insert({
         action_id: action_id,
         user_id: user_id,
@@ -357,7 +361,7 @@ function createActionUser(action_id: Number, user_id: Number) {
 * @description Returns all supported action types
 */
 function getActionTypes() {
-  return knex('action_type').select('*')
+  return bookshelf.knex('action_type').select('*')
     .returning('*');
 }
 
@@ -367,18 +371,17 @@ function getActionTypes() {
 * @param user_id: ID of the user marking the action as deleted
 */
 function deleteAction(action_id: Number, user_id: Number) {
-  return knex('action').where({action_id})
-    .update({deleted_at: knex.fn.now(), deleted_by_user_id: user_id});
+  return bookshelf.knex('action').where({action_id})
+    .update({deleted_at: bookshelf.knex.fn.now(), deleted_by_user_id: user_id});
 }
 
 function updateAction(action_id: Number, action_body: JSON) {
-  return knex('action').where({action_id})
+  return bookshelf.knex('action').where({action_id})
     .update(action_body);
 }
 
 module.exports = {
   // User Functions
-  createUser,
   validateEmail,
   getUserByUsername,
   getUserByEmail,
@@ -387,7 +390,6 @@ module.exports = {
   getUsersGroups,
   getUsersPublicGroups,
   updateUser,
-  comparePass,
   ensureAuthenticated,
   // Group Functions
   getAllGroups,
