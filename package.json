@@ -32,6 +32,8 @@
     "bcryptjs": "^2.3.0",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.10.3",
+    "bookshelf-validate": "^2.0.3",
+    "bookshelf-validator": "^0.2.2",
     "checkit": "^0.7.0",
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",

@@ -26,38 +26,6 @@ export class AuthRouter {
  * TODO: throw error if email or username already exists : Done
  */
   public register(req: IRequest, res: Response, next: NextFunction) {
-
-    let validationMsg = [];
-    try {
-      if(!toolHelpers.validateEmail(req.body.email)) {
-        validationMsg.push('Invalid email address');
-      }
-      if(req.body.password.length < 6) {
-        validationMsg.push('Password must be 6 or more characters');
-      }
-      User.where({email:req.body.email}).fetch().then(function(user){
-        if(user != null)
-          validationMsg.push('Choose other email');
-        User.where({username:req.body.username}).fetch().then(function(user){
-          if(user != null)
-            validationMsg.push('Choose other username');
-        });
-        
-      });
-    }
-    catch(err) {
-      return res.status(400).json({
-        success: 0,
-        message: [err.message]
-      });
-    }
-    if(validationMsg.length != 0){
-      return res.status(400).json({
-        success: 0,
-        message: validationMsg
-      });
-    }
-    
     return User.createUser(req.body)
     .then((user) => {
       req.user = user;

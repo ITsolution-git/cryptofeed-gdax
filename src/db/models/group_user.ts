@@ -1,5 +1,5 @@
 
-var bookshelf = require('../connection');
+import bookshelf from '../connection';
 import User from './user';
 import Group from './group';
 
