@@ -1,14 +1,19 @@
 
 var bookshelf = require('../connection');
 
-const bcrypt = require('bcryptjs');
-const tokenHelper = require('../../tools/tokens');
+let bcrypt = require('bcryptjs');
+import Group from './group';
+import GroupUser from './group_user';
+import User from './user';
 
-var User = bookshelf.Model.extend({
+
+export default bookshelf.Model.extend({
   tableName: 'user',
   hasTimestamps: true,
   idAttribute: 'user_id',
-
+  groups: function() {
+    return this.belongsToMany(Group, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id');
+  },
   
   authenticate: function(password){
     const bool = bcrypt.compareSync(password, this.get('password'));
@@ -23,22 +28,27 @@ var User = bookshelf.Model.extend({
   // },
 
 }, {
+  saveUser: function(attrs){
+    if(attrs.password){
+
+    }
+
+  },
   createUser: function(attrs){
     const salt = bcrypt.genSaltSync();
     const hash = bcrypt.hashSync(attrs.password, salt);
 
     //TODO: Validate the email & username don't exist in the system
-    
     var user = new User({
       email: attrs.email,
       username: attrs.username,
       password: hash,
       first_name: attrs.first_name,
       last_name: attrs.last_name,
-      avatar_url: attrs.avatar_url,
-      bio: attrs.bio,
-      latitude: attrs.latitude,
-      longitude: attrs.longitude
+      // avatar_url: attrs.avatar_url,
+      // bio: attrs.bio,
+      // latitude: attrs.latitude,
+      // longitude: attrs.longitude
     }).save(); 
     return user;  
   },
@@ -53,5 +63,3 @@ var User = bookshelf.Model.extend({
     });
   }
 });
-
-module.exports = User;  

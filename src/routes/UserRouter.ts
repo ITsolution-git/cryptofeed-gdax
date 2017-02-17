@@ -3,6 +3,9 @@ import {IRequest} from '../classes/IRequest';
 const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
+import User from '../db/models/user';
+var path = require('path'),
+    fs = require('fs');
 
 export class UserRouter {
   router: Router
@@ -24,9 +27,8 @@ export class UserRouter {
    * @return 200 JSON of user object
    */
     public getUser(req: IRequest, res: Response, next: NextFunction) {
-      let uid = parseInt(req.params.id);
-      if(uid) {
-        return User.where({user_id:uid}).fetch()
+      if(req.params.id) {
+        return User.where({user_id:parseInt(req.params.id)}).fetch()
         .asCallback((err, user) => {
           res.status(200).json({
             status: 'success',
@@ -48,26 +50,51 @@ export class UserRouter {
     * @param Request
     * @param Response
     * @param Callback function (NextFunction)
-    */
-    public putUser(req: Request, res: Response, next: NextFunction) {
-      tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-        if(err) {
-            res.status(401).json({
-            status: 'Token has expired',
-            message: 'Your token has expired.'
-          });
-        } else {
-          toolHelpers.updateUser(user_id, req.body, function(err, count) {
-            var user = toolHelpers.getUserById(user_id)
-            .asCallback((err, values) => {
-              res.status(200).json({
-                status: 'success',
-                token: token,
-                user: values
-              });
-            });
-          });
+    */  
+    public putUser(req: IRequest, res: Response, next: NextFunction) {
+      let message = "";
+      if(req.files){
+        try{
+          let file = req.files.avatar_url;
+          let targetPath = path.resolve('./public/uploads/'+req.user.get('username')+path.extname(file.name).toLowerCase());
+          if ((path.extname(file.name).toLowerCase() === '.jpg')||
+              (path.extname(file.name).toLowerCase() === '.png')) { 
+              file.mv(targetPath, function(err) {
+                if (err) {
+                  throw err;
+                }
+                else {
+                  message = "Successfully Uploaded";
+                  User.forge({user_id:req.user.id}).save(
+                    {avatar_url:targetPath});
+                }
+              });   
+          } else {
+            message = "Only jpg/png are acceptable";
+          }
+        }catch(err){
+          message = err.message;
         }
+      }
+      return User.forge({user_id:req.user.id}).saveUser(req.body)
+      .then((user) => {
+        req.user = user;
+        return tokenHelper.encodeToken(user.get('user_id')); 
+      })
+      .then((token) => {
+        res.status(200).json({
+          success: 1,
+          token: token,
+          user: req.user,
+          message:["Successfully updated", message]
+        });
+      })
+      .catch((err) => {
+        res.status(500).json({
+          success: 0,
+          message:["Unknown error", message],
+          user:[]
+        });
       });
     }
 
@@ -77,36 +104,20 @@ export class UserRouter {
     * @param Response
     * @param Callback function (NextFunction)
     */
-    public getGroups(req: Request, res: Response, next: NextFunction) {
-      tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-        if(err) {
-            res.status(401).json({
-            status: 'Token has expired',
-            message: 'Your token has expired.'
-          });
-        } else {
-          let uid = parseInt(req.params.id);
-          if(uid) {
-            var groups = toolHelpers.getUsersPublicGroups(uid)
-            .asCallback((err, values) => {
-              res.status(200).json({
-                status: 'success',
-                token: token,
-                groups: values
-              });
-            });
-          } else {
-            var groups = toolHelpers.getUsersGroups(user_id)
-            .asCallback((err, values) => {
-              res.status(200).json({
-                status: 'success',
-                token: token,
-                groups: values
-              });
-            });
-          }
+    public getGroups(req: IRequest, res: Response, next: NextFunction) {
+      let uid = parseInt(req.params.id);
 
-        }
+      if(!uid) {
+        uid = req.user.id;
+      }
+      User.where({user_id: uid}).fetch({withRelated: ['groups']})
+      .asCallback((err, user) => {
+        if(err) res.status(200).json({status: 'error', err:err});
+        res.status(200).json({
+          status: 'success',
+          token: tokenHelper.encodeToken(req.user.id),
+          groups: user.related('groups')
+        });
       });
     }
 

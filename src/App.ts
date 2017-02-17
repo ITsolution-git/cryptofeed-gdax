@@ -9,6 +9,9 @@ import AuthRouter from './routes/AuthRouter';
 import UserRouter from './routes/UserRouter';
 
 
+var fileUpload = require('express-fileupload');
+
+
 // Creates and configures an ExpressJS web server.
 class App {
 
@@ -25,6 +28,7 @@ class App {
   // Configure Express middleware.
   private middleware(): void {
     this.express.use(logger('dev'));
+    this.express.use(fileUpload());
     this.express.use(bodyParser.json());
     this.express.use(bodyParser.urlencoded({ extended: false }));
   }

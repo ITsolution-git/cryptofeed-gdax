@@ -1,9 +1,10 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest'
+
 const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
-var User = require('../db/models/user');
+import User from '../db/models/user';
 
 export class AuthRouter {
   router: Router
@@ -26,21 +27,37 @@ export class AuthRouter {
  */
   public register(req: IRequest, res: Response, next: NextFunction) {
 
+    let validationMsg = [];
     try {
       if(!toolHelpers.validateEmail(req.body.email)) {
-        throw Error('Invalid email address');
+        validationMsg.push('Invalid email address');
       }
       if(req.body.password.length < 6) {
-        throw Error('Password must be 6 or more characters');
+        validationMsg.push('Password must be 6 or more characters');
       }
+      User.where({email:req.body.email}).fetch().then(function(user){
+        if(user != null)
+          validationMsg.push('Choose other email');
+        User.where({username:req.body.username}).fetch().then(function(user){
+          if(user != null)
+            validationMsg.push('Choose other username');
+        });
+        
+      });
     }
     catch(err) {
       return res.status(400).json({
-        status: 'error',
-        message: err.message
+        success: 0,
+        message: [err.message]
       });
     }
-
+    if(validationMsg.length != 0){
+      return res.status(400).json({
+        success: 0,
+        message: validationMsg
+      });
+    }
+    
     return User.createUser(req.body)
     .then((user) => {
       req.user = user;
@@ -48,14 +65,15 @@ export class AuthRouter {
     })
     .then((token) => {
       res.status(200).json({
-        status: 'success',
+        success: 1,
+        user: req.user,
         token: token
       });
     })
     .catch((err) => {
-      res.status(500).json({
-        status: 'error',
-        message: err
+      res.status(400).json({
+        success: 0,
+        message: err.message
       });
     });
   }
@@ -81,14 +99,15 @@ export class AuthRouter {
     })
     .then((token) => {
       res.status(200).json({
-        status: 'success',
+        success: 1,
         token: token,
         user: req.user
       });
     })
     .catch((err) => {
       res.status(401).json({
-        status: 'error'
+        success: 0,
+        message: "Login failed"
       });
     });
   }

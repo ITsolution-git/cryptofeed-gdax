@@ -1,7 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
 
-const tokenHelper = require('../tools/tokens');
-const toolHelpers = require('../tools/_helpers');
+let tokenHelper = require('../tools/tokens');
+let toolHelpers = require('../tools/_helpers');
 
 
 var util = require('util');

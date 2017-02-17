@@ -4,7 +4,7 @@ const bookshelf = require('../db/connection');
 const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
 var util = require('util');
-
+import User from '../db/models/user';
 
 /***************************************************************/
 /**  User Functions **/
@@ -115,9 +115,8 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
       });
     } else {
       // check if the user still exists in the db
-      return bookshelf.knex('user').where({user_id: user_id}).first()
+      return User.where({user_id: user_id}).fetch()
       .then((user) => {
-        console.log(user);
         req.user = user;
         next();
       })
