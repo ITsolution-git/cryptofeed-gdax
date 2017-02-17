@@ -26,7 +26,7 @@ export class AuthRouter {
  * TODO: throw error if email or username already exists : Done
  */
   public register(req: IRequest, res: Response, next: NextFunction) {
-    return User.createUser(req.body)
+    return new User(req.body).save()
     .then((user) => {
       req.user = user;
       return tokenHelpers.encodeToken(user.get('user_id')); 
@@ -41,7 +41,8 @@ export class AuthRouter {
     .catch((err) => {
       res.status(400).json({
         success: 0,
-        message: err.message
+        message: err.message,
+        data: err.data
       });
     });
   }
@@ -58,6 +59,8 @@ export class AuthRouter {
     const password = req.body.password;
     return User.where({email : email}).fetch()
     .then((user) => {
+      if(!user)
+        throw Error("Invalid email address");
       user.authenticate(password);
       req.user = user;
       return user;
@@ -75,7 +78,7 @@ export class AuthRouter {
     .catch((err) => {
       res.status(401).json({
         success: 0,
-        message: "Login failed"
+        message: err.message
       });
     });
   }

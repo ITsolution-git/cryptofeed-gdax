@@ -1,8 +1,9 @@
 
 import bookshelf from '../connection';
-import  _ from 'lodash';
+var _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
+const ValidationError = require('bookshelf-validate/lib/errors').ValidationError;
 import bluebird from 'bluebird';
 import Group from './group';
 import GroupUser from './group_user';
@@ -14,48 +15,54 @@ export default bookshelf.Model.extend({
   idAttribute: 'user_id',
 
   initialize: function() {
-    this.on("saving", this.assertUnique("email"));
-    this.on("saving", this.assertUnique("username"));
+    this.on("saving", this._assertEmailUnique);
+    this.on("saving", this._assertUsernameUnique);
+    if(this.isNew())
+      this.on('saving', this.validateOnSave);
+    this.on('saving', this.cryptPassword);
   },
 
   validations: {
     email: [
-      'isRequired',
+      { method: 'isRequired', error:'Email Required'},
       { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
-      { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+      // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
     ],
-    username: 'isRequired',
-    firstname: 'isRequired',
-    lastname: 'isRequired',
+    password: { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+    
+    username: { method: 'isRequired', error:'Username Required'},
+    first_name: { method: 'isRequired', error:'First Name Required'},
+    last_name: { method: 'isRequired', error:'Last Name Required'},
   },
-  assertUnique :function () {
-    const columns = _.toArray(arguments)
-    if (columns.length === 0) {
-      throw new Error("please pass unique columns")
+
+  cryptPassword: function(model, attributes, options) {
+    if (this.hasChanged('password')) {
+      const salt = bcrypt.genSaltSync();
+      const hash = bcrypt.hashSync(this.get('password'), salt);
+
+      this.set({password:hash});
+      return this;
     }
-    return function(model, attributes, options) {
-      const hasChanged = _.some(columns, column => {
-        return model.hasChanged(column)
-      })
-      if (model.isNew() || hasChanged) {
-        return this.constructor.query(q => {
-          columns.forEach(column => {
-            q.where(column, '=', model.get(column))
-          })
-          if (!model.isNew()) {
-            q.where(model.idAttribute, '<>', model.id)
-          }
-        })
-        .count({ transacting: options.transacting })
-        .then(n => {
-          if (n > 0) {
-            return bluebird.reject({
-              name: "DuplicateError",
-              message: columns.join(", ")
-            })
-          }
-        })
-      }
+  },
+
+  _assertEmailUnique: function(model, attributes, options) {
+    if (this.hasChanged('email')) {
+      return User
+        .query('where', 'email', this.get('email'))
+        .fetch({})
+        .then(function (existing) {
+          if (existing) throw new ValidationError('Choose Another Email');
+        });
+    }
+  },
+  _assertUsernameUnique: function(model, attributes, options) {
+    if (this.hasChanged('username')) {
+      return User
+        .query('where', 'username', this.get('username'))
+        .fetch({})
+        .then(function (existing) {
+          if (existing) throw new ValidationError('Choose Another Username');
+        });
     }
   },
   groups: function() {
@@ -64,7 +71,7 @@ export default bookshelf.Model.extend({
   
   authenticate: function(password){
     const bool = bcrypt.compareSync(password, this.get('password'));
-    if (!bool) throw new Error('invalid password');
+    if (!bool) throw new Error('Invalid password');
     else return true;
   },
   // initialize: function() {
@@ -80,24 +87,6 @@ export default bookshelf.Model.extend({
 
     }
 
-  },
-  createUser: function(attrs){
-    const salt = bcrypt.genSaltSync();
-    const hash = bcrypt.hashSync(attrs.password, salt);
-
-    //TODO: Validate the email & username don't exist in the system
-    var user = new User({
-      email: attrs.email,
-      username: attrs.username,
-      password: hash,
-      first_name: attrs.first_name,
-      last_name: attrs.last_name,
-      // avatar_url: attrs.avatar_url,
-      // bio: attrs.bio,
-      // latitude: attrs.latitude,
-      // longitude: attrs.longitude
-    }).save(); 
-    return user;  
   },
   login: function(email, password) {
     if (!email || !password) throw new Error('Email and password are both required');

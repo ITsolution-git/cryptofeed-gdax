@@ -31,6 +31,7 @@ class App {
     this.express.use(fileUpload());
     this.express.use(bodyParser.json());
     this.express.use(bodyParser.urlencoded({ extended: false }));
+    this.express.use(express.static(__dirname + '/../public')); 
   }
 
   // Configure API endpoints.

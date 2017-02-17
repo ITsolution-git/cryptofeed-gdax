@@ -14,10 +14,12 @@ var validator = require('validator');
 //     }
 //   }
 // };
-
+validator.isRequired = function(str, options){
+  return str !== undefined;
+}
 var bookshelf = require('bookshelf')(knex);
 bookshelf.plugin('bookshelf-validate', {
   validator: validator,
-  validateOnSave: false 
+  validateOnSave: true 
 });
 export default bookshelf;

@@ -2,6 +2,7 @@ import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
 const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
+import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
 var path = require('path'),
@@ -52,31 +53,44 @@ export class UserRouter {
     * @param Callback function (NextFunction)
     */  
     public putUser(req: IRequest, res: Response, next: NextFunction) {
-      let message = "";
-      if(req.files){
-        try{
-          let file = req.files.avatar_url;
-          let targetPath = path.resolve('./public/uploads/'+req.user.get('username')+path.extname(file.name).toLowerCase());
-          if ((path.extname(file.name).toLowerCase() === '.jpg')||
-              (path.extname(file.name).toLowerCase() === '.png')) { 
+      return req.user.save(req.body)
+      .then((user) => {
+        req.user = user;
+        if(req.files){
+          try{
+            let file = req.files.avatar_url;
+            var targetPath = path.resolve('./public/uploads/'+req.user.get('username')+path.extname(file.name).toLowerCase());
+            if ((path.extname(file.name).toLowerCase() === '.jpg')||
+                (path.extname(file.name).toLowerCase() === '.png')) { 
+
               file.mv(targetPath, function(err) {
                 if (err) {
+                  err.message = "Upload failed";
                   throw err;
                 }
                 else {
-                  message = "Successfully Uploaded";
-                  User.forge({user_id:req.user.id}).save(
-                    {avatar_url:targetPath});
+                  return true;
                 }
               });   
-          } else {
-            message = "Only jpg/png are acceptable";
+              return true;  
+            } else {
+              let err = new Error();
+              err.message = "Only jpg/png are acceptable";
+              throw err;
+            }
+          }catch(err){
+            err.message = "Unknown error prevented from uploading";
+            throw err;
           }
-        }catch(err){
-          message = err.message;
         }
-      }
-      return User.forge({user_id:req.user.id}).saveUser(req.body)
+        else{
+          return false;
+        }
+      })
+      .then((isUploadSuccess)=>{
+        var targetPath = '/uploads/'+req.user.get('username')+path.extname(req.files.avatar_url.name).toLowerCase();
+        return req.user.save({avatar_url:targetPath});
+      })
       .then((user) => {
         req.user = user;
         return tokenHelper.encodeToken(user.get('user_id')); 
@@ -86,13 +100,14 @@ export class UserRouter {
           success: 1,
           token: token,
           user: req.user,
-          message:["Successfully updated", message]
+          message:"Success"
         });
       })
       .catch((err) => {
         res.status(500).json({
           success: 0,
-          message:["Unknown error", message],
+          message:err.message,
+          data:err.data,  
           user:[]
         });
       });
