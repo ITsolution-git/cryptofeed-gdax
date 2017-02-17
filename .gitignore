@@ -1,6 +1,7 @@
 #Ignore Folders
 dist/
 node_modules/
+public/uploads/
 
 #Ignore Files
 **/.DS_Store

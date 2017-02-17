@@ -4,7 +4,10 @@
     "module": "commonjs",
     "outDir": "dist",
     "sourceMap": true,
-    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      "test"
+    ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
