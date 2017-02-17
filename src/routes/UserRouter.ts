@@ -31,15 +31,28 @@ export class UserRouter {
       if(req.params.id) {
         return User.where({user_id:parseInt(req.params.id)}).fetch()
         .asCallback((err, user) => {
-          res.status(200).json({
-            status: 'success',
-            token: tokenHelper.encodeToken(user.get('user_id')),
-            user: user
-          });
+          if(err)
+            throw err;
+          else if(user == null)
+            res.status(500).json({
+              success: 1,
+              message: "No user id"
+            })
+          else 
+            res.status(200).json({
+              status: 'success',
+              user: user
+            });
+        })
+        .catch(function(err){
+          res.status(500).json({
+            success: 0,
+            message: err.message
+          })
         });
       } else {
         res.status(200).json({
-          status: 'success',
+          success: 1,
           token: tokenHelper.encodeToken(req.user.id),
           user: req.user
         });
@@ -120,20 +133,23 @@ export class UserRouter {
     * @param Callback function (NextFunction)
     */
     public getGroups(req: IRequest, res: Response, next: NextFunction) {
-      let uid = parseInt(req.params.id);
+      let uid;
 
-      if(!uid) {
+      if(!req.params.id) {
         uid = req.user.id;
       }
+      else
+        uid = parseInt(req.params.id);
       User.where({user_id: uid}).fetch({withRelated: ['groups']})
       .asCallback((err, user) => {
-        if(err) res.status(200).json({status: 'error', err:err});
-        res.status(200).json({
-          status: 'success',
-          token: tokenHelper.encodeToken(req.user.id),
+        if(err) return res.status(500).json({success: 0, message:err.message});
+        if(user == null) return res.status(500).json({success:0, message:"Invalid userid"});
+        return res.status(200).json({
+          success: 1,
           groups: user.related('groups')
         });
       });
+      
     }
 
   /**

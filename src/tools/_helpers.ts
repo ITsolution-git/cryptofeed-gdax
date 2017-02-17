@@ -122,7 +122,8 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
       })
       .catch((err) => {
         res.status(500).json({
-          status: err
+          success: 0,
+          message: err.message
         });
       });
     }

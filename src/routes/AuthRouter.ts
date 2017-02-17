@@ -66,7 +66,7 @@ export class AuthRouter {
       return user;
     })
     .then((response) => {
-      return tokenHelpers.encodeToken(response.user_id);
+      return tokenHelpers.encodeToken(response.id);
     })
     .then((token) => {
       res.status(200).json({
