@@ -60,7 +60,7 @@ export default bookshelf.Model.extend({
         .query('where', 'email', this.get('email'))
         .fetch({})
         .then(function (existing) {
-          if (existing) throw new ValidationError('Choose Another Email');
+          if (existing || existing.id == this.id) throw new ValidationError('Choose Another Email');
         });
     }
   },
@@ -70,7 +70,7 @@ export default bookshelf.Model.extend({
         .query('where', 'username', this.get('username'))
         .fetch({})
         .then(function (existing) {
-          if (existing) throw new ValidationError('Choose Another Username');
+          if (existing || existing.id == this.id) throw new ValidationError('Choose Another Username');
         });
     }
   },

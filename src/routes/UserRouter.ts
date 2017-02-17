@@ -72,7 +72,7 @@ export class UserRouter {
         if(req.files){
           try{
             let file = req.files.avatar_file;
-            var targetPath = path.resolve('./public/uploads/'+req.user.get('username')+path.extname(file.name).toLowerCase());
+            var targetPath = path.resolve('./public/uploads/'+req.user.get('user_id')+path.extname(file.name).toLowerCase());
             if ((path.extname(file.name).toLowerCase() === '.jpg')||
                 (path.extname(file.name).toLowerCase() === '.png')) { 
 
@@ -102,7 +102,7 @@ export class UserRouter {
       })
       .then((isUploadSuccess)=>{
         if(isUploadSuccess){
-          var targetPath = '/uploads/'+req.user.get('username')+path.extname(req.files.avatar_file.name).toLowerCase();
+          var targetPath = '/uploads/'+req.user.get('user_id')+path.extname(req.files.avatar_file.name).toLowerCase();
           return req.user.save({avatar_file:targetPath});
         }
         else
