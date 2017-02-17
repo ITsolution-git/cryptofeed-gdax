@@ -32,7 +32,7 @@ describe('********* routes : auth *********', () => {
         password: 'password',
         first_name: 'jason',
         last_name: 'test',
-        avatar_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
+        avatar_file: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
         bio: 'Jason is a great user. The best!',
         latitude: '51.5032520',
         longitude: '-0.1278990'

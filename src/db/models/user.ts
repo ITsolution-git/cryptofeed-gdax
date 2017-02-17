@@ -18,22 +18,31 @@ export default bookshelf.Model.extend({
     this.on("saving", this._assertEmailUnique);
     this.on("saving", this._assertUsernameUnique);
     if(this.isNew())
-      this.on('saving', this.validateOnSave);
+      this.validations =  {
+        email: [
+          { method: 'isRequired', error:'Email Required'},
+          { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
+          // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+        ],
+        password: [
+          { method: 'isRequired', error:'Password Required'},
+          { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+        ]
+      };
+    else
+      this.validations =  {
+        email: [
+          { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
+          // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+        ],
+        password: { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+        
+      };
+    this.on('saving', this.validateOnSave);
     this.on('saving', this.cryptPassword);
   },
 
-  validations: {
-    email: [
-      { method: 'isRequired', error:'Email Required'},
-      { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
-      // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
-    ],
-    password: { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
-    
-    username: { method: 'isRequired', error:'Username Required'},
-    first_name: { method: 'isRequired', error:'First Name Required'},
-    last_name: { method: 'isRequired', error:'Last Name Required'},
-  },
+ 
 
   cryptPassword: function(model, attributes, options) {
     if (this.hasChanged('password')) {

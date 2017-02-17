@@ -26,7 +26,7 @@ import User from '../db/models/user';
 //     password: hash,
 //     first_name: req.body.first_name,
 //     last_name: req.body.last_name,
-//     avatar_url: req.body.avatar_url,
+//     avatar_file: req.body.avatar_file,
 //     bio: req.body.bio,
 //     latitude: req.body.latitude,
 //     longitude: req.body.longitude
@@ -73,7 +73,7 @@ function getUserById(user_id: Number) {
 * @param user_id: Number id of the user
 */
 function getUserProfileById(user_id: Number) {
-  return bookshelf.knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_url', 'bio','latitude', 'longitude').where({user_id}).first();
+  return bookshelf.knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_file', 'bio','latitude', 'longitude').where({user_id}).first();
 }
 
 /**
@@ -109,7 +109,7 @@ function updateUser(user_id: Number, user_body: JSON, callback) {
 function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
     if(err) {
-        res.status(400).json({
+        res.status(401).json({
         status: 'Authentication required',
         message: 'Your token has expired.'
       });
@@ -121,7 +121,7 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
         next();
       })
       .catch((err) => {
-        res.status(500).json({
+        res.status(400).json({
           success: 0,
           message: err.message
         });
@@ -250,7 +250,7 @@ function joinGroup(group_id: Number, user_id: Number, callback) {
 * @param callback function
 */
 function getGroupMembers(group_id: Number, callback) {
-  bookshelf.knex('user').select('user.user_id', 'user.username', 'user.avatar_url',
+  bookshelf.knex('user').select('user.user_id', 'user.username', 'user.avatar_file',
                       'group_user.admin_settings', 'group_user.admin_members',
                       'group_user.mod_actions', 'group_user.mod_comments',
                       'group_user.submit_action')

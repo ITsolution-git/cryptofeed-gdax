@@ -34,7 +34,7 @@ export class UserRouter {
           if(err)
             throw err;
           else if(user == null)
-            res.status(500).json({
+            res.status(400).json({
               success: 1,
               message: "No user id"
             })
@@ -45,7 +45,7 @@ export class UserRouter {
             });
         })
         .catch(function(err){
-          res.status(500).json({
+          res.status(400).json({
             success: 0,
             message: err.message
           })
@@ -71,7 +71,7 @@ export class UserRouter {
         req.user = user;
         if(req.files){
           try{
-            let file = req.files.avatar_url;
+            let file = req.files.avatar_file;
             var targetPath = path.resolve('./public/uploads/'+req.user.get('username')+path.extname(file.name).toLowerCase());
             if ((path.extname(file.name).toLowerCase() === '.jpg')||
                 (path.extname(file.name).toLowerCase() === '.png')) { 
@@ -101,8 +101,12 @@ export class UserRouter {
         }
       })
       .then((isUploadSuccess)=>{
-        var targetPath = '/uploads/'+req.user.get('username')+path.extname(req.files.avatar_url.name).toLowerCase();
-        return req.user.save({avatar_url:targetPath});
+        if(isUploadSuccess){
+          var targetPath = '/uploads/'+req.user.get('username')+path.extname(req.files.avatar_file.name).toLowerCase();
+          return req.user.save({avatar_file:targetPath});
+        }
+        else
+          return req.user;
       })
       .then((user) => {
         req.user = user;

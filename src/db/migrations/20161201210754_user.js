@@ -8,7 +8,7 @@ exports.up = (knex, Promise) => {
     table.string('password').notNullable();
     table.string('first_name');
     table.string('last_name');
-    table.string('avatar_url');
+    table.string('avatar_file');
     table.text('bio');
     table.decimal('latitude',9,6);
     table.decimal('longitude',9,6);
