@@ -15,21 +15,21 @@ const helpers = require('../../src/tools/_helpers');
 
 describe('auth : helpers', () => {
 
-  describe('comparePass()', () => {
-    it('should return true', (done) => {
-      const output = helpers.comparePass('testpassword', hash);
-      should.exist(output);
-      output.should.eql(true);
-      done();
-    });
-  });
+  // describe('comparePass()', () => {
+  //   it('should return true', (done) => {
+  //     const output = helpers.comparePass('testpassword', hash);
+  //     should.exist(output);
+  //     output.should.eql(true);
+  //     done();
+  //   });
+  // });
 
-  describe('getUserByUsername()', () => {
-    it('should return a user object', (done) => {
-      const user = helpers.getUserByUsername('seeder1');
-      should.exist(user);
-      done();
-    });
-  });
+  // describe('getUserByUsername()', () => {
+  //   it('should return a user object', (done) => {
+  //     const user = helpers.getUserByUsername('seeder1');
+  //     should.exist(user);
+  //     done();
+  //   });
+  // });
 
 });

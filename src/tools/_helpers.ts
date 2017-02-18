@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
-const bookshelf = require('../db/connection');
+import bookshelf from '../db/bookshelf';
 const bcrypt = require('bcryptjs');
 const tokenHelper = require('./tokens');
 var util = require('util');

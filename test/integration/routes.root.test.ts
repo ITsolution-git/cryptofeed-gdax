@@ -41,8 +41,8 @@ describe('********* routes : api root *********', () => {
         // res.redirects.length.should.eql(0);
         res.status.should.eql(200);
         res.type.should.eql('application/json');
-        res.body.should.include.keys('status', 'message');
-        res.body.status.should.eql('success');
+        res.body.should.include.keys('success', 'message');
+        res.body.success.should.eql(1);
         res.body.message.should.eql('Action Now API v1.0');
         done();
       });

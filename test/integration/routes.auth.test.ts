@@ -5,7 +5,7 @@ import * as chai from 'chai';
 import app from '../../src/App';
 
 const should = chai.should();
-const knex = require('../../src/db/connection');
+const bookshelf = require('../../src/db/connection');
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
@@ -13,13 +13,13 @@ chai.use(chaiHttp);
 describe('********* routes : auth *********', () => {
 
   beforeEach(() => {
-    return knex.migrate.rollback()
-    .then(() => { return knex.migrate.latest(); })
-    .then(() => { return knex.seed.run(); });
+    return bookshelf.knex.migrate.rollback()
+    .then(() => { return bookshelf.knex.migrate.latest(); })
+    .then(() => { return bookshelf.knex.seed.run(); });
   });
 
   afterEach(() => {
-    return knex.migrate.rollback();
+    return bookshelf.knex.migrate.rollback();
   });
 
   describe('POST /api/v1/auth/register', () => {
@@ -27,61 +27,54 @@ describe('********* routes : auth *********', () => {
       chai.request(app)
       .post('/api/v1/auth/register')
       .send({
-        email: 'seed12@test.net',
-        username: 'jasonh3',
+        email: 'newuser@test.net',
         password: 'password',
-        first_name: 'jason',
-        last_name: 'test',
-        avatar_file: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
-        bio: 'Jason is a great user. The best!',
-        latitude: '51.5032520',
-        longitude: '-0.1278990'
       })
       .end((err, res) => {
         should.not.exist(err);
         res.status.should.eql(200);
         res.type.should.eql('application/json');
-        res.body.should.include.keys('status', 'token');
-        res.body.status.should.eql('success');
+        res.body.should.include.keys('success', 'token');
+        res.body.success.should.eql(1);
         done();
       });
     });
   });
 
-  describe('POST /api/v1/auth/login', () => {
-    it('should log in a registered user', (done) => {
-      chai.request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'seed1@test.net',
-        password: 'password'
-      })
-      .end((err, res) => {
-        should.not.exist(err);
-        //res.redirects.length.should.eql(0);
-        res.status.should.eql(200);
-        res.type.should.eql('application/json');
-        res.body.should.include.keys('status', 'token');
-        res.body.status.should.eql('success');
-        should.exist(res.body.token);
-        done();
-      });
-    });
+  // describe('POST /api/v1/auth/login', () => {
+  //   it('should log in a registered user', (done) => {
+  //     chai.request(app)
+  //     .post('/api/v1/auth/login')
+  //     .send({
+  //       email: 'seed1@test.net',
+  //       password: 'password'
+  //     })
+  //     .end((err, res) => {
+  //       should.not.exist(err);
+  //       //res.redirects.length.should.eql(0);
+  //       res.status.should.eql(200);
+  //       res.type.should.eql('application/json');
+  //       res.body.should.include.keys('status', 'token');
+  //       res.body.status.should.eql('success');
+  //       should.exist(res.body.token);
+  //       done();
+  //     });
+  //   });
 
-    it('should not log in an unregistered user', (done) => {
-      chai.request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        username: 'nouser',
-        password: 'password'
-      })
-      .end((err, res) => {
-        should.exist(err);
-        res.status.should.eql(401);
-        res.type.should.eql('application/json');
-        res.body.status.should.eql('error');
-        done();
-      });
-    });
-  });
+  //   it('should not log in an unregistered user', (done) => {
+  //     chai.request(app)
+  //     .post('/api/v1/auth/login')
+  //     .send({
+  //       username: 'nouser',
+  //       password: 'password'
+  //     })
+  //     .end((err, res) => {
+  //       should.exist(err);
+  //       res.status.should.eql(401);
+  //       res.type.should.eql('application/json');
+  //       res.body.status.should.eql('error');
+  //       done();
+  //     });
+  //   });
+  // });
 });

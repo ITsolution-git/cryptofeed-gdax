@@ -1,5 +1,5 @@
 
-import bookshelf from '../connection';
+import bookshelf from '../bookshelf';
 import User from './user';
 import Group from './group';
 
