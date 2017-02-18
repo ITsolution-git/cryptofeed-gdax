@@ -111,8 +111,8 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
     if(err) {
         res.status(401).json({
         success: 0,
-        // message: err.message
-        message: "Expired or wrong token"
+        message: err.message
+        // message: "Expired or wrong token"
       });
     } else {
       // check if the user still exists in the db
@@ -122,7 +122,7 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
         next();
       })
       .catch((err) => {
-        res.status(400).json({
+        res.status(401).json({
           success: 0,
           message: err.message
         });

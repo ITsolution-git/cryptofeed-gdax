@@ -76,7 +76,7 @@ export class AuthRouter {
       });
     })
     .catch((err) => {
-      res.status(401).json({
+      res.status(200).json({
         success: 0,
         message: err.message
       });

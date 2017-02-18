@@ -48,7 +48,7 @@ function getUserIdFromRequest(req, callback) {
       callback(err);
     }
   } else {
-    callback(new Error("Token not found"));
+    callback(new Error("Authentication required"));
   }
 }
 
