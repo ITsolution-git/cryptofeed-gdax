@@ -5,7 +5,7 @@ import * as chai from 'chai';
 import app from '../../src/App';
 
 const should = chai.should();
-const knex = require('../../src/db/connection');
+// const knex = require('../../src/db/connection');
 var util = require('util');
 
 const chaiHttp = require('chai-http');

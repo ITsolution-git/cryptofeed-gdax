@@ -110,8 +110,9 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
     if(err) {
         res.status(401).json({
-        status: 'Authentication required',
-        message: 'Your token has expired.'
+        success: 0,
+        // message: err.message
+        message: "Expired or wrong token"
       });
     } else {
       // check if the user still exists in the db

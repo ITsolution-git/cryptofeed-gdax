@@ -60,7 +60,7 @@ export default bookshelf.Model.extend({
         .query('where', 'email', this.get('email'))
         .fetch({})
         .then(function (existing) {
-          if (existing && existing.id != this.id) throw new ValidationError('Choose Another Email');
+          if (existing) throw new ValidationError('Choose Another Email');
         });
     }
   },
@@ -70,7 +70,7 @@ export default bookshelf.Model.extend({
         .query('where', 'username', this.get('username'))
         .fetch({})
         .then(function (existing) {
-          if (existing && existing.id != this.id) throw new ValidationError('Choose Another Username');
+          if (existing) throw new ValidationError('Choose Another Username');
         });
     }
   },
@@ -91,12 +91,19 @@ export default bookshelf.Model.extend({
   // },
 
 }, {
-  saveUser: function(attrs){
-    if(attrs.password){
+  // saveUser: function(attrs){
+  //   if(attrs.password){
 
-    }
+  //   }
 
-  },
+  // },
+
+  // byIdWithUserGroup: function (userId) {
+  //     return this.forge()
+  //         .query({ where: { id: userId } })
+  //         .fetch({ withRelated: ['userGroup'] })
+  //     ;
+  // }
   login: function(email, password) {
     if (!email || !password) throw new Error('Email and password are both required');
     return new this({email: email.toLowerCase().trim()}).fetch({require: true})

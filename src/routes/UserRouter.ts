@@ -40,7 +40,7 @@ export class UserRouter {
             })
           else 
             res.status(200).json({
-              status: 'success',
+              success: 1,
               user: user
             });
         })

@@ -34,6 +34,7 @@ function decodeToken(token: String, callback) {
 */
 function getUserIdFromRequest(req, callback) {
   if('authorization' in req.headers) {
+    try{
     var header = req.headers.authorization.split(' ');
     var token = header[1];
     this.decodeToken(token, (err, cb) => {
@@ -43,8 +44,11 @@ function getUserIdFromRequest(req, callback) {
         callback(null, cb.sub);
       }
     });
+    }catch(err){
+      callback(err);
+    }
   } else {
-    callback("AUTHORIZATION not found");
+    callback(new Error("Token not found"));
   }
 }
 

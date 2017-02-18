@@ -1,6 +1,6 @@
 const environment = process.env.NODE_ENV;
 const config = require('../../knexfile.js')[environment];
-var knex = require('knex')(config);
+export var knex = require('knex')(config);
 
 var validator = require('validator');
 

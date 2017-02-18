@@ -5,21 +5,30 @@ import * as chai from 'chai';
 import app from '../../src/App';
 
 const should = chai.should();
-const bookshelf = require('../../src/db/connection');
+// const bookshelf = require('../../src/db/bookshelf');
+// import bookshelf from '../../src/db/bookshelf';
+const environment = "test";
+const config = require('../../knexfile.js')[environment];
+export var knex = require('knex')(config);
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe('********* routes : auth *********', () => {
+describe('********* routes : auth *********', function(){
 
-  beforeEach(() => {
-    return bookshelf.knex.migrate.rollback()
-    .then(() => { return bookshelf.knex.migrate.latest(); })
-    .then(() => { return bookshelf.knex.seed.run(); });
+    this.timeout(1500000);
+  // this.timeout(5000);
+  beforeEach((done) => {
+
+    return knex.migrate.rollback()
+    .then(() => { console.log("sssssssssssssssssssssssssSSS"); return knex.migrate.latest(); })
+    .then(() => { console.log("sssssssssssssssssssssssssSSS"); return knex.seed.run(); })
+    .then(() => { console.log("sssssssssssssssssssssssssSSS"); done() });
   });
 
-  afterEach(() => {
-    return bookshelf.knex.migrate.rollback();
+  afterEach((done) => {
+    return knex.migrate.rollback()
+    .then(() => { return done() });
   });
 
   describe('POST /api/v1/auth/register', () => {
