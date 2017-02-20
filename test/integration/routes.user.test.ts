@@ -101,7 +101,7 @@ describe('********* routes : user *********', function(){
     });
   });
 
-  describe('PUT /api/v1/user', () => {
+  describe('POST /api/v1/user', () => {
     it('should return a json array of updated user', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
@@ -112,11 +112,10 @@ describe('********* routes : user *********', function(){
       .end((error, response) => {
         should.not.exist(error);
         chai.request(app)
-        .put('/api/v1/user')
+        .post('/api/v1/user')
         .set('authorization', 'Bearer ' + response.body.token)
         .send({'first_name':'NEW','last_name':'NAME', email:"again@a.com"})
         .end((err, res) => {
-          should.not.exist(err);
           res.status.should.eql(200);
           res.should.be.json;
           res.body.should.be.a('object');
@@ -131,7 +130,7 @@ describe('********* routes : user *********', function(){
     });
     it('should return an error when not logged in', (done) => {
       chai.request(app)
-      .put('/api/v1/user')
+      .post('/api/v1/user')
       .send({'first_name':'NEW','last_name':'NAME'})
       .end((err, res) => {
         should.exist(err);

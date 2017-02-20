@@ -65,7 +65,7 @@ export class UserRouter {
     * @param Response
     * @param Callback function (NextFunction)
     */  
-    public putUser(req: IRequest, res: Response, next: NextFunction) {
+    public postUser(req: IRequest, res: Response, next: NextFunction) {
       return req.user.save(req.body)
       .then((user) => {
         req.user = user;
@@ -125,7 +125,8 @@ export class UserRouter {
           success: 0,
           message:err.message,
           data:err.data,  
-          user:[]
+          user:{},
+          token:""
         });
       });
     }
@@ -146,7 +147,7 @@ export class UserRouter {
         uid = parseInt(req.params.id);
       User.where({user_id: uid}).fetch({withRelated: ['groups']})
       .asCallback((err, user) => {
-        if(err) return res.status(500).json({success: 0, message:err.message});
+        if(err) return res.status(500).json({success: 0, message:err.message, token:"", groups:[]});
         if(user == null) return res.status(500).json({success:0, message:"Invalid userid"});
         return res.status(200).json({
           success: 1,
@@ -163,7 +164,7 @@ export class UserRouter {
   init() {
     // Routes for /api/v1/user
     this.router.get('/', this.getUser);
-    this.router.put('/', this.putUser);
+    this.router.post('/', this.postUser);
     this.router.get('/groups', this.getGroups);
     this.router.get('/:id', this.getUser);
     this.router.get('/:id/groups', this.getGroups);
