@@ -44,7 +44,8 @@ class App {
     router.get('/', (req, res, next) => {
       res.status(200).json({
         success: 1,
-        message: 'Action Now API v1.0'
+        message: 'Action Now API v1.0',
+        lastChange: '02/20/2017 00:30 pm'
       });
     });
 
