@@ -42,7 +42,9 @@ export class AuthRouter {
       res.status(400).json({
         success: 0,
         message: err.message,
-        data: err.data
+        data: err.data,
+        user: {},
+        token: "",
       });
     });
   }
@@ -78,6 +80,8 @@ export class AuthRouter {
     .catch((err) => {
       res.status(200).json({
         success: 0,
+        user: {},
+        token: "",
         message: err.message
       });
     });
