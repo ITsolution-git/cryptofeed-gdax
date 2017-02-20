@@ -5,6 +5,7 @@ const toolHelpers = require('../tools/_helpers');
 import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
+import Group from '../db/models/group';
 var path = require('path'),
     fs = require('fs');
 
@@ -145,16 +146,17 @@ export class UserRouter {
       }
       else
         uid = parseInt(req.params.id);
-      User.where({user_id: uid}).fetch({withRelated: ['groups']})
+      User.where({user_id: uid}).fetch({
+        withRelated: [ 'groups', 'groups.settings', 'groups.tags']
+      })
       .asCallback((err, user) => {
         if(err) return res.status(500).json({success: 0, message:err.message, token:"", groups:[]});
         if(user == null) return res.status(500).json({success:0, message:"Invalid userid"});
-        return res.status(200).json({
-          success: 1,
-          groups: user.related('groups')
-        });
+          return res.status(200).json({
+            success: 1,
+            groups: user.related('groups')
+          });
       });
-      
     }
 
   /**
