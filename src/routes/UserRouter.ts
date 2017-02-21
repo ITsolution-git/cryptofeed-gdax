@@ -158,6 +158,39 @@ export class UserRouter {
           });
       });
     }
+    public putUserpassword(req: IRequest, res: Response, next: NextFunction) {
+      try{
+        req.user.authenticate(req.body.original_password);
+        
+        req.user.save({ 
+          password:req.body.new_password })
+        .then((user) => {
+          req.user = user;
+          return tokenHelper.encodeToken(user.get('user_id')); 
+        })
+        .then((token) => {
+          res.status(200).json({
+            success: 1,
+            token: token,
+            user: req.user,
+            message:"Success"
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            success: 0,
+            message:err.message,
+            data:err.data,
+          });
+        });
+      }catch(err){
+        res.status(400).json({
+          success: 0,
+          message: err.message,
+          data: []
+        })
+      }
+    }
 
   /**
    * Take each handler, and attach to one of the Express.Router's
@@ -167,6 +200,7 @@ export class UserRouter {
     // Routes for /api/v1/user
     this.router.get('/', this.getUser);
     this.router.put('/', this.putUser);
+    this.router.put('/password', this.putUserpassword);
     this.router.get('/groups', this.getGroups);
     this.router.get('/:id', this.getUser);
     this.router.get('/:id/groups', this.getGroups);

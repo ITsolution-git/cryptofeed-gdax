@@ -52,6 +52,33 @@ describe('********* routes : user *********', function(){
         });
       });
     });
+
+    it('should return a success and correct user object on /user/1', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'seed1@test.net',
+        password: 'password'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .get('/api/v1/user/2')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(1);
+          res.body.should.have.property('user');
+          res.body.user.should.have.property('username');
+          res.body.user.username.should.equal('seeder2');
+
+          done();
+        });
+      });
+    });
+
     it('should throw an error if a user is not logged in', (done) => {
       chai.request(app)
       .get('/api/v1/user')
@@ -63,6 +90,7 @@ describe('********* routes : user *********', function(){
         done();
       });
     });
+
   });
 
   describe('GET /api/v1/user/groups', () => {
@@ -178,7 +206,6 @@ describe('********* routes : user *********', function(){
           should.not.exist(err);
           res.status.should.eql(200);
           res.type.should.eql('application/json');
-          console.log(res.body);
           res.body.should.include.keys('user', 'token');
           done(); 
         })
