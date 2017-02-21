@@ -27,15 +27,28 @@ export class GroupRouter {
   public getPublicGroups(req: Request, res: Response, next: NextFunction) {
 
     Group.where({'private':0, 'deleted_at':null}).fetch({
-      withRelated: [ 'settings', 'tags', 'creator']
+      withRelated: [ 
+        // {'settings':function(qb) {
+        //   qb.select('allow_member_action','member_action_level', 'group_setting_id');
+        // }}, 
+        // {'tags':function(qb) {
+        //   qb.select('group_tag_id', 'tag' );
+        // }}, 
+        'settings', 'tags',
+        {'creator':function(qb) {
+          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+        }}]
     })
     .asCallback((err, groups) => {
       if(err) {
           res.status(404).json({
           success: 0,
-          message: 'Error retrieving groups.'
+          message: err.message
         });
       } else {
+        var tags = groups.related('tags').map(function(a) {
+          return a.get('tag');
+        });
         res.status(200).json({
           success: 1,
           groups: groups
@@ -72,12 +85,12 @@ export class GroupRouter {
     });
   }
 
-  /**
-  * @description Creates a new group
-  * @param Request
-  * @param Response
-  * @param Callback Function
-  */
+    /**
+    * @description Creates a new group
+    * @param Request
+    * @param Response
+    * @param Callback Function
+    */
   public createGroup(req: Request, res: Response, next: NextFunction) {
     tokenHelper.getUserIdFromRequest(req, (err, cur_user_id) => {
       return toolHelpers.createGroup(cur_user_id, req)

@@ -14,7 +14,9 @@ export default bookshelf.Model.extend({
     return this.belongsToMany(User, 'group_user', 'group_id', 'user_id', 'group_id', 'user_id');
   },
   tags: function() {
+    // return this.hasMany(GroupTag, 'group_id', 'group_id').query({}).column(['tag']);
     return this.hasMany(GroupTag, 'group_id', 'group_id');
+    
   },
   settings: function() {
     return this.hasMany(GroupSetting, 'group_id', 'group_id');
