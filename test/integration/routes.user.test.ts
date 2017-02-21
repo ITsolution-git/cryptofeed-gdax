@@ -14,17 +14,17 @@ chai.use(chaiHttp);
 
 describe('********* routes : user *********', function(){
   
-  this.timeout(30000);
-  before(() => {
+  // this.timeout(30000);
+  // before(() => {
 
-    return knex.migrate.rollback()
-    .then(() => { return knex.migrate.latest(); })
-    .then(() => { return knex.seed.run(); })
-  });
+  //   return knex.migrate.rollback()
+  //   .then(() => { return knex.migrate.latest(); })
+  //   .then(() => { return knex.seed.run(); })
+  // });
 
-  after(() => {
-    return knex.migrate.rollback();
-  });
+  // after(() => {
+  //   return knex.migrate.rollback();
+  // });
 
   // describe('GET /api/v1/user', () => {
   //   it('should return a success and correct user object', (done) => {
@@ -187,35 +187,35 @@ describe('********* routes : user *********', function(){
   // });
 
 
-  describe('GET /api/v1/user/groups', () => {
-    var token = "";
-    it('should return a groups of seed1@test.net', (done) => {
-      chai.request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'seed1@test.net',
-        password: 'password'
-      })
-      .end((error, response) => {
-        should.not.exist(error);
-        chai.request(app)
-        .get('/api/v1/user/groups')
-        .set('authorization', 'Bearer ' + response.body.token)
-        .send({})
-        .end((err, res) => {
-          res.status.should.eql(200);
-          res.should.be.json;
-          res.body.should.be.a('object');
-          res.body.should.include.keys('groups', 'success');
-          res.body.success.should.equal(1);
-          res.body.groups.should.be.a('array');
-          res.body.groups.should.have.length(2);
-          res.body.groups[0].should.include.keys('group_id', 'settings','tags');
-          res.body.groups[0].settings[0].allow_member_action.should.equal(0);
-          done();
-        });
-      });
-    });
+  // describe('GET /api/v1/user/groups', () => {
+  //   var token = "";
+  //   it('should return a groups of seed1@test.net', (done) => {
+  //     chai.request(app)
+  //     .post('/api/v1/auth/login')
+  //     .send({
+  //       email: 'seed1@test.net',
+  //       password: 'password'
+  //     })
+  //     .end((error, response) => {
+  //       should.not.exist(error);
+  //       chai.request(app)
+  //       .get('/api/v1/user/groups')
+  //       .set('authorization', 'Bearer ' + response.body.token)
+  //       .send({})
+  //       .end((err, res) => {
+  //         res.status.should.eql(200);
+  //         res.should.be.json;
+  //         res.body.should.be.a('object');
+  //         res.body.should.include.keys('groups', 'success');
+  //         res.body.success.should.equal(1);
+  //         res.body.groups.should.be.a('array');
+  //         res.body.groups.should.have.length(2);
+  //         res.body.groups[0].should.include.keys('group_id', 'settings','tags');
+  //         res.body.groups[0].settings[0].allow_member_action.should.equal(0);
+  //         done();
+  //       });
+  //     });
+  //   });
 
-  });
+  // });
 });
