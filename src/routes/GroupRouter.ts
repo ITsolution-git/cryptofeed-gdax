@@ -4,6 +4,7 @@ let tokenHelper = require('../tools/tokens');
 let toolHelpers = require('../tools/_helpers');
 
 
+import Group from '../db/models/group';
 var util = require('util');
 
 export class GroupRouter {
@@ -24,19 +25,21 @@ export class GroupRouter {
    * @param Callback (NextFunction)
    */
   public getPublicGroups(req: Request, res: Response, next: NextFunction) {
-    toolHelpers.getAllGroups()
-    .asCallback((err, values) => {
+
+    Group.where({'private':0, 'deleted_at':null}).fetch({
+      withRelated: [ 'settings', 'tags', 'creator']
+    })
+    .asCallback((err, groups) => {
       if(err) {
           res.status(404).json({
-          status: 'Error retrieving groups',
+          success: 0,
           message: 'Error retrieving groups.'
         });
       } else {
         res.status(200).json({
-          status: 'success',
-          groups: values
+          success: 1,
+          groups: groups
         });
-
       }
     });
   }

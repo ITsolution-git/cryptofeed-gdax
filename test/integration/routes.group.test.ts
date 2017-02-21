@@ -5,48 +5,54 @@ import * as chai from 'chai';
 import app from '../../src/App';
 
 const should = chai.should();
-// const knex = require('../../src/db/connection');
+const environment = "test";
+const config = require('../../knexfile.js')[environment];
+export var knex = require('knex')(config);
+
 var util = require('util');
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-describe('********* routes : group *********', () => {
-  // beforeEach(() => {
-  //   return knex.migrate.rollback()
-  //   .then(() => { return knex.migrate.latest(); })
-  //   .then(() => { return knex.seed.run(); });
-  // });
+describe('********* routes : group *********', function(){
+  
+  this.timeout(30000);
+  before(() => {
 
-  // afterEach(() => {
-  //   return knex.migrate.rollback();
-  // });
+    return knex.migrate.rollback()
+    .then(() => { return knex.migrate.latest(); })
+    .then(() => { return knex.seed.run(); })
+  });
 
-  // describe('GET /api/v1/groups', () => {
-  //   it('should return a success', (done) => {
-  //     chai.request(app)
-  //     .get('/api/v1/groups')
-  //     .end((err, res) => {
-  //       should.not.exist(err);
-  //       res.status.should.eql(200);
-  //       res.type.should.eql('application/json');
-  //       res.body.status.should.eql('success');
-  //       done();
-  //     });
-  //   });
+  after(() => {
+    return knex.migrate.rollback();
+  });
 
-  //   it('should return array of groups', (done) => {
-  //     chai.request(app)
-  //     .get('/api/v1/groups')
-  //     .end((err, res) => {
-  //       should.not.exist(err);
-  //       res.status.should.eql(200);
-  //       res.type.should.eql('application/json');
-  //       res.body.should.have.property('groups');
-  //       done();
-  //     });
-  //   });
-  // });
+  describe('GET /api/v1/groups', () => {
+    it('should return a success', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.success.should.eql(1);
+        done();
+      });
+    });
+
+    it('should return array of groups', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.should.have.property('groups');
+        done();
+      });
+    });
+  });
 
   // describe('GET /api/v1/groups/3', () => {
   //   it('should return expected group', (done) => {
