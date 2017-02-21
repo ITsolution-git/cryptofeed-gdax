@@ -14,17 +14,17 @@ chai.use(chaiHttp);
 
 describe('********* routes : auth *********', function(){
 
-  // this.timeout(30000);
-  // before(() => {
+  this.timeout(30000);
+  before(() => {
 
-  //   return knex.migrate.rollback()
-  //   .then(() => { return knex.migrate.latest(); })
-  //   .then(() => { return knex.seed.run(); })
-  // });
+    return knex.migrate.rollback()
+    .then(() => { return knex.migrate.latest(); })
+    .then(() => { return knex.seed.run(); })
+  });
 
-  // after(() => {
-  //   return knex.migrate.rollback();
-  // });
+  after(() => {
+    return knex.migrate.rollback();
+  }); 
 
   // describe('POST /api/v1/auth/register', () => {
   //   it('should register a new user', (done) => {
@@ -40,6 +40,23 @@ describe('********* routes : auth *********', function(){
   //       res.type.should.eql('application/json');
   //       res.body.should.include.keys('success', 'token');
   //       res.body.success.should.eql(1);
+  //       done();
+  //     });
+  //   });
+  //   it('should return error with the same email register', (done) => {
+  //     chai.request(app)
+  //     .post('/api/v1/auth/register')
+  //     .send({
+  //       email: 'newuser@test.net',
+  //       password: 'password',
+  //     })
+  //     .end((err, res) => {
+  //       should.exist(err);
+  //       res.status.should.eql(400);
+  //       res.type.should.eql('application/json');
+  //       res.body.should.include.keys('success', 'data');
+  //       res.body.success.should.eql(0);
+  //       res.body.data.should.eql("Choose Another Email");
   //       done();
   //     });
   //   });

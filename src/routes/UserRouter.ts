@@ -66,7 +66,7 @@ export class UserRouter {
     * @param Response
     * @param Callback function (NextFunction)
     */  
-    public postUser(req: IRequest, res: Response, next: NextFunction) {
+    public putUser(req: IRequest, res: Response, next: NextFunction) {
       return req.user.save(req.body)
       .then((user) => {
         req.user = user;
@@ -166,7 +166,7 @@ export class UserRouter {
   init() {
     // Routes for /api/v1/user
     this.router.get('/', this.getUser);
-    this.router.post('/', this.postUser);
+    this.router.put('/', this.putUser);
     this.router.get('/groups', this.getGroups);
     this.router.get('/:id', this.getUser);
     this.router.get('/:id/groups', this.getGroups);
