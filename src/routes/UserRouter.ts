@@ -147,7 +147,7 @@ export class UserRouter {
       else
         uid = parseInt(req.params.id);
       User.where({user_id: uid}).fetch({
-        withRelated: [ 'groups', 'groups.settings', 'groups.tags']
+        withRelated: [ 'groups', 'groups.settings', 'groups.tags', 'groups.creator']
       })
       .asCallback((err, user) => {
         if(err) return res.status(500).json({success: 0, message:err.message, token:"", groups:[]});
