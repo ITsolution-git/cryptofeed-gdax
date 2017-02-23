@@ -43,7 +43,7 @@ function onListening(): void {
   let bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;
   debug(`Listening on ${bind}`);
 }
-
+// Commented;; HTTPS server
 // var dotenv = require('dotenv').load();
 // import * as http from 'http';
 // import * as debug from 'debug';
