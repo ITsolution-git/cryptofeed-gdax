@@ -2,7 +2,10 @@ import {Router, Request, Response, NextFunction} from 'express';
 
 let tokenHelper = require('../tools/tokens');
 let toolHelpers = require('../tools/_helpers');
+import {IRequest} from '../classes/IRequest';
 
+var path = require('path'),
+    fs = require('fs');
 
 import Group from '../db/models/group';
 var util = require('util');
@@ -36,7 +39,7 @@ export class GroupRouter {
         // }}, 
         'settings', 'tags',
         {'creator':function(qb) {
-          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+          qb.column('user_id', 'first_name', 'last_name', 'banner_image_file');
         }}]
     })
     .asCallback((err, groups) => {
@@ -64,26 +67,27 @@ export class GroupRouter {
    * @param Callback function (NextFunction)
    * TODO: Need to make sure user is member of group, or group is public
    */
-  public getGroup(req: Request, res: Response, next: NextFunction) {
-    let groupId = parseInt(req.params.id);
-    return toolHelpers.getGroupById(groupId)
-    .asCallback((err, values) => {
-      if(err) {
-        res.status(404)
-          .send({
-            message: 'No group found with the given id.',
-            status: res.status
-          });
-      } else {
-        res.status(200)
-          .send({
-            message: 'Success',
-            status: res.status,
-            group: values
-          });
-      }
-    });
-  }
+  //////////****getGroup will no longer need because the GET user/1/groups returns them */
+  // public getGroup(req: Request, res: Response, next: NextFunction) {
+  //   let groupId = parseInt(req.params.id);
+  //   return toolHelpers.getGroupById(groupId)
+  //   .asCallback((err, values) => {
+  //     if(err) {
+  //       res.status(404)
+  //         .send({
+  //           message: 'No group found with the given id.',
+  //           status: res.status
+  //         });
+  //     } else {
+  //       res.status(200)
+  //         .send({
+  //           message: 'Success',
+  //           status: res.status,
+  //           group: values
+  //         });
+  //     }
+  //   });
+  // }
 
     /**
     * @description Creates a new group
@@ -91,27 +95,58 @@ export class GroupRouter {
     * @param Response
     * @param Callback Function
     */
-  public createGroup(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, cur_user_id) => {
-      return toolHelpers.createGroup(cur_user_id, req)
-      .then((groupId) => {
-        toolHelpers.getGroupById(groupId[0])
-          .then((group) => {
-            res.status(200).json({
-              status: 'success',
-              token: tokenHelper.encodeToken(cur_user_id),
-              group: group
-            });
-        });
+  public createGroup(req: IRequest, res: Response, next: NextFunction) {
+    return new Group(req.body).save()
+      .then((group) => {
+        if(req.files){
+          try{
+            let file = req.files.banner_image_file;
+            var targetPath = path.resolve('./public/uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase());
+            if ((path.extname(file.name).toLowerCase() === '.jpg')||
+                (path.extname(file.name).toLowerCase() === '.png')) { 
+
+              file.mv(targetPath, function(err) {
+                if (err) {
+                  err.message = "Upload failed";
+                  throw err;
+                }
+                else {
+                  return true;
+                }
+              });   
+              return group.save({banner_image_file:targetPath});
+
+            } else {
+              let err = new Error();
+              err.message = "Only jpg/png are acceptable";
+              throw err;
+            }
+          }catch(err){
+            if(!err.message) err.message = "Unknown error prevented from uploading";
+            throw err;
+          }
+        }
+        else{
+          return group;
+          
+        }
+      })
+      .then((group) => {
+        res.status(200).json({
+            success: 1,
+            token: tokenHelper.encodeToken(req.user.get('user_id')),
+            user: req.user,
+            group: group,
+            message:"Success"
+          });
       })
       .catch((err) => {
-        res.status(401).json({
-          status: 'error',
-          message: 'Something went wrong, and we didn\'t create a group. :('
+        return res.status(500).json({
+          success: 0,
+          message:err.message,
+          data:err.data,  
         });
       });
-
-    });
   }
 
   /**
@@ -518,8 +553,8 @@ export class GroupRouter {
    */
   init() {
     this.router.get('/', this.getPublicGroups);
-    this.router.post('/', this.createGroup);
-    this.router.get('/:id', this.getGroup);
+    this.router.post('/', toolHelpers.ensureAuthenticated, this.createGroup);
+    // this.router.get('/:id', this.getGroup);
     this.router.put('/:id', this.putGroup);
     this.router.get('/:id/members', this.getGroupMembers);
     this.router.post('/:id/members', this.joinGroup);

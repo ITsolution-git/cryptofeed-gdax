@@ -10,7 +10,7 @@ exports.seed = (knex, Promise) => {
         latitude: '51.5032520',
         longitude: '-0.1278990',
         private: 0,
-        banner_image_url: 'https://theinquisitiveloon.files.wordpress.com/2013/04/avatar-the-last-airbender-the-gang-in-earth-colors.jpg',
+        banner_image_file: 'https://theinquisitiveloon.files.wordpress.com/2013/04/avatar-the-last-airbender-the-gang-in-earth-colors.jpg',
         group_code: 'ABCD1234'
       })
     );
@@ -25,7 +25,7 @@ exports.seed = (knex, Promise) => {
         latitude: '51.5032520',
         longitude: '-0.1278990',
         private: 1,
-        banner_image_url: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
+        banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: 'ZYXW0987'
       })
     );
@@ -40,7 +40,7 @@ exports.seed = (knex, Promise) => {
         latitude: '51.5032520',
         longitude: '-0.1278990',
         private: 0,
-        banner_image_url: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
+        banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: '2345GHJKL',
         deleted_at: '2016-11-01 22:50:00',
         deleted_by_user_id: 1
@@ -57,7 +57,7 @@ exports.seed = (knex, Promise) => {
         latitude: '51.5032520',
         longitude: '-0.1278990',
         private: 0,
-        banner_image_url: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
+        banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: '98765ASDF'
       })
     );

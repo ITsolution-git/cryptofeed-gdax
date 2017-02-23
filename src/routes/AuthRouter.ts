@@ -1,6 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest'
-
 const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');

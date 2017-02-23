@@ -23,7 +23,35 @@ export default bookshelf.Model.extend({
   },
   creator: function() {
     return this.belongsTo(User, 'created_by_user_id', 'user_id');
-  }
+  },
+
+  initialize: function() {
+    // this.on("saving", this._assertEmailUnique);
+    // this.on("saving", this._assertUsernameUnique);
+    
+    this.on('saving', this.validateOnSave);
+  },
+  // validations:{
+  //   email: [
+  //     { method: 'isRequired', error:'Email Required'},
+  //     { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
+  //     // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+  //   ],
+  //   password: [
+  //     { method: 'isRequired', error:'Password Required'},
+  //     { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+  //   ]
+  // };
+  // _assertEmailUnique: function(model, attributes, options) {
+  //   if (this.hasChanged('email')) {
+  //     return User
+  //       .query('where', 'email', this.get('email'))
+  //       .fetch({})
+  //       .then(function (existing) {
+  //         if (existing) throw new ValidationError('Choose Another Email');
+  //       });
+  //   }
+  // },
 }, {
  
 });

@@ -27,7 +27,7 @@ describe('********* routes : api root *********', () => {
   //     .end((err, res) => {
   //       should.not.exist(err);
   //       // res.redirects.length.should.eql(0);
-  //       res.status.should.eql(200);
+  //       res.status.should.eql(204);
   //       res.type.should.eql('application/json');
   //       done();
   //     });
@@ -39,7 +39,7 @@ describe('********* routes : api root *********', () => {
   //     .end((err, res) => {
   //       should.not.exist(err);
   //       // res.redirects.length.should.eql(0);
-  //       res.status.should.eql(200);
+  //       res.status.should.eql(204);
   //       res.type.should.eql('application/json');
   //       res.body.should.include.keys('success', 'message');
   //       res.body.success.should.eql(1);

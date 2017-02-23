@@ -10,84 +10,84 @@ import User from '../db/models/user';
 /**  User Functions **/
 /***************************************************************/
 
-/**
-* @description Inserts user data into database
-* @param req: Request request object containing the user form data
-*/
-// function createUser(req: Request) {
-//   const salt = bcrypt.genSaltSync();
-//   const hash = bcrypt.hashSync(req.body.password, salt);
+// /**
+// * @description Inserts user data into database
+// * @param req: Request request object containing the user form data
+// */
+// // function createUser(req: Request) {
+// //   const salt = bcrypt.genSaltSync();
+// //   const hash = bcrypt.hashSync(req.body.password, salt);
 
-//   //TODO: Validate the email & username don't exist in the system
-//   const user = bookshelf.knex('user')
-//   .insert({
-//     email: req.body.email,
-//     username: req.body.username,
-//     password: hash,
-//     first_name: req.body.first_name,
-//     last_name: req.body.last_name,
-//     avatar_file: req.body.avatar_file,
-//     bio: req.body.bio,
-//     latitude: req.body.latitude,
-//     longitude: req.body.longitude
-//   })
-//   .returning('*');
-//   return user;
+// //   //TODO: Validate the email & username don't exist in the system
+// //   const user = bookshelf.knex('user')
+// //   .insert({
+// //     email: req.body.email,
+// //     username: req.body.username,
+// //     password: hash,
+// //     first_name: req.body.first_name,
+// //     last_name: req.body.last_name,
+// //     avatar_file: req.body.avatar_file,
+// //     bio: req.body.bio,
+// //     latitude: req.body.latitude,
+// //     longitude: req.body.longitude
+// //   })
+// //   .returning('*');
+// //   return user;
+// // }
+
+// /**
+// * @description Validates the specified email is a valid format
+// * @param email: String the email address for the account
+// */
+// function validateEmail(email: string) {
+//     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+//     return re.test(email);
 // }
 
-/**
-* @description Validates the specified email is a valid format
-* @param email: String the email address for the account
-*/
-function validateEmail(email: string) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-}
+// /**
+// * @description Returns user data for the specified username
+// * @param username: String the username for the account
+// */
+// function getUserByUsername(username: String) {
+//   return bookshelf.knex('user').where({username}).first();
+// }
 
-/**
-* @description Returns user data for the specified username
-* @param username: String the username for the account
-*/
-function getUserByUsername(username: String) {
-  return bookshelf.knex('user').where({username}).first();
-}
+// /**
+// * @description Returns user data for the specified email
+// * @param email: String the email address for the account
+// */
+// function getUserByEmail(email: String) {
+//   return bookshelf.knex('user').where({email}).first();
+// }
 
-/**
-* @description Returns user data for the specified email
-* @param email: String the email address for the account
-*/
-function getUserByEmail(email: String) {
-  return bookshelf.knex('user').where({email}).first();
-}
+// /**
+// * @description Returns user data for the specified id
+// * @param user_id: Number id of the user
+// */
+// function getUserById(user_id: Number) {
+//   return bookshelf.knex('user').where({user_id}).first();
+// }
 
-/**
-* @description Returns user data for the specified id
-* @param user_id: Number id of the user
-*/
-function getUserById(user_id: Number) {
-  return bookshelf.knex('user').where({user_id}).first();
-}
+// /**
+// * @description Returns user profile data for the specified id
+// * @param user_id: Number id of the user
+// */
+// function getUserProfileById(user_id: Number) {
+//   return bookshelf.knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_file', 'bio','latitude', 'longitude').where({user_id}).first();
+// }
 
-/**
-* @description Returns user profile data for the specified id
-* @param user_id: Number id of the user
-*/
-function getUserProfileById(user_id: Number) {
-  return bookshelf.knex('user').select('user_id', 'created_at', 'username', 'first_name', 'avatar_file', 'bio','latitude', 'longitude').where({user_id}).first();
-}
-
-/**
-* @description Updates the user record based on JSON array userBody
-* @param user_id: Number id of the user being updatedUser
-* @param user_body: JSON array of user fields to update
-*/
-function updateUser(user_id: Number, user_body: JSON, callback) {
-  bookshelf.knex('user').where({user_id})
-    .update(user_body)
-    .then(function(count) {
-      callback(null, count);
-    });
-}
+// /**
+// * @description Updates the user record based on JSON array userBody
+// * @param user_id: Number id of the user being updatedUser
+// * @param user_body: JSON array of user fields to update
+// */
+// function updateUser(user_id: Number, user_body: JSON, callback) {
+//   bookshelf.knex('user').where({user_id})
+//     .update(user_body)
+//     .then(function(count) {
+//       callback(null, count);
+//     });
+// }
 
 /**
 * @description Compares the given (plain text) password and encrypted password
@@ -139,13 +139,13 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
 * @description Returns all the groups the user belongs to
 * @param user_id: Number id of the user
 */
-function getUsersGroups(user_id: Number) {
-  //TODO: Need to return creator profile info with the group
-  //TODO: Need to return group setting info with the group
-  return bookshelf.knex('group')
-    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
-    .where('user_id', user_id);
-}
+// function getUsersGroups(user_id: Number) {
+//   //TODO: Need to return creator profile info with the group
+//   //TODO: Need to return group setting info with the group
+//   return bookshelf.knex('group')
+//     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
+//     .where('user_id', user_id);
+// }
 
 /**
 * @description Returns all the groups the user belongs to
@@ -383,15 +383,16 @@ function updateAction(action_id: Number, action_body: JSON) {
 
 module.exports = {
   // User Functions
-  validateEmail,
-  getUserByUsername,
-  getUserByEmail,
-  getUserById,
-  getUserProfileById,
-  getUsersGroups,
+  // validateEmail,
+  // getUserByUsername,
+  // getUserByEmail,
+  // getUserById,
+  // getUserProfileById,
+  // getUsersGroups,
   getUsersPublicGroups,
-  updateUser,
+  // updateUser,
   ensureAuthenticated,
+  
   // Group Functions
   getAllGroups,
   getGroupById,

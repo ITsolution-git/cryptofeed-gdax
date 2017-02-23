@@ -10,7 +10,7 @@ exports.up = (knex, Promise) => {
     table.decimal('latitude',9,6);
     table.decimal('longitude',9,6);
     table.boolean('private').notNullable().defaultTo(0);
-    table.string('banner_image_url');
+    table.string('banner_image_file');
     table.string('group_code');
     table.dateTime('deleted_at');
     table.integer('deleted_by_user_id');
