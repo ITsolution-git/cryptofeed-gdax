@@ -102,7 +102,7 @@ export class UserRouter {
       })
       .then((isUploadSuccess)=>{
         if(isUploadSuccess){
-          let image_url = toolHelpers.getBaseUrl(req) + '/uploads/users/avatars/'+req.user.get('user_id')+path.extname(req.files.avatar_file.name).toLowerCase();
+          let image_url = toolHelpers.getBaseUrl(req) + 'uploads/users/avatars/'+req.user.get('user_id')+path.extname(req.files.avatar_file.name).toLowerCase();
              
           return req.user.save({avatar_file:image_url});
         }
