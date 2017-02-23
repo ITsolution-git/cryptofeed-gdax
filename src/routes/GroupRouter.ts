@@ -101,7 +101,8 @@ export class GroupRouter {
         if(req.files){
           try{
             let file = req.files.banner_image_file;
-            var targetPath = path.resolve('./public/uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase());
+            let relativepath = './public/uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
+            var targetPath = path.resolve(relativepath);
             if ((path.extname(file.name).toLowerCase() === '.jpg')||
                 (path.extname(file.name).toLowerCase() === '.png')) { 
 
@@ -113,8 +114,9 @@ export class GroupRouter {
                 else {
                   return true;
                 }
-              });   
-              return group.save({banner_image_file:targetPath});
+              });
+              let image_url = toolHelpers.getBaseUrl(req) + 'uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
+              return group.save({banner_image_file:image_url });
 
             } else {
               let err = new Error();

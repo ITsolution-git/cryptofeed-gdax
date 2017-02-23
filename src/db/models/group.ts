@@ -5,7 +5,9 @@ import GroupUser from './group_user';
 import User from './user';
 import GroupSetting from './group_settings';
 import GroupTag from './group_tag';
+import Group from './group';
 
+const ValidationError = require('bookshelf-validate/lib/errors').ValidationError;
 export default bookshelf.Model.extend({
   tableName: 'group',
   hasTimestamps: true,
@@ -26,32 +28,45 @@ export default bookshelf.Model.extend({
   },
 
   initialize: function() {
-    // this.on("saving", this._assertEmailUnique);
-    // this.on("saving", this._assertUsernameUnique);
+    this.on("saving", this._assertNameUnique);
+    this.on("saving", this._assertCodeUnique);
     
-    this.on('saving', this.validateOnSave);
+    // if(this.isNew())
+    //   this.validations =  {
+    //     name: [
+    //       { method: 'isRequired', error:'Name Required'},
+    //     ],
+    //     group_code: [
+    //       { method: 'isRequired', error:'Group Code Required'},
+    //     ]
+    //   };
+    // else
+    //   this.validations =  {
+    //   };
+    // this.on('saving', this.validateOnSave);
   },
-  // validations:{
-  //   email: [
-  //     { method: 'isRequired', error:'Email Required'},
-  //     { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
-  //     // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
-  //   ],
-  //   password: [
-  //     { method: 'isRequired', error:'Password Required'},
-  //     { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
-  //   ]
-  // };
-  // _assertEmailUnique: function(model, attributes, options) {
-  //   if (this.hasChanged('email')) {
-  //     return User
-  //       .query('where', 'email', this.get('email'))
-  //       .fetch({})
-  //       .then(function (existing) {
-  //         if (existing) throw new ValidationError('Choose Another Email');
-  //       });
-  //   }
-  // },
+ 
+  _assertCodeUnique: function(model, attributes, options) {
+    if (this.hasChanged('group_code')) {
+      return Group
+        .query('where', 'group_code', this.get('group_code'))
+        .fetch({})
+        .then(function (existing) {
+          if (existing) throw new ValidationError('Choose Another Group Code');
+        });
+    }
+  },
+
+  _assertNameUnique: function(model, attributes, options) {
+    if (this.hasChanged('name')) {
+      return Group
+        .query('where', 'name', this.get('name'))
+        .fetch({})
+        .then(function (existing) {
+          if (existing) throw new ValidationError('Choose Another Name');
+        });
+    }
+  },
 }, {
  
 });

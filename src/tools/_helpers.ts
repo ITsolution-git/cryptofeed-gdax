@@ -6,6 +6,17 @@ const tokenHelper = require('./tokens');
 var util = require('util');
 import User from '../db/models/user';
 
+
+/**
+* @description Get Base uri of current api call
+* @param req: Request request object containing uri information
+*/
+function getBaseUrl(req: Request) {
+  let base =  req.secure ? 'https' : 'http';
+  base += '://' + req.headers['host'].toString();
+  base += '/';
+  return base;
+}
 /***************************************************************/
 /**  User Functions **/
 /***************************************************************/
@@ -118,6 +129,13 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
       // check if the user still exists in the db
       return User.where({user_id: user_id}).fetch()
       .then((user) => {
+        if(user == null)
+        {
+          res.status(400).json({
+            success: 0,
+            message: "You are no longer a member here."
+          });
+        }
         req.user = user;
         next();
       })
@@ -389,6 +407,7 @@ module.exports = {
   // getUserById,
   // getUserProfileById,
   // getUsersGroups,
+  getBaseUrl,
   getUsersPublicGroups,
   // updateUser,
   ensureAuthenticated,
