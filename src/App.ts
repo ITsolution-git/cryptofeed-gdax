@@ -42,7 +42,7 @@ class App {
     let router = express.Router();
     // placeholder route handler
     router.get('/', (req, res, next) => {
-      res.status(204).json({
+      res.status(200).json({
         success: 1,
         message: 'Action Now API v1.0',
         lastChange: '02/20/2017 08:25 pm'
