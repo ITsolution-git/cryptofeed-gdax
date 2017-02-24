@@ -28,44 +28,6 @@
 //   },
 
 //   initialize: function() {
-//     this.on("saving", this._assertNameUnique);
-//     this.on("saving", this._assertCodeUnique);
-    
-//     // if(this.isNew())
-//     //   this.validations =  {
-//     //     name: [
-//     //       { method: 'isRequired', error:'Name Required'},
-//     //     ],
-//     //     group_code: [
-//     //       { method: 'isRequired', error:'Group Code Required'},
-//     //     ]
-//     //   };
-//     // else
-//     //   this.validations =  {
-//     //   };
-//     // this.on('saving', this.validateOnSave);
-//   },
- 
-//   _assertCodeUnique: function(model, attributes, options) {
-//     if (this.hasChanged('group_code')) {
-//       return Group
-//         .query('where', 'group_code', this.get('group_code'))
-//         .fetch({})
-//         .then(function (existing) {
-//           if (existing) throw new ValidationError('Choose Another Group Code');
-//         });
-//     }
-//   },
-
-//   _assertNameUnique: function(model, attributes, options) {
-//     if (this.hasChanged('name')) {
-//       return Group
-//         .query('where', 'name', this.get('name'))
-//         .fetch({})
-//         .then(function (existing) {
-//           if (existing) throw new ValidationError('Choose Another Name');
-//         });
-//     }
 //   },
 // }, {
  
