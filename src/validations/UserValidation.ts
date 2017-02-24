@@ -16,22 +16,22 @@ export default {
   // GET user/
   getUser: {
     params: {
-        id: Joi.integer().required()
+        id: Joi.number().integer().required()
     }
-  }
+  },
   
   // GET user/groups
   getUserGroups: {
     params: {
-        id: Joi.integer().required()
+        id: Joi.number().integer().required()
     }
-  }
+  },
 
   // PUT user/password
   putUserpassword: {
-    params: {
+    body: {
         original_password: Joi.string().required(),
-        new_password: Joi.string().required()
+        new_password: Joi.string().required().min(6)
     }
   }
 };
