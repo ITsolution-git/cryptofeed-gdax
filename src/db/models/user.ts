@@ -17,28 +17,28 @@ export default bookshelf.Model.extend({
   initialize: function() {
     this.on("saving", this._assertEmailUnique);
     this.on("saving", this._assertUsernameUnique);
-    if(this.isNew())
-      this.validations =  {
-        email: [
-          { method: 'isRequired', error:'Email Required'},
-          { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
-          // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
-        ],
-        password: [
-          { method: 'isRequired', error:'Password Required'},
-          { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
-        ]
-      };
-    else
-      this.validations =  {
-        email: [
-          { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
-          // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
-        ],
-        password: { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+    // if(this.isNew())
+    //   this.validations =  {
+    //     email: [
+    //       { method: 'isRequired', error:'Email Required'},
+    //       { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
+    //       // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+    //     ],
+    //     password: [
+    //       { method: 'isRequired', error:'Password Required'},
+    //       { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
+    //     ]
+    //   };
+    // else
+    //   this.validations =  {
+    //     email: [
+    //       { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
+    //       // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
+    //     ],
+    //     password: { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
         
-      };
-    this.on('saving', this.validateOnSave);
+    //   };
+    // this.on('saving', this.validateOnSave);
     this.on('saving', this.cryptPassword);
   },
 

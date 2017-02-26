@@ -236,7 +236,7 @@ function createGroup(owner_id: Number, req: Request) {
 */
 function updateGroup(group_id: Number, group_body: JSON, callback) {
   bookshelf.knex('group').where({group_id})
-    .update(group_body) 
+    .update(group_body)
     .then(function(count) {
       callback(null, count);
     });

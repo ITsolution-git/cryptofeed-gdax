@@ -1,5 +1,8 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import {IRequest} from '../classes/IRequest'
+import {IRequest} from '../classes/IRequest';
+const validate = require('../classes/ParamValidator');
+import AuthValidation from '../validations/AuthValidation';
+
 const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 var util = require('util');
@@ -28,7 +31,7 @@ export class AuthRouter {
     return new User(req.body).save()
     .then((user) => {
       req.user = user;
-      return tokenHelpers.encodeToken(user.get('user_id')); 
+      return tokenHelpers.encodeToken(user.get('user_id'));
     })
     .then((token) => {
       res.status(200).json({
@@ -91,8 +94,8 @@ export class AuthRouter {
    * endpoints.
    */
   init() {
-    this.router.post('/register', this.register);
-    this.router.post('/login', this.login);
+    this.router.post('/register', validate(AuthValidation.register), this.register);
+    this.router.post('/login', validate(AuthValidation.login), this.login);
   }
 
 }

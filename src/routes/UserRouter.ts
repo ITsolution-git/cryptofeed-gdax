@@ -2,6 +2,9 @@ import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
 const tokenHelper = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
+const validate = require('../classes/ParamValidator');
+import UserValidation from '../validations/UserValidation';
+
 import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
@@ -102,7 +105,7 @@ export class UserRouter {
       })
       .then((isUploadSuccess)=>{
         if(isUploadSuccess){
-          let image_url = toolHelpers.getBaseUrl(req) + '/uploads/users/avatars/'+req.user.get('user_id')+path.extname(req.files.avatar_file.name).toLowerCase();
+          let image_url = toolHelpers.getBaseUrl(req) + 'uploads/users/avatars/'+req.user.get('user_id')+path.extname(req.files.avatar_file.name).toLowerCase();
              
           return req.user.save({avatar_file:image_url});
         }
@@ -199,11 +202,11 @@ export class UserRouter {
   init() {
     // Routes for /api/v1/user
     this.router.get('/', this.getUser);
-    this.router.put('/', this.putUser);
-    this.router.put('/password', this.putUserpassword);
-    this.router.get('/groups', this.getGroups);
-    this.router.get('/:id', this.getUser);
-    this.router.get('/:id/groups', this.getGroups);
+    this.router.put('/', validate(UserValidation.putUser), this.putUser);
+    this.router.put('/password', validate(UserValidation.putUserpassword), this.putUserpassword);
+    this.router.get('/groups',  this.getGroups);
+    this.router.get('/:id', validate(UserValidation.getUser), this.getUser);
+    this.router.get('/:id/groups', validate(UserValidation.getUserGroups), this.getGroups);
   }
 
 }

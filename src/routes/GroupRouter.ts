@@ -39,12 +39,12 @@ export class GroupRouter {
         // }}, 
         'settings', 'tags',
         {'creator':function(qb) {
-          qb.column('user_id', 'first_name', 'last_name', 'banner_image_file');
+          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
         }}]
     })
     .asCallback((err, groups) => {
       if(err) {
-          res.status(404).json({
+          res.status(400).json({
           success: 0,
           message: err.message
         });
