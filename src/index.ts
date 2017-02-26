@@ -4,12 +4,19 @@ import * as debug from 'debug';
 
 import App from './App';
 
+var fs = require('fs');
+var https = require('https');
+
+var privateKey  = fs.readFileSync(process.env.CERTKEY, 'utf8');
+var certificate = fs.readFileSync(process.env.CERTCRT, 'utf8');
+var credentials = { key: privateKey, cert: certificate };
+
 debug('ts-express:server');
 
 const port = normalizePort(process.env.PORT || 3000);
 App.set('port', port);
 
-const server = http.createServer(App);
+const server = https.createServer(credentials, App);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
