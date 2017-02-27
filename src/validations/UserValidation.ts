@@ -5,7 +5,6 @@ export default {
   putUser: {
     body: {
       email: Joi.string().email(),
-      password: Joi.string().min(6),
       username: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),
@@ -29,9 +28,9 @@ export default {
 
   // PUT user/password
   putUserpassword: {
-    body: {
+    body: Joi.object({
         original_password: Joi.string().required(),
         new_password: Joi.string().required().min(6)
-    }
+    }).unknown(false)
   }
 };

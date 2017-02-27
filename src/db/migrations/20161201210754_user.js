@@ -5,13 +5,13 @@ exports.up = (knex, Promise) => {
     table.dateTime('updated_at', true).defaultTo();
     table.string('email').unique().notNullable();
     table.string('username').unique();
-    table.string('password').notNullable();
-    table.string('first_name');
-    table.string('last_name');
-    table.string('avatar_file');
-    table.text('bio');
-    table.decimal('latitude',9,6);
-    table.decimal('longitude',9,6);
+    table.string('password').notNullable("");
+    table.string('first_name').defaultTo("");
+    table.string('last_name').defaultTo("");
+    table.string('avatar_file').defaultTo("");
+    table.text('bio').defaultTo("");
+    table.decimal('latitude',9,6).defaultTo(0);
+    table.decimal('longitude',9,6).defaultTo(0);
   });
 };
 
