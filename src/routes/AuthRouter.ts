@@ -80,7 +80,7 @@ export class AuthRouter {
       });
     })
     .catch((err) => {
-      res.status(200).json({
+      res.status(401).json({
         success: 0,
         user: {},
         token: "",
