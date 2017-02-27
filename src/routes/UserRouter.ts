@@ -34,7 +34,15 @@ export class UserRouter {
     public getUser(req: IRequest, res: Response, next: NextFunction) {
       if(req.params.id) {
         return User.where({user_id:parseInt(req.params.id)}).fetch({
-          columns:['username']
+          columns: ['user_id',
+                    'created_at',
+                    'username',
+                    'first_name',
+                    'avatar_file',
+                    'bio',
+                    'longitude',
+                    'latitude',
+                   ]
         })
         .asCallback((err, user) => {
           if(err)
@@ -44,11 +52,12 @@ export class UserRouter {
               success: 1,
               message: "No user id"
             })
-          else 
+          else{
             res.status(200).json({
               success: 1,
               user: user
             });
+          }
         })
         .catch(function(err){
           res.status(400).json({
