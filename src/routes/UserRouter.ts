@@ -130,10 +130,12 @@ export class UserRouter {
         return tokenHelper.encodeToken(user.get('user_id')); 
       })
       .then((token) => {
+        let filter = req.user.toJSON();
+        delete filter['password'];
         res.status(200).json({
           success: 1,
           token: token,
-          user: req.user,
+          user: filter,
           message:"Success"
         });
       })
@@ -185,10 +187,12 @@ export class UserRouter {
           return tokenHelper.encodeToken(user.get('user_id')); 
         })
         .then((token) => {
+          let filter = req.user.toJSON();
+          delete filter['password'];
           res.status(200).json({
             success: 1,
             token: token,
-            user: req.user,
+            user: filter,
             message:"Success"
           });
         })
