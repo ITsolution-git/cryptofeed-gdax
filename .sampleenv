@@ -4,3 +4,11 @@ DEV_DB_HOST=servers
 DEV_DB_NAME=database
 DEV_DB_USER=user
 DEV_DB_PASSWORD=abc123
+
+TEST_DB_HOST=localhost
+TEST_DB_NAME=action_api_test
+TEST_DB_USER=root
+TEST_DB_PASSWORD=root
+
+CERTKEY=/etc/nginx/cert.key
+CERTCRT=/etc/nginx/cert.crt

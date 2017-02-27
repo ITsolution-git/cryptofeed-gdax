@@ -6,7 +6,8 @@ exports.seed = function(knex, Promise) {
     return Promise.join(
       knex('group_settings').insert({
         group_id: 1,
-        allow_member_action: 0
+        allow_member_action: 0,
+        member_action_level: 5000
       })
     );
   })
@@ -15,7 +16,7 @@ exports.seed = function(knex, Promise) {
       knex('group_settings').insert({
         group_id: 2,
         allow_member_action: 1,
-        member_action_level: 50
+        member_action_level: 5000
       })
     );
   });

@@ -6,30 +6,51 @@ exports.seed = function(knex, Promise) {
       return Promise.all([
         // Inserts seed entries
         knex('action').insert({
-            action_id: 1,
             group_id: 1,
             created_by_user_id: 1,
-            title: 'Group 1 Action 1 email',
-            subtitle: 'This is the subtitle 1',
+            title: 'Welcome to ACTodo',
+            subtitle: 'This is your first act. Tap here to view the details.',
             action_type_id: 1,
-            description: 'Group 1 Action 1 Email Description',
-            points: 100,
-            param1: 'test@test.net',
-            param2: 'This is the Subject',
-            param3: 'This is the body of the email.'
+            description: `
+                  Nice work! You’re viewing the details of the act to do. Had this been an actual act, this is where the who, what, where, why and how of the action would live.
+
+                  To do this action, tap the “Do Action” button at the bottom of the screen.
+                  `,
+            points: 200,
+            param1: `Awesome!
+
+                  Had this been an actual act, this screen would show you details, such as talking points, or example statements, to help you quickly complete the action.
+
+                  Tap the “Complete Action” button below to complete the action.`,
+            thanks_msg: `Congrats! You just completed this action!
+
+                  Easy, right?
+
+                  Let’s head back to the dashboard to see what other acts you can do.`,
+            start_at: '2/1/2017'
         }),
         knex('action').insert({
-            action_id: 2,
             group_id: 1,
             created_by_user_id: 1,
-            title: 'Group 1 Action 2 call',
-            subtitle: 'This is the subtitle 2',
-            action_type_id: 2,
-            description: 'Group 1 Action 2 Call Description',
-            points: 200,
-            param1: '866-231-8505',
-            param2: 'These are talking points'
+            title: 'Skip this action',
+            subtitle: 'Swipe left to reveal the skip button. Then tap it.',
+            action_type_id: 1,
+            description: `
+                  Oops. Looks like you tapped the action, rather than swiped it.
+
+                  No worries. Just tap the “Skip” button in the header instead.
+
+                  Or if you just want to ignore these instructions completely, go ahead and tap the button to do this action.
+                  `,
+            points: 1,
+            param1: `
+                  Well, instead of skipping it, you’re doing it. That’s cool. You go, Glen Coco!`,
+            thanks_msg: `Thanks for completing this act.
+
+                  Let’s head back to the dashboard for more!`,
+            start_at: '2/1/2017'
         }),
+        
       ]);
     });
 };

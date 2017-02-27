@@ -33,7 +33,9 @@ export class UserRouter {
    */
     public getUser(req: IRequest, res: Response, next: NextFunction) {
       if(req.params.id) {
-        return User.where({user_id:parseInt(req.params.id)}).fetch()
+        return User.where({user_id:parseInt(req.params.id)}).fetch({
+          columns:['username']
+        })
         .asCallback((err, user) => {
           if(err)
             throw err;
@@ -55,10 +57,12 @@ export class UserRouter {
           })
         });
       } else {
+        let filter = req.user.toJSON();
+        delete filter['password'];
         res.status(200).json({
           success: 1,
           token: tokenHelper.encodeToken(req.user.id),
-          user: req.user
+          user: filter
         });
       }
     }

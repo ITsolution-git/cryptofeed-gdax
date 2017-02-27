@@ -30,7 +30,8 @@ export class AuthRouter {
   public register(req: IRequest, res: Response, next: NextFunction) {
     return new User(req.body).save()
     .then((user) => {
-      req.user = user;
+      req.user = user.toJSON();
+      delete req.user['password'];
       return tokenHelpers.encodeToken(user.get('user_id'));
     })
     .then((token) => {
@@ -66,7 +67,8 @@ export class AuthRouter {
       if(!user)
         throw Error("Invalid email address");
       user.authenticate(password);
-      req.user = user;
+      req.user = user.toJSON();
+      delete req.user['password'];
       return user;
     })
     .then((response) => {
