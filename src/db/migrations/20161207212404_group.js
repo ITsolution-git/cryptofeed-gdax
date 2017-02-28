@@ -5,12 +5,12 @@ exports.up = (knex, Promise) => {
     table.dateTime('updated_at', true).defaultTo();
     table.integer('created_by_user_id').notNullable();
     table.string('name').notNullable();
-    table.text('description');
-    table.text('welcome');
-    table.decimal('latitude',9,6);
-    table.decimal('longitude',9,6);
+    table.text('description').defaultTo('');
+    table.text('welcome').defaultTo('');
+    table.decimal('latitude',9,6).defaultTo(0);
+    table.decimal('longitude',9,6).defaultTo(0);
     table.boolean('private').notNullable().defaultTo(0);
-    table.string('banner_image_file');
+    table.string('banner_image_file').defaultTo('');
     table.string('group_code');
     table.dateTime('deleted_at');
     table.integer('deleted_by_user_id');

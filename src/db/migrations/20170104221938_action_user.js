@@ -6,6 +6,7 @@ exports.up = function(knex, Promise) {
     table.dateTime('updated_at', true).defaultTo();
     table.integer('action_id').notNullable();
     table.integer('user_id').notNullable();
+    table.boolean('skip').defaultTo(0);
     table.integer('points');
   });
 };
