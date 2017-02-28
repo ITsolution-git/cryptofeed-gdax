@@ -31,8 +31,8 @@ describe('********* routes : user *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed1@test.net',
-        password: 'password'
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
       })
       .end((error, response) => {
         should.not.exist(error);
@@ -46,7 +46,7 @@ describe('********* routes : user *********', function(){
           res.body.success.should.eql(1);
           res.body.should.have.property('user');
           res.body.user.should.have.property('username');
-          res.body.user.username.should.equal('seeder1');
+          res.body.user.username.should.equal('jasonh');
 
           done();
         });
@@ -57,22 +57,23 @@ describe('********* routes : user *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed1@test.net',
-        password: 'password'
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
       })
       .end((error, response) => {
         should.not.exist(error);
         chai.request(app)
-        .get('/api/v1/user/2')
+        .get('/api/v1/user/1')
         .set('authorization', 'Bearer ' + response.body.token)
         .end((err, res) => {
+          console.log(err);
           should.not.exist(err);
           res.status.should.eql(200);
           res.type.should.eql('application/json');
           res.body.success.should.eql(1);
           res.body.should.have.property('user');
           res.body.user.should.have.property('username');
-          res.body.user.username.should.equal('seeder2');
+          res.body.user.username.should.equal('jasonh');
 
           done();
         });
@@ -98,8 +99,8 @@ describe('********* routes : user *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed1@test.net',
-        password: 'password'
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
       })
       .end((error, response) => {
         should.not.exist(error);
@@ -135,8 +136,8 @@ describe('********* routes : user *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed1@test.net',
-        password: 'password'
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
       })
       .end((error, response) => {
         should.not.exist(error);
@@ -216,12 +217,12 @@ describe('********* routes : user *********', function(){
 
   describe('GET /api/v1/user/groups', () => {
     var token = "";
-    it('should return a groups of seed1@test.net', (done) => {
+    it('should return a groups of jasonh@actodo.co', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed2@test.net',
-        password: 'password'
+        email: 'erwin@g.com',
+        password: 'newpassword'
       })
       .end((error, response) => {
         should.not.exist(error);
@@ -237,14 +238,13 @@ describe('********* routes : user *********', function(){
           res.body.success.should.equal(1);
           res.body.groups.should.be.a('array');
           res.body.groups.should.have.length(2);
-          res.body.groups[0].should.include.keys('group_id', 'settings','tags');
-          res.body.groups[0].settings[0].allow_member_action.should.equal(0);
+          res.body.groups[0].should.include.keys('group_id');
           done();
         });
       });
     });
-
   });
+  
 
   describe('PUT /api/v1/user/password', () => {
     var token = "";
@@ -252,15 +252,15 @@ describe('********* routes : user *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'seed2@test.net',
-        password: 'password'
+        email: 'erwin@g.com',
+        password: 'newpassword'
       })
       .end((error, response) => {
         should.not.exist(error);
         chai.request(app)
         .put('/api/v1/user/password')
         .set('authorization', 'Bearer ' + response.body.token)
-        .send({original_password:"password", new_password:"password"})
+        .send({original_password:"newpassword", new_password:"password"})
         .end((err, res) => {
           res.status.should.eql(200);
           res.should.be.json;
@@ -272,29 +272,5 @@ describe('********* routes : user *********', function(){
       });
     });
 
-    it('should return invalid password on wrong original password', (done) => {
-      chai.request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'seed1@test.net',
-        password: 'password'
-      })
-      .end((error, response) => {
-        should.not.exist(error);
-        chai.request(app)
-        .put('/api/v1/user/password')
-        .set('authorization', 'Bearer ' + response.body.token)
-        .send({original_password:"wrongoriginal", new_password:"newpassword"})
-        .end((err, res) => {
-          res.status.should.eql(401);
-          res.should.be.json;
-          res.body.should.be.a('object');
-          res.body.should.include.keys('message', 'success');
-          res.body.success.should.equal(0);
-          res.body.message.should.equal("No token supplied");
-          done();
-        });
-      });
-    });
   });
 });

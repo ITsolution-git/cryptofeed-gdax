@@ -24,7 +24,8 @@ export default bookshelf.Model.extend({
     return this.hasMany(GroupSetting, 'group_id', 'group_id');
   },
   creator: function() {
-    return this.belongsTo(User, 'created_by_user_id', 'user_id');
+    var data = this.belongsTo(User, 'created_by_user_id', 'user_id');
+    return data;
   },
 
   initialize: function() {

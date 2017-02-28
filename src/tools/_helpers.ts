@@ -136,7 +136,7 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
             message: "You are no longer a member here."
           });
         }
-        req.user = user;
+          req.user = user;
         next();
       })
       .catch((err) => {

@@ -165,15 +165,15 @@ export class UserRouter {
       else
         uid = parseInt(req.params.id);
       User.where({user_id: uid}).fetch({
-        withRelated: [ 'groups', 'groups.settings', 'groups.tags', 'groups.creator']
+        withRelated: [ 'groups']
       })
       .asCallback((err, user) => {
         if(err) return res.status(500).json({success: 0, message:err.message, token:"", groups:[]});
-        if(user == null) return res.status(500).json({success:0, message:"Invalid userid"});
-          return res.status(200).json({
-            success: 1,
-            groups: user.related('groups')
-          });
+        if(user == null)  return res.status(500).json({success:0, message:"Invalid userid"});
+        return res.status(200).json({
+          success: 1,
+          groups: user.related('groups')  
+        });
       });
     }
     public putUserpassword(req: IRequest, res: Response, next: NextFunction) {
