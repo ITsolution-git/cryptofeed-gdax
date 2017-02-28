@@ -27,7 +27,7 @@ exports.seed = function(knex, Promise) {
                   Easy, right?
 
                   Let’s head back to the dashboard to see what other acts you can do.`,
-            start_at: '2/1/2017'
+            start_at: new Date(2017, 1, 1) 
         }),
         knex('action').insert({
             group_id: 1,
@@ -48,7 +48,7 @@ exports.seed = function(knex, Promise) {
             thanks_msg: `Thanks for completing this act.
 
                   Let’s head back to the dashboard for more!`,
-            start_at: '2/1/2017'
+            start_at: new Date(2017, 1, 1) 
         }),
         
       ]);
