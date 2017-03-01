@@ -94,6 +94,39 @@ export class AuthRouter {
   }
 
   public loginFacebook(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user){
+        return new User(req.body).save()
+        .then((user) => {
+          req.user = user.toJSON();
+          delete req.user['password'];
+          return user;
+        })
+      }
+      else{
+        req.user = user.toJSON();
+        delete req.user['password'];
+        return user;
+      }
+    })
+    .then((user) => {
+      return tokenHelpers.encodeToken(user.id);
+    })
+    .then((token) => {
+      res.status(200).json({
+        success: 1,
+        token: token,
+        user: req.user
+      });
+    })
+    .catch((err) => {
+      res.status(401).json({
+        success: 0,
+        message: err.message
+      });
+    });
   //   var fields = ['id', 'email', 'first_name', 'last_name', 'link', 'name'];
   //   var accessTokenUrl = 'https://graph.facebook.com/v2.5/oauth/access_token';
   //   var graphApiUrl = 'https://graph.facebook.com/v2.5/me?fields=' + fields.join(',');
@@ -164,6 +197,7 @@ export class AuthRouter {
   init() {
     this.router.post('/register', validate(AuthValidation.register), this.register);
     this.router.post('/login', validate(AuthValidation.login), this.login);
+    this.router.post('/facebook', validate(AuthValidation.loginFacebook), this.loginFacebook);
   }
 
 }

@@ -13,7 +13,7 @@ exports.up = (knex, Promise) => {
     table.text('bio').defaultTo('');
     table.decimal('latitude',9,6).defaultTo(0);
     table.decimal('longitude',9,6).defaultTo(0);
-    table.string('facebook');
+    table.string('facebook').nullable();
   });
 };
 
