@@ -9,6 +9,7 @@ import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
 import Group from '../db/models/group';
+import ActionUser from '../db/models/action_user'
 var path = require('path'),
     fs = require('fs');
 
@@ -211,7 +212,45 @@ export class UserRouter {
         })
       }
     }
-
+  
+    /**
+    * @description Gets list of actions user can perform
+    *              skip = 0 and deleted_at=null
+    * @param Request
+    * @param Response
+    * @param Callback function (NextFunction)
+    */
+    public getActions(req: IRequest, res: Response, next: NextFunction) {
+      var nonskipIDs = [];
+      ActionUser.collection().query(function(qb) {
+        qb.where('user_id', '=', req.user.get('user_id')).andWhere('skip', '=', false)
+      }).fetch({columns:['action_id']})
+      .then(nonskip=>{
+        nonskipIDs = nonskip.toJSON().map((actionuser)=>{return actionuser.action_id});
+        return User.where(function(qb) {
+          qb.where('user_id', '=', req.user.get('user_id'))
+        }).fetch({withRelated:[
+          {'actions.creator':function(qb) {
+            qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+          }},
+          'actions.action_type']})
+      })
+      .then(user=>{
+        return user.related('actions').query(function(qb){
+          qb.whereIn('action.action_id', nonskipIDs)
+        }).fetch().then(result=>{
+          res.status(200).json({
+            actions:result
+          });
+        })
+      })
+      .catch(err=>{
+        res.status(400).json({
+          success: 0,
+          message: err.message,
+        })
+      })
+    }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -222,6 +261,7 @@ export class UserRouter {
     this.router.put('/', validate(UserValidation.putUser), this.putUser);
     this.router.put('/password', validate(UserValidation.putUserpassword), this.putUserpassword);
     this.router.get('/groups',  this.getGroups);
+    this.router.get('/actions',  this.getActions);
     this.router.get('/:id', validate(UserValidation.getUser), this.getUser);
     this.router.get('/:id/groups', validate(UserValidation.getUserGroups), this.getGroups);
   }

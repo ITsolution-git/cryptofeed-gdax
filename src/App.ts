@@ -7,8 +7,6 @@ const toolHelpers = require('./tools/_helpers');
 import GroupRouter from './routes/GroupRouter';
 import AuthRouter from './routes/AuthRouter';
 import UserRouter from './routes/UserRouter';
-
-
 var fileUpload = require('express-fileupload');
 
 
@@ -53,6 +51,7 @@ class App {
     this.express.use('/api/v1/groups', GroupRouter);
     this.express.use('/api/v1/auth', AuthRouter);
     this.express.use('/api/v1/user', toolHelpers.ensureAuthenticated, UserRouter);
+
   }
 
 }

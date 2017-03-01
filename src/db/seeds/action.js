@@ -6,6 +6,7 @@ exports.seed = function(knex, Promise) {
       return Promise.all([
         // Inserts seed entries
         knex('action').insert({
+            action_id: 1,
             group_id: 1,
             created_by_user_id: 1,
             title: 'Welcome to ACTodo',
@@ -30,6 +31,7 @@ exports.seed = function(knex, Promise) {
             start_at: new Date(2017, 1, 1) 
         }),
         knex('action').insert({
+            action_id: 2,
             group_id: 1,
             created_by_user_id: 1,
             title: 'Skip this action',

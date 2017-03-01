@@ -8,6 +8,7 @@ import bluebird from 'bluebird';
 import Group from './group';
 import GroupUser from './group_user';
 import User from './user';
+import Action from './action';
 
 export default bookshelf.Model.extend({
   tableName: 'user',
@@ -76,6 +77,9 @@ export default bookshelf.Model.extend({
   },
   groups: function() {
     return this.belongsToMany(Group, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id');
+  },
+  actions: function() {
+    return this.belongsToMany(Action, 'action_user', 'user_id', 'action_id', 'user_id', 'action_id');
   },
   
   authenticate: function(password){

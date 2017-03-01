@@ -32,5 +32,6 @@ export default {
         original_password: Joi.string().required(),
         new_password: Joi.string().required().min(6)
     }).unknown(false)
-  }
+  },
+  
 };
