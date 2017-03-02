@@ -1,0 +1,112 @@
+import {Router, Request, Response, NextFunction} from 'express';
+import {IRequest} from '../classes/IRequest';
+const tokenHelper = require('../tools/tokens');
+const toolHelpers = require('../tools/_helpers');
+const validate = require('../classes/ParamValidator');
+import ActionValidation from '../validations/ActionValidation';
+
+import bluebird from 'bluebird';
+var util = require('util');
+import User from '../db/models/user';
+import Group from '../db/models/group';
+import ActionUser from '../db/models/action_user';
+import GroupUser from '../db/models/group_user';
+import Action from '../db/models/action';
+
+var path = require('path'),
+    fs = require('fs');
+
+export class ActionRouter {
+  router: Router
+
+
+  /**
+   * Initialize the ActionRouter
+   */
+  constructor() {
+    this.router = Router();
+    this.init();
+  }
+
+  
+  /**
+  * @description Gets list of actions user can perform
+  *              skip = 0 and deleted_at=null
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  
+  public getAction(req: IRequest, res: Response, next: NextFunction) {
+    var userGroupsIDs = [];
+    var retAction = {};
+    return GroupUser.collection().query(function(qb) {
+      qb.where('user_id', '=', req.user.get('user_id'))
+    }).fetch({columns:['group_id']})
+    .then(groups=>{
+      userGroupsIDs = groups.toJSON().map((group)=>{return group.group_id});
+
+      return Action.where({action_id:req.params.id}).fetch({withRelated:[
+        {'creator':function(qb) {
+          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+        }},
+        'action_type']})
+    })
+    .then(action=>{
+      if(action==null)
+        res.status(404).json({
+          success: 0,
+          message: "Action not found"
+        });
+      else if(userGroupsIDs.indexOf(action.get('group_id')) == -1)
+        res.status(403).json({
+          success: 0,
+          message: "User is not a member of the group"
+        });
+      else if(action.get('deleted_at') != null)
+        res.status(404).json({
+          success: 0,
+          message: "The action was deleted"
+        });
+      else{
+        retAction = action;
+        return ActionUser.where({action_id:req.params.id, user_id:req.user.get('user_id')}).fetch();
+      }
+    })
+    .then(actionuser=>{
+      if((actionuser != null) && (actionuser.get('skip') == true))
+        res.status(404).json({
+          success: 0,
+          message: "The action was skipped by user"
+        });
+      else
+        res.status(404).json({
+          success: 1,
+          action: retAction
+        });
+    })
+    .catch(err=>{
+      res.status(400).json({
+        success: 0,
+        message: err.message,
+      })
+    })
+  }
+  /**
+   * Take each handler, and attach to one of the Express.Router's
+   * endpoints.
+   */
+  init() {  
+    // Routes for /api/v1/action
+    // this.router.get('/', this.getUser);
+    this.router.get('/:id', validate(ActionValidation.getAction), this.getAction);
+    // this.router.get('/:id/groups', validate(UserValidation.getUserGroups), this.getGroups);
+  }
+
+}
+
+// Create the ActionRouter, and export its configured Express.Router
+const actionRoutes = new ActionRouter();
+actionRoutes.init();
+
+export default actionRoutes.router;

@@ -9,7 +9,10 @@ import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
 import Group from '../db/models/group';
-import ActionUser from '../db/models/action_user'
+import ActionUser from '../db/models/action_user';
+import GroupUser from '../db/models/group_user';
+import Action from '../db/models/action';
+
 var path = require('path'),
     fs = require('fs');
 
@@ -220,29 +223,36 @@ export class UserRouter {
     * @param Response
     * @param Callback function (NextFunction)
     */
+
     public getActions(req: IRequest, res: Response, next: NextFunction) {
-      var nonskipIDs = [];
+
+      var skipnfinishActionIDs = [];
+      var userGroupsIDs = [];
       ActionUser.collection().query(function(qb) {
-        qb.where('user_id', '=', req.user.get('user_id')).andWhere('skip', '=', false)
+        qb.where('user_id', '=', req.user.get('user_id'))
       }).fetch({columns:['action_id']})
-      .then(nonskip=>{
-        nonskipIDs = nonskip.toJSON().map((actionuser)=>{return actionuser.action_id});
-        return User.where(function(qb) {
+      .then(skipnfinish=>{
+        skipnfinishActionIDs = skipnfinish.toJSON().map((actionuser)=>{return actionuser.action_id});
+        return GroupUser.collection().query(function(qb) {
           qb.where('user_id', '=', req.user.get('user_id'))
+        }).fetch({columns:['group_id']});
+      })
+      .then(groups=>{
+        userGroupsIDs = groups.toJSON().map((group)=>{return group.group_id});
+
+        return Action.collection().query(function(qb) {
+          qb.whereIn('group_id', userGroupsIDs).whereNotIn('action_id', skipnfinishActionIDs)
         }).fetch({withRelated:[
-          {'actions.creator':function(qb) {
+          {'creator':function(qb) {
             qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
           }},
-          'actions.action_type']})
+          'action_type']})
       })
-      .then(user=>{
-        return user.related('actions').query(function(qb){
-          qb.whereIn('action.action_id', nonskipIDs)
-        }).fetch().then(result=>{
-          res.status(200).json({
-            actions:result
-          });
-        })
+      .then(actions=>{
+        res.status(200).json({
+          success: 1,
+          actions:actions
+        });
       })
       .catch(err=>{
         res.status(400).json({
@@ -250,12 +260,41 @@ export class UserRouter {
           message: err.message,
         })
       })
+      // var nonskipIDs = [];
+      // ActionUser.collection().query(function(qb) {
+      //   qb.where('user_id', '=', req.user.get('user_id')).andWhere('skip', '=', false)
+      // }).fetch({columns:['action_id']})
+      // .then(nonskip=>{
+      //   nonskipIDs = nonskip.toJSON().map((actionuser)=>{return actionuser.action_id});
+      //   return User.where(function(qb) {
+      //     qb.where('user_id', '=', req.user.get('user_id'))
+      //   }).fetch({withRelated:[
+      //     {'actions.creator':function(qb) {
+      //       qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+      //     }},
+      //     'actions.action_type']})
+      // })
+      // .then(user=>{
+      //   return user.related('actions').query(function(qb){
+      //     qb.whereIn('action.action_id', nonskipIDs)
+      //   }).fetch().then(result=>{
+      //     res.status(200).json({
+      //       actions:result
+      //     });
+      //   })
+      // })
+      // .catch(err=>{
+      //   res.status(400).json({
+      //     success: 0,
+      //     message: err.message,
+      //   })
+      // })
     }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
    */
-  init() {
+  init() {  
     // Routes for /api/v1/user
     this.router.get('/', this.getUser);
     this.router.put('/', validate(UserValidation.putUser), this.putUser);

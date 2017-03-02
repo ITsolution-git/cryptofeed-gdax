@@ -215,6 +215,33 @@ describe('********* routes : user *********', function(){
   });
 
 
+  describe('GET /api/v1/user/actions', () => {
+    var token = "";
+    it('should return a json array of action of group user belongs to', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'erwin@g.com',
+        password: 'newpassword'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .get('/api/v1/user/actions')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          console.log(err);
+          res.status.should.eql(200);
+          res.should.be.json; 
+          res.body.should.be.a('object');
+          res.body.should.have.property('actions');
+          token = response.body.token;
+          done();
+        });
+      });
+    });
+  });
+
   describe('GET /api/v1/user/groups', () => {
     var token = "";
     it('should return a groups of jasonh@actodo.co', (done) => {
