@@ -6,7 +6,7 @@ exports.up = (knex, Promise) => {
     table.dateTime('updated_at', true).defaultTo();
     table.string('email').unique().notNullable();
     table.string('username').unique();
-    table.string('password').notNullable('');
+    table.string('password').defaultTo();
     table.string('first_name').defaultTo('');
     table.string('last_name').defaultTo('');
     table.string('avatar_file').defaultTo('');

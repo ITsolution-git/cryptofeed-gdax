@@ -28,7 +28,7 @@ export default {
       avatar_file: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),
-      facebook: Joi.string()
+      facebook: Joi.string().required()
     }).unknown(false)
   }
 };
