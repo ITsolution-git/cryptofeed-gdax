@@ -113,7 +113,7 @@ export default bookshelf.Model.extend({
     }).then(actionIDs=>{
       let _this = this;
       return ActionUser.collection().query(function(qb) {
-        qb.where('user_id', '=', _this.get('user_id')).whereIn('action_id', actionIDs)
+        qb.where('user_id', '=', _this.get('user_id')).whereIn('action_id', actionIDs);
       })
     }).then(actionusers=>{
       let points = 0;

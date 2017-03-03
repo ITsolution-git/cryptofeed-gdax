@@ -6,7 +6,9 @@ const groupHelper = require('../tools/group_helpers');
 import {IRequest} from '../classes/IRequest';
 const validate = require('../classes/ParamValidator');
 import GroupValidation from '../validations/GroupValidation';
+import Action from '../db/models/action';
 
+var moment = require('moment');
 
 var path = require('path'),
     fs = require('fs');
@@ -190,10 +192,27 @@ export class GroupRouter {
   * TODO: Need to ensure user is member of group, or group is public
   */
   public createGroupAction(req: IRequest, res: Response, next: NextFunction) {
-    res.status(200).json({
-      success: 1,
-      actions: req.current_group.related('open_actions')
-    });
+    req.body.start_at = req.body.start_at ? req.body.start_at : moment();
+    req.body.end_at = req.body.end_at ? req.body.end_at : moment().day(7).format("YYYY-MM-DD HH:MM:SS");
+    req.body.points = req.body.points ? req.body.points : req.action_type.get('default_points');
+    req.body.created_by_user_id = req.user.get('user_id');
+    new Action(req.body).save()
+    .then(action=>{
+      // console.log(action);
+      return action.load(['creator', 'action_type']);
+    })
+    .then(action=>{
+      res.status(200).json({
+        success: 1,
+        action: action
+      })
+    })
+    .catch(err=>{
+      res.status(400).json({
+        success: 0,
+        message: err.message
+      })
+    })
   }
 
 
@@ -548,6 +567,7 @@ export class GroupRouter {
                     toolHelpers.ensureAuthenticated,
                     validate(GroupValidation.createGroupAction),
                     groupHelper.checkGroup,
+                    groupHelper.checkActionType,
                     groupHelper.checkUserBelongsToGroup,
                     groupHelper.checkUserPermissionModifyGroupActions,
                     this.createGroupAction);

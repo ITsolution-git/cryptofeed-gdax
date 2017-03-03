@@ -4,6 +4,7 @@ import bookshelf from '../db/bookshelf';
 var util = require('util');
 import User from '../db/models/user';
 import Group from '../db/models/group';
+import ActionType from '../db/models/action_type';
 
 /* Check  
     - Group exists?
@@ -77,6 +78,30 @@ function checkUserBelongsToGroup(req: IRequest, res: Response, next: NextFunctio
     }
   });
 }
+
+/*
+  must ensure req.body.action_type_id exist.
+  Check  
+    return req.action_type
+  */
+function checkActionType(req: IRequest, res: Response, next: NextFunction) {
+  ActionType.where({action_type_id: req.body.action_type_id}).fetch()
+  .then(action_type=>{
+    if(action_type == null){
+      res.status(404).json({
+        success: 1,
+        message: "No Action Type exist"
+      })
+    }
+    else{
+      req.action_type = action_type;
+      next();
+    }
+  })
+  .catch(err=>{
+    next(err)
+  });
+}
 /*
   must ensure req.group exist.
   Check  
@@ -119,5 +144,6 @@ module.exports = {
   checkGroup,
   checkUserPermissionAccessGroup,
   checkUserBelongsToGroup,
+  checkActionType,
   checkUserPermissionModifyGroupActions
 };
