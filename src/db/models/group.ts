@@ -6,6 +6,7 @@ import User from './user';
 import GroupSetting from './group_settings';
 import GroupTag from './group_tag';
 import Group from './group';
+import Action from './action';
 
 const ValidationError = require('bookshelf-validate/lib/errors').ValidationError;
 export default bookshelf.Model.extend({
@@ -26,6 +27,9 @@ export default bookshelf.Model.extend({
   creator: function() {
     var data = this.belongsTo(User, 'created_by_user_id', 'user_id');
     return data;
+  },
+  actions: function() {
+    return this.hasMany(Action, 'group_id', 'group_id');
   },
 
   initialize: function() {
@@ -70,4 +74,7 @@ export default bookshelf.Model.extend({
   },
 }, {
  
+  getGroupWithRelated: function(group_id: number, withRelated: any){
+    return this.where({group_id:group_id}).fetch({withRelated:withRelated})
+  }
 });
