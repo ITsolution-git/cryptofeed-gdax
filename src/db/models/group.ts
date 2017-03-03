@@ -8,6 +8,7 @@ import GroupTag from './group_tag';
 import Group from './group';
 import Action from './action';
 
+var moment = require('moment');
 const ValidationError = require('bookshelf-validate/lib/errors').ValidationError;
 export default bookshelf.Model.extend({
   tableName: 'group',
@@ -28,8 +29,25 @@ export default bookshelf.Model.extend({
     var data = this.belongsTo(User, 'created_by_user_id', 'user_id');
     return data;
   },
-  actions: function() {
-    return this.hasMany(Action, 'group_id', 'group_id');
+  /* not deleted actions
+     open actions
+     actions ended in 2 months ago
+  */
+  open_actions: function() {
+    return this.hasMany(Action, 'group_id', 'group_id').query(function(qb){
+      qb.whereNull('deleted_at')
+        .where(function(){ 
+          this.where(function(){
+            this.where('end_at', '>', moment().month(-2).format("YYYY-MM-DD HH:MM:SS"))
+            .where('end_at', '<', moment().format("YYYY-MM-DD HH:MM:SS"))
+          })
+          .orWhere(function(){
+            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:MM:SS")).where('end_at', '>', moment().format("YYYY-MM-DD HH:MM:SS"))
+          })
+          .orWhere(function(){
+            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:MM:SS")).whereNull('end_at')
+          })});
+    });
   },
 
   initialize: function() {

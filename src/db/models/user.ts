@@ -93,9 +93,11 @@ export default bookshelf.Model.extend({
   // validateSave: function() {
     // return checkit(rules).run(this.attributes);
   // },
+
+  /* returns ID array of groups this user belongs to */
   getGroupIDs: function(){
 
-    return this.load('groups')
+     return this.load('groups')
       .then(user=>{
         return user.related('groups').toJSON().map((group)=>{return group.group_id});
       })

@@ -161,35 +161,17 @@ export class GroupRouter {
                   Returns array of all non-deleted actions for the specified group
                   Only return all open actions, and any actions that ended in the last 2 months
                   Exclude any deleted actions (where action.deleted_at is not null)
+                  
                   If group is private, only return actions if calling user is a member of the group
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
   * TODO: Need to ensure user is member of group, or group is public
   */
-  public getGroupActions(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, cur_user_id) => {
-      if(err) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Something went wrong.'
-        });
-      } else {
-        let group_id = parseInt(req.params.id);
-        toolHelpers.getGroupActions(group_id, function(err, actions) {
-          if(err) {
-            res.status(404).json({
-              status: 'Error retrieving groups',
-              message: 'Error retrieving groups.'
-            });
-          } else {
-            res.status(200).json({
-              status: 'success',
-              actions: actions
-            });
-          }
-        });
-      }
+  public getGroupActions(req: IRequest, res: Response, next: NextFunction) {
+    res.status(200).json({
+      success: 1,
+      actions: req.current_group.related('open_actions')
     });
   }
 
@@ -573,8 +555,10 @@ export class GroupRouter {
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);
       // this.router.get('/:id/actions/types', this.getActionTypes);
     this.router.get('/:group_id/actions', 
+                    toolHelpers.ensureAuthenticated,
                     validate(GroupValidation.getGroupActions),
                     groupHelper.checkGroup,
+                    groupHelper.checkUserPermissionAccessGroup,
                     this.getGroupActions);
       // this.router.post('/:id/actions', this.createGroupAction);
       // this.router.get('/:id/actions/:action_id', this.getGroupAction);

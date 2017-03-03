@@ -20,13 +20,13 @@ exports.seed = (knex, Promise) => {
     return Promise.join(
       knex('group').insert({
         group_id: 2,
-        created_by_user_id: 1,
+        created_by_user_id: 2,
         name: 'ACTodo Action',
         description: 'This is the group where action happens. Join the group to receive actions that we tailor for you.',
         welcome: 'Welcome to the action group! Get started by completing our current actions',
         latitude: '51.5032520',
         longitude: '-0.1278990',
-        private: 0,
+        private: 1,
         banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: 'ZYXW0987'
       })

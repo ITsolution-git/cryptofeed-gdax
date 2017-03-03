@@ -17,6 +17,30 @@ exports.seed = (knex, Promise) => {
         bio: 'Jason is the founder of ACTodo. A political junkie, and pursuer of getting shit done.',
         latitude: '39.087943',
         longitude: '-120.035874'
+      }),
+      knex('user').insert({
+        user_id: 2,
+        email: 'erwin@actodo.co',
+        username: 'erwin',
+        password: hash,
+        first_name: 'Erwin',
+        last_name: 'Keller',
+        avatar_file: 'https://aboutme.imgix.net/background/users/j/a/s/jasonholderness_1437586180_71.jpg',
+        bio: 'Javascript developer',
+        latitude: '39.087943',
+        longitude: '-120.035874'
+      }),
+      knex('user').insert({
+        user_id: 3,
+        email: 'sunil@actodo.co',
+        username: 'sunil',
+        password: hash,
+        first_name: 'Sunil',
+        last_name: '',
+        avatar_file: 'https://aboutme.imgix.net/background/users/j/a/s/jasonholderness_1437586180_71.jpg',
+        bio: 'IOS developer',
+        latitude: '39.087943',
+        longitude: '-120.035874'
       })
     );
   })

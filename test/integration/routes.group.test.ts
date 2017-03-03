@@ -1,33 +1,108 @@
-// process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test';
 
-// import * as mocha from 'mocha';
-// import * as chai from 'chai';
-// import app from '../../src/App';
+import * as mocha from 'mocha';
+import * as chai from 'chai';
+import app from '../../src/App';
 
-// const should = chai.should();
-// const environment = "test";
-// const config = require('../../knexfile.js')[environment];
-// export var knex = require('knex')(config);
+const should = chai.should();
+const environment = "test";
+const config = require('../../knexfile.js')[environment];
+export var knex = require('knex')(config);
 
-// var util = require('util');
+var util = require('util');
 
-// const chaiHttp = require('chai-http');
-// chai.use(chaiHttp);
+const chaiHttp = require('chai-http');
+chai.use(chaiHttp);
 
-// describe('********* routes : group *********', function(){
+describe('********* routes : group *********', function(){
   
-//   this.timeout(30000);
-//   before(() => {
+  this.timeout(30000);
+  before(() => {
 
-//     return knex.migrate.rollback()
-//     .then(() => { return knex.migrate.latest(); })
-//     .then(() => { return knex.seed.run(); })
-//   });
+    return knex.migrate.rollback()
+    .then(() => { return knex.migrate.latest(); })
+    .then(() => { return knex.seed.run(); })
+  });
 
-//   after(() => {
-//     return knex.migrate.rollback();
-//   });
+  after(() => {
+    return knex.migrate.rollback();
+  });
 
+	describe('GET /groups/{group_id}/actions', () => {
+		var token = "";
+		it('should return success login with jasonh and /groups/1/actions', (done) => {
+			chai.request(app)
+			.post('/api/v1/auth/login')
+			.send({
+				email: 'jasonh@actodo.co',
+				password: 'letmein'
+			})
+			.end((error, response) => {
+				should.not.exist(error);
+				token = response.body.token;
+				chai.request(app)
+				.get('/api/v1/groups/1/actions')
+				.set('authorization', 'Bearer ' + response.body.token)
+				.end((err, res) => {
+					should.not.exist(err);
+					res.status.should.eql(200);
+					res.type.should.eql('application/json');
+					res.body.success.should.eql(1);
+					res.body.should.have.property('actions');
+					done();
+				});
+			});
+		});
+		it('should return No permission /groups/2/actions; 2 is private group', (done) => {
+			chai.request(app)
+			.get('/api/v1/groups/2/actions')
+			.set('authorization', 'Bearer ' + token)
+			.end((err, res) => {
+				should.exist(err);
+				res.status.should.eql(403);
+				res.type.should.eql('application/json');
+				res.body.success.should.eql(0);
+				done();
+			});
+		});
+
+		it('should return Not Found /groups/6/actions; 6 is non-exist', (done) => {
+			chai.request(app)
+			.get('/api/v1/groups/6/actions')
+			.set('authorization', 'Bearer ' + token)
+			.end((err, res) => {
+				should.exist(err);
+				res.status.should.eql(404);
+				res.type.should.eql('application/json');
+				res.body.success.should.eql(0);
+				done();
+			});
+		});
+
+		it('should return success log in with erwin and /groups/2/actions', (done) => {
+			chai.request(app)
+			.post('/api/v1/auth/login')
+			.send({
+				email: 'erwin@actodo.co',
+				password: 'letmein'
+			})
+			.end((error, response) => {
+				should.not.exist(error);
+				token = response.body.token;
+				chai.request(app)
+				.get('/api/v1/groups/2/actions')
+				.set('authorization', 'Bearer ' + response.body.token)
+				.end((err, res) => {
+					should.not.exist(err);
+					res.status.should.eql(200);
+					res.type.should.eql('application/json');
+					res.body.success.should.eql(1);
+					res.body.should.have.property('actions');
+					done();
+				});
+			});
+		});
+	});
 //   describe('GET /api/v1/groups', () => {
 //     it('should return a success', (done) => {
 //       chai.request(app)
@@ -274,4 +349,4 @@
 // //     });
 // //   });
 
-// });
+});

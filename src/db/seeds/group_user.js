@@ -20,7 +20,7 @@ exports.seed = function(knex, Promise) {
     return Promise.join(
       knex('group_user').insert({
         group_id: 2,
-        user_id: 1,
+        user_id: 2,
         admin_settings: 1,
         admin_members: 1,
         mod_actions: 1,

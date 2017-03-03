@@ -18,9 +18,10 @@ export default bookshelf.Model.extend({
     return this.belongsTo(ActionType, 'action_type_id', 'action_type_id');
   },
   creator: function() {
-    return this.belongsTo(User, 'created_by_user_id', 'user_id');
+    return this.belongsTo(User, 'created_by_user_id', 'user_id').query(function(qb){
+      qb.column('user_id', 'first_name', 'last_name', 'avatar_file', 'username'); });
   },
-  deletor: function() {
+  deletor: function() { 
     return this.belongsTo(User, 'deleted_by_user_id', 'user_id');
   },
 

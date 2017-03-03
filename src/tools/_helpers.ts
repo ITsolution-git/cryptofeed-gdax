@@ -149,51 +149,6 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
   });
 }
 
-/***************************************************************/
-/**  Group Functions **/
-/***************************************************************/
-
-/**
-* @description Returns all the groups the user belongs to
-* @param user_id: Number id of the user
-*/
-// function getUsersGroups(user_id: Number) {
-//   //TODO: Need to return creator profile info with the group
-//   //TODO: Need to return group setting info with the group
-//   return bookshelf.knex('group')
-//     .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
-//     .where('user_id', user_id);
-// }
-
-/**
-* @description Returns all the groups the user belongs to
-* @param user_id: Number id of the user
-*/
-function getUsersPublicGroups(user_id: Number) {
-  //TODO: Need to return creator profile info with the group
-  //TODO: Need to return group setting info with the group
-  return bookshelf.knex('group')
-    .innerJoin('group_user', 'group.group_id', 'group_user.group_id')
-    .where({'user_id':user_id, 'private':0});
-}
-
-/**
-* @description Returns all non-private and non-deleted groups (public call)
-*/
-function getAllGroups() {
-  return bookshelf.knex('group')
-    .where({'private':0, 'deleted_at':null});
-}
-
-/**
-* @description Returns a single group as specified by group_id
-* @param group_id: Number ID of the group to return
-*/
-function getGroupById(group_id: Number) {
-  return bookshelf.knex('group')
-    .select('*').where({group_id}).first();
-}
-
 /**
 * @description Creates a unique group code and returns it
 */
@@ -204,121 +159,6 @@ function createGroupCode() {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
   //TODO: check that code doesn't already exist in database
   return text;
-}
-
-/**
-* @description Creates a new group based on owner and request params
-* @param owner_id: Number user_id of person creating group
-* @param req: Request object
-*/
-function createGroup(owner_id: Number, req: Request) {
-  let groupCode = createGroupCode();
-  return bookshelf.knex('group')
-  .insert({
-    created_by_user_id: owner_id,
-    name: req.body.name,
-    description: req.body.description,
-    welcome: req.body.welcome,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-    private: req.body.private,
-    banner_image_url: req.body.banner_image_url,
-    group_code: groupCode
-  })
-  .returning('group_id');
-}
-
-/**
-* @description Updates group details
-* @param group_id: Number ID of the group
-* @param group_body: JSON array of group data being updated
-* @param callback function
-*/
-function updateGroup(group_id: Number, group_body: JSON, callback) {
-  bookshelf.knex('group').where({group_id})
-    .update(group_body)
-    .then(function(count) {
-      callback(null, count);
-    });
-}
-
-/**
-* @description Allows user to join group
-* @param Number ID of the group
-* @param Number ID of the user joining the group
-* @param callback function
-*/
-function joinGroup(group_id: Number, user_id: Number, callback) {
-  bookshelf.knex('group_user')
-  .insert({
-    group_id: group_id,
-    user_id: user_id,
-    admin_settings: 0,
-    admin_members: 0,
-    mod_actions: 0,
-    mod_comments: 0,
-    submit_action: 0,
-    banned: 0
-  })
-  .then(callback());
-}
-
-/**
-* @description Returns array of group members (excludes banned)
-* @param Number ID of the group
-* @param callback function
-*/
-function getGroupMembers(group_id: Number, callback) {
-  bookshelf.knex('user').select('user.user_id', 'user.username', 'user.avatar_file',
-                      'group_user.admin_settings', 'group_user.admin_members',
-                      'group_user.mod_actions', 'group_user.mod_comments',
-                      'group_user.submit_action')
-    .from('user')
-    .innerJoin('group_user', 'user.user_id', 'group_user.user_id')
-    .where({ group_id:group_id, banned:0 })
-    .asCallback(function(err, values) {
-      callback(err, values);
-    });
-}
-
-/**
-* @description Updates settings for a group user
-* @param group_id: Number ID of the group
-* @param user_id: Number ID of the user being edited
-* @param perm_body: JSON array of settings being updated
-*/
-function updateGroupUser(group_id: Number, user_id: Number, perm_body: JSON) {
-  return bookshelf.knex('group_user')
-    .update(perm_body)
-    .where({group_id, user_id})
-    .returning('*');
-}
-
-/**
-* @description gets specific group_user record for user
-* @param group_id: Number ID of the group
-* @param user_id: Number ID of the user
-*/
-function getGroupMemberById(group_id: Number, user_id: Number) {
-  return bookshelf.knex('group_user')
-    .where({group_id, user_id}).first();
-}
-
-/***************************************************************/
-/**  Group Action Functions **/
-/***************************************************************/
-
-/**
-* @description returns all non-deleted actions for specified group_id
-* @param group_id int id of group
-*/
-function getGroupActions(group_id, callback) {
-  bookshelf.knex('action')
-    .innerJoin('action_type', 'action.action_type_id', 'action_type.action_type_id')
-    .where({'action.group_id':group_id, 'action.deleted_at':null})
-    .asCallback(function(err, actions) {
-      callback(err, actions);
-    });
 }
 
 /**
@@ -400,29 +240,10 @@ function updateAction(action_id: Number, action_body: JSON) {
 }
 
 module.exports = {
-  // User Functions
-  // validateEmail,
-  // getUserByUsername,
-  // getUserByEmail,
-  // getUserById,
-  // getUserProfileById,
-  // getUsersGroups,
   getBaseUrl,
-  getUsersPublicGroups,
   // updateUser,
   ensureAuthenticated,
   
-  // Group Functions
-  getAllGroups,
-  getGroupById,
-  createGroup,
-  updateGroup,
-  joinGroup,
-  getGroupMembers,
-  updateGroupUser,
-  getGroupMemberById,
-  // Group Action Functions
-  getGroupActions,
   createGroupAction,
   getActionById,
   createActionUser,
