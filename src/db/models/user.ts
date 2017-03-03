@@ -95,10 +95,13 @@ export default bookshelf.Model.extend({
   // },
   getGroupIDs: function(){
 
-      return this.load('groups')
-        .then(user=>{
-          return user.related('groups').toJSON().map((group)=>{return group.group_id});
-        })
+    return this.load('groups')
+      .then(user=>{
+        return user.related('groups').toJSON().map((group)=>{return group.group_id});
+      })
+  },
+  getGroupUser: function(group_id){
+    return GroupUser.where({user_id: this.get('user_id'), group_id: group_id}).fetch();
   }
 }, {
   // saveUser: function(attrs){

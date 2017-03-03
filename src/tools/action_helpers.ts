@@ -48,7 +48,33 @@ function checkUserBelongtoAction(req: IRequest, res: Response, next: NextFunctio
     
 }
 
+/*
+  must ensure req.action exist.
+  must ensure user belongs to group
+  Check  
+    - has group_user.mod_actions = true, OR
+    - is the action.created_by_user_id creator of the action
+  */
+function checkUserPermissionModAction(req: IRequest, res: Response, next: NextFunction) {
+  if(req.user.get('user_id') == req.current_action.get('created_by_user_id'))
+    return next();
+  
+  req.user.getGroupUser(req.current_action.get('group_id'))
+  .then(groupuser=>{
+    if(groupuser.get('mod_actions') == false)
+      res.status(403).json({
+        success: 0,
+        message: "User has no permission to delete or update action"
+      });
+    else
+      next();
+  }).catch(err=>{
+    next(err)
+  });
+    
+}
 module.exports = {
   checkAction,
-  checkUserBelongtoAction
+  checkUserBelongtoAction,
+  checkUserPermissionModAction
 };

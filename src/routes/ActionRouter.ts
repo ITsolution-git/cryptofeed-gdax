@@ -186,6 +186,35 @@ export class ActionRouter {
         });
      })
   }
+
+  /**
+  * @description 
+            - Create DELETE `/actions/:action_id` API Call
+            - Ensure caller is member of the group and either:
+              - has `group_user.mod_actions` = true, OR
+              - is the `action.created_by_user_id` creator of the action
+            - Delete action should *not* delete the action, but should set the `deleted_at` datetime, and set `deleted_by_user_id` to the user_id of the calling user
+
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  
+  public deleteAction(req: IRequest, res: Response, next: NextFunction) {
+     return req.current_action.save({deleted_at: new Date(),
+                                     deleted_by_user_id: req.user.get('user_id')})
+     .then(action=>{
+        res.status(200).json({
+          success: 1,
+          message: "The action is successfully deleted"
+        })
+     }).catch(err=>{
+       res.status(500).json({
+          success: 1,
+          message: err.message
+        });
+     })
+  }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -193,8 +222,14 @@ export class ActionRouter {
   init() {  
     // Routes for /api/v1/action
     // this.router.get('/', this.getUser);
-    this.router.get('/:action_id', validate(ActionValidation.needActionId), this.getAction);
-    // this.router.delete('/:id', validate(ActionValidation.needActionId), this.deleteAction);
+    this.router.get('/:action_id', validate(ActionValidation.needActionId), this.getAction);  
+
+    this.router.delete('/:action_id', 
+                validate(ActionValidation.needActionId), 
+                actionHelper.checkAction,
+                actionHelper.checkUserBelongtoAction,
+                actionHelper.checkUserPermissionModAction,
+                this.deleteAction);
     // this.router.put('/:id', validate(ActionValidation.needActionId), this.putAction);
     this.router.get('/:action_id/skip', 
                 validate(ActionValidation.needActionId), 
