@@ -215,6 +215,35 @@ export class ActionRouter {
         });
      })
   }
+
+  /**
+  * @description 
+            Create PUT /actions/:action_id API Call
+            Updates the specified action based on the submitted payload
+            Ensure caller is member of the group and either:
+              has group_user.mod_actions = true, OR
+              is the action.created_by_user_id creator of the action
+
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  
+  public putAction(req: IRequest, res: Response, next: NextFunction) {
+     return req.current_action.save(req.body)
+     .then(action=>{
+        res.status(200).json({
+          success: 1,
+          message: "The action is successfully updated",
+          action: action
+        })
+     }).catch(err=>{
+       res.status(500).json({
+          success: 1,
+          message: err.message
+        });
+     })
+  }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -230,7 +259,13 @@ export class ActionRouter {
                 actionHelper.checkUserBelongtoAction,
                 actionHelper.checkUserPermissionModAction,
                 this.deleteAction);
-    // this.router.put('/:id', validate(ActionValidation.needActionId), this.putAction);
+    this.router.put('/:action_id', 
+                validate(ActionValidation.putAction),
+                actionHelper.checkAction,
+                actionHelper.checkUserBelongtoAction,
+                actionHelper.checkUserPermissionModAction,
+                this.putAction);
+
     this.router.get('/:action_id/skip', 
                 validate(ActionValidation.needActionId), 
                 actionHelper.checkAction,
