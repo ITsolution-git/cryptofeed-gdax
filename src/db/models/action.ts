@@ -28,5 +28,11 @@ export default bookshelf.Model.extend({
   },
  
 }, {
- 
+  getAction: function(action_id: number){
+    return this.where({action_id:action_id}).fetch({withRelated:[
+    {'creator':function(qb) {
+        qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+    }},
+    'action_type']})
+  }
 });

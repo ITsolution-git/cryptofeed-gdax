@@ -93,7 +93,13 @@ export default bookshelf.Model.extend({
   // validateSave: function() {
     // return checkit(rules).run(this.attributes);
   // },
+  getGroupIDs: function(){
 
+      return this.load('groups')
+        .then(user=>{
+          return user.related('groups').toJSON().map((group)=>{return group.group_id});
+        })
+  }
 }, {
   // saveUser: function(attrs){
   //   if(attrs.password){
