@@ -9,6 +9,7 @@ import Group from './group';
 import GroupUser from './group_user';
 import User from './user';
 import Action from './action';
+import ActionUser from './action_user';
 
 export default bookshelf.Model.extend({
   tableName: 'user',
@@ -104,7 +105,24 @@ export default bookshelf.Model.extend({
   },
   getGroupUser: function(group_id){
     return GroupUser.where({user_id: this.get('user_id'), group_id: group_id}).fetch();
-  }
+  },
+  getTotalPointsOn: function(group){  
+    let actionIDs = [];
+    return group.load('actions').then(gro=>{
+      return actionIDs = gro.related('actions').toJSON().map((action)=>{return action.action_id});
+    }).then(actionIDs=>{
+      let _this = this;
+      return ActionUser.collection().query(function(qb) {
+        qb.where('user_id', '=', _this.get('user_id')).whereIn('action_id', actionIDs)
+      })
+    }).then(actionusers=>{
+      let points = 0;
+      actionusers.forEach(actionuser=>{
+        points += actionuser.points;
+      });
+      return points;      
+    });
+  },
 }, {
   // saveUser: function(attrs){
   //   if(attrs.password){

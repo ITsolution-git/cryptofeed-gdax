@@ -22,12 +22,18 @@ export default bookshelf.Model.extend({
     return this.hasMany(GroupTag, 'group_id', 'group_id');
     
   },
-  settings: function() {
-    return this.hasMany(GroupSetting, 'group_id', 'group_id');
+  setting: function() {
+    return this.hasOne(GroupSetting, 'group_id', 'group_id');
   },
   creator: function() {
     var data = this.belongsTo(User, 'created_by_user_id', 'user_id');
     return data;
+  },
+  /* all actions
+  */
+  actions: function(){
+    return this.hasMany(Action, 'group_id', 'group_id').query(function(qb){
+    });
   },
   /* not deleted actions
      open actions

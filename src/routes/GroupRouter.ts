@@ -176,6 +176,28 @@ export class GroupRouter {
   }
 
   /**
+  * @description  createGroupAction
+          Create POST /groups/:group_id/actions API Call
+              Creates a new action for the specified group
+                  -Ensure required fields are sent: title, subtitle, description, thanks_msg, action_type_id
+                  -Ensure submitter is a member of the group (group_user record) and:
+                    ;Has group_user.submit_action = true
+                    ;OR, group_setting.allow_member_action = true and user has earned points on group actions equal to or greater than group_setting.member_action_level
+          Returns the created action
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  * TODO: Need to ensure user is member of group, or group is public
+  */
+  public createGroupAction(req: IRequest, res: Response, next: NextFunction) {
+    res.status(200).json({
+      success: 1,
+      actions: req.current_group.related('open_actions')
+    });
+  }
+
+
+  /**
   * @description updates details of a group
   * @param Request
   * @param Response
@@ -271,44 +293,6 @@ export class GroupRouter {
     });
   }
 
-
-  /**
-  * @description creates a group action
-  * @param Request
-  * @param Response
-  * @param Callback function (NextFunction)
-  * TODO: Need to ensure user has permission to add action
-  */
-  public createGroupAction(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, cur_user_id) => {
-      if(err) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Something went wrong.'
-        });
-      } else {
-        let group_id = parseInt(req.params.id);
-        toolHelpers.createGroupAction(cur_user_id, req)
-        .then((actionId) => {
-          toolHelpers.getActionById(actionId[0], group_id)
-            .then((action) => {
-              res.status(200).json({
-                status: 'success',
-                token: tokenHelper.encodeToken(cur_user_id),
-                action: action
-              });
-          });
-        })
-        .catch((err) => {
-          console.log(util.inspect(err));
-          res.status(401).json({
-            status: 'error',
-            message: 'Something went wrong, and we didn\'t create an action. :('
-          });
-        });
-      }
-    });
-  }
 
   /**
   * @description Gets a specific group action (by ID)
@@ -560,7 +544,13 @@ export class GroupRouter {
                     groupHelper.checkGroup,
                     groupHelper.checkUserPermissionAccessGroup,
                     this.getGroupActions);
-      // this.router.post('/:id/actions', this.createGroupAction);
+    this.router.post('/:group_id/actions', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.createGroupAction),
+                    groupHelper.checkGroup,
+                    groupHelper.checkUserBelongsToGroup,
+                    groupHelper.checkUserPermissionModifyGroupActions,
+                    this.createGroupAction);
       // this.router.get('/:id/actions/:action_id', this.getGroupAction);
       // this.router.put('/:id/actions/:action_id', this.updateGroupAction);
       // this.router.delete('/:id/actions/:action_id', this.deleteGroupAction);
