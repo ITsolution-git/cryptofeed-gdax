@@ -266,12 +266,12 @@ export class ActionRouter {
                 actionHelper.checkUserPermissionModAction,
                 this.putAction);
 
-    this.router.get('/:action_id/skip', 
+    this.router.post('/:action_id/skip', 
                 validate(ActionValidation.needActionId), 
                 actionHelper.checkAction,
                 actionHelper.checkUserBelongtoAction,
                 this.skipAction);
-    this.router.get('/:action_id/complete', 
+    this.router.post('/:action_id/complete', 
                 validate(ActionValidation.needActionId), 
                 actionHelper.checkAction,
                 actionHelper.checkUserBelongtoAction,
