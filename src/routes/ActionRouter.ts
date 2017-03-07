@@ -54,7 +54,7 @@ export class ActionRouter {
         'action_type']})
     })
     .then(action=>{
-      if(action==null)
+      if(action==null)  
         res.status(404).json({
           success: 0,
           message: "Action not found"
@@ -78,7 +78,7 @@ export class ActionRouter {
       if((actionuser != null) && (actionuser.get('skip') == true))
         res.status(404).json({
           success: 0,
-          message: "The action was skipped by user"
+          message: "The action was already skipped by user"
         });
       else
         res.status(404).json({
@@ -109,7 +109,7 @@ export class ActionRouter {
                               user_id:req.user.get('user_id')}).fetch()
      .then(action_user=>{
        if(action_user != null){
-        return res.status(405).json({
+        return res.status(404).json({
           success: 0,
           message: "User already completed/skipped action and is not allowed to do it again"
         });
@@ -122,7 +122,7 @@ export class ActionRouter {
         .then(function(actionuser) {
           res.status(200).json({
             success: 1,
-            message: "The action was skipped"
+            message: "The action was successfully skipped"
           })
         })
        }
