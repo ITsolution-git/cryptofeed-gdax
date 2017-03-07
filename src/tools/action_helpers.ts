@@ -45,7 +45,6 @@ function checkUserBelongtoAction(req: IRequest, res: Response, next: NextFunctio
     else
       next();
   }).catch(err=>next(err));
-    
 }
 
 /*

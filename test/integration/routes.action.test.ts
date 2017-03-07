@@ -232,6 +232,78 @@ describe('********* routes : auth *********', function(){
     });
   });
 
+  describe('PUT /api/v1/actions/{action_id}', () => {
+    let token = "";
+    it('should login with jasonh@actodo.co', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jasonh@actodo.co',
+        password: 'letmein',
+      })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.should.include.keys('success', 'token');
+        token = res.body.token;
+        res.body.success.should.eql(1);
+        done();
+      });
+    });
+    it('should update action_id 1', (done) => {
+      chai.request(app)
+      .put('/api/v1/actions/1')
+	    .set('authorization', 'Bearer ' + token)
+      .send({
+        title: 'New title',
+        subtitle:'New subtitle',
+        points: 230
+      })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.should.include.keys('success','action');
+        res.body.success.should.eql(1);
+        res.body.action.title.should.eql('New title');
+        done(); 
+      });
+    });
+
+    it('should return error with updating action_id 8:out of user\'s permission', (done) => {
+      chai.request(app)
+      .put('/api/v1/actions/8')
+	    .set('authorization', 'Bearer ' + token)
+      .send({
+      })
+      .end((err, res) => {
+        console.log(res.body);
+        should.exist(err);
+        res.status.should.eql(403);
+        res.type.should.eql('application/json');
+        res.body.should.include.keys('success', 'message');
+        res.body.success.should.eql(0);
+        done();
+      });
+    });
+    it('should return error with updating action_id 100 not found', (done) => {
+      chai.request(app)
+      .put('/api/v1/actions/100')
+	    .set('authorization', 'Bearer ' + token)
+      .send({
+      })
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(404);
+        res.type.should.eql('application/json');
+        res.body.should.include.keys('success');
+        res.body.success.should.eql(0);
+        done();
+      });
+    });
+  });
+
   describe('DELETE /api/v1/actions/{action_id}', () => {
     let token = "";
     it('should login with jasonh@actodo.co', (done) => {
