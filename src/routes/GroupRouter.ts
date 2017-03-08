@@ -198,7 +198,6 @@ export class GroupRouter {
     req.body.created_by_user_id = req.user.get('user_id');
     new Action(req.body).save()
     .then(action=>{
-      // console.log(action);
       return action.load(['creator', 'action_type']);
     })
     .then(action=>{

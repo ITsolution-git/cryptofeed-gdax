@@ -33,7 +33,7 @@ describe('********* routes : auth *********', function(){
       .send({
         email: 'jasonh@actodo.co',
         password: 'letmein',
-      })
+      })  
       .end((err, res) => {
         should.not.exist(err);
         res.status.should.eql(200);
