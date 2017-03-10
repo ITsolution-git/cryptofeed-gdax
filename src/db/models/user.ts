@@ -103,9 +103,6 @@ export default bookshelf.Model.extend({
         return user.related('groups').toJSON().map((group)=>{return group.group_id});
       })
   },
-  getGroupUser: function(group_id){
-    return GroupUser.where({user_id: this.get('user_id'), group_id: group_id}).fetch();
-  },
   getTotalPointsOn: function(group){  
     let actionIDs = [];
     return group.load('actions').then(gro=>{
@@ -114,14 +111,17 @@ export default bookshelf.Model.extend({
       let _this = this;
       return ActionUser.collection().query(function(qb) {
         qb.where('user_id', '=', _this.get('user_id')).whereIn('action_id', actionIDs);
-      })
+      }).fetch();
     }).then(actionusers=>{
       let points = 0;
       actionusers.forEach(actionuser=>{
-        points += actionuser.points;
+        points += actionuser.get('points');
       });
       return points;      
     });
+  },
+  getGroupUser: function(group_id){
+    return GroupUser.where({user_id: this.get('user_id'), group_id: group_id}).fetch();
   },
 }, {
   // saveUser: function(attrs){

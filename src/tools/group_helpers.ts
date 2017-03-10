@@ -59,25 +59,6 @@ function checkUserPermissionAccessGroup(req: IRequest, res: Response, next: Next
   }
 }
 
-/*
-  must ensure req.group exist.
-  Check  
-     if the user is member of this group
-  */
-function checkUserBelongsToGroup(req: IRequest, res: Response, next: NextFunction) {
-  req.user.getGroupIDs().then(function(groupIDs){
-    if(groupIDs.indexOf(req.current_group.get('group_id')) == -1){
-      //If user is not a member of group
-      return res.status(403).json({
-        success: 0,
-        message: "User is not member of the group"
-      }); 
-    }
-    else{
-      return next();
-    }
-  });
-}
 
 /*
   must ensure req.body.action_type_id exist.
@@ -100,6 +81,27 @@ function checkActionType(req: IRequest, res: Response, next: NextFunction) {
   })
   .catch(err=>{
     next(err)
+  });
+}
+
+
+/*
+  must ensure req.group exist.
+  Check  
+     if the user is member of this group
+  */
+function checkUserBelongsToGroup(req: IRequest, res: Response, next: NextFunction) {
+  req.user.getGroupIDs().then(function(groupIDs){
+    if(groupIDs.indexOf(req.current_group.get('group_id')) == -1){
+      //If user is not a member of group
+      return res.status(403).json({
+        success: 0,
+        message: "User is not member of the group"
+      }); 
+    }
+    else{
+      return next();
+    }
   });
 }
 /*

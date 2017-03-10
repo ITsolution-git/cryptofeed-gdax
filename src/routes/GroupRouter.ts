@@ -496,54 +496,6 @@ export class GroupRouter {
     });
   }
 
-  /**
-  * @description updates the group settings for a specific user. Current User
-  * must have admin_members set as 1 (true) to do this
-  * @param Request
-  * @param Response
-  * @param Callback function (NextFunction)
-  */
-  public updateGroupMember(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, cur_user_id) => {
-      if(err) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Something went wrong.'
-        });
-      } else {
-        let group_id = parseInt(req.params.id);
-        toolHelpers.getGroupMemberById(group_id, cur_user_id)
-        .then((cur_user) => {
-          if(cur_user.admin_members) {
-            let user_id = parseInt(req.params.user_id);
-            toolHelpers.updateGroupUser(group_id, user_id, req.body)
-            .then((cnt) => {
-              toolHelpers.getGroupMembers(group_id, function(err, members) {
-                if(err) {
-                  res.status(400).json({
-                    status: 'error',
-                    message: 'Something went wrong.'
-                  });
-                } else {
-                  res.status(200).json({
-                    status: 'success',
-                    token: tokenHelper.encodeToken(cur_user_id),
-                    members: members
-                  });
-                }
-
-              });
-            });
-          } else {
-            res.status(401).json({
-              status: 'error',
-              message: 'Not authorized'
-            });
-          }
-        });
-      }
-    });
-  }
 
   /**
    * Take each handler, and attach to one of the Express.Router's
