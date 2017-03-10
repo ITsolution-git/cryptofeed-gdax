@@ -89,7 +89,7 @@ function checkActionType(req: IRequest, res: Response, next: NextFunction) {
   .then(action_type=>{
     if(action_type == null){
       res.status(404).json({
-        success: 1,
+        success: 0,
         message: "No Action Type exist"
       })
     }

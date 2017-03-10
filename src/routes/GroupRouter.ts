@@ -184,7 +184,9 @@ export class GroupRouter {
                   -Ensure required fields are sent: title, subtitle, description, thanks_msg, action_type_id
                   -Ensure submitter is a member of the group (group_user record) and:
                     ;Has group_user.submit_action = true
-                    ;OR, group_setting.allow_member_action = true and user has earned points on group actions equal to or greater than group_setting.member_action_level
+                    ;OR, group_setting.allow_member_action = true 
+                       and user has earned points on group actions equal to 
+                       or greater than group_setting.member_action_level
           Returns the created action
   * @param Request
   * @param Response
