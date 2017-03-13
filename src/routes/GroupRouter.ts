@@ -187,6 +187,14 @@ export class GroupRouter {
                     ;OR, group_setting.allow_member_action = true 
                        and user has earned points on group actions equal to 
                        or greater than group_setting.member_action_level
+
+
+          “points” (int): Number of points
+              If not specified, set to action_type.default_points
+          “start_at” (datetime): Datetime action starts (default now)
+          “end_at” (datetime): Datetime action ends (default 1 week)
+
+
           Returns the created action
   * @param Request
   * @param Response
@@ -194,10 +202,19 @@ export class GroupRouter {
   * TODO: Need to ensure user is member of group, or group is public
   */
   public createGroupAction(req: IRequest, res: Response, next: NextFunction) {
-    req.body.start_at = req.body.start_at ? req.body.start_at : moment();
-    req.body.end_at = req.body.end_at ? req.body.end_at : moment().day(7).format("YYYY-MM-DD HH:MM:SS");
+    if((req.body.start_at && req.body.end_at && req.body.start_at > req.body.end_at) 
+    ||(!req.body.start_at && req.body.end_at && moment() > moment(req.body.end_at)))
+    {
+      res.status(400).json({
+        success: 0,
+        message: "EndDate cannot be earlier than StartDate"
+      })
+    }
+    req.body.start_at = req.body.start_at ? req.body.start_at : moment().format("YYYY-MM-DD HH:MM:SS");
+    req.body.end_at = req.body.end_at ? req.body.end_at : moment(req.body.start_at).add(7, 'days').format("YYYY-MM-DD HH:MM:SS");
     req.body.points = req.body.points ? req.body.points : req.action_type.get('default_points');
     req.body.created_by_user_id = req.user.get('user_id');
+    req.body.group_id = req.params.group_id;
     new Action(req.body).save()
     .then(action=>{
       return action.load(['creator', 'action_type']);
