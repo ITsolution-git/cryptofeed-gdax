@@ -123,6 +123,22 @@ export default bookshelf.Model.extend({
   getGroupUser: function(group_id){
     return GroupUser.where({user_id: this.get('user_id'), group_id: group_id}).fetch();
   },
+  //add group1, 2 to this user ; this is the case when user registers and add default group
+  addDefaultGroup: function(){
+    return new GroupUser({user_id: this.get('user_id'), group_id: 1}).save()
+    .then(groupuser => {
+      if(groupuser)
+        return new GroupUser({user_id: this.get('user_id'), group_id: 2}).save();
+      else
+        throw new Error('Adding user to default group failed');
+    })
+    .then(groupuser =>{
+      if(groupuser)
+        return groupuser;
+      else
+        throw new Error('Adding user to default group failed');
+    })
+  }
 }, {
   // saveUser: function(attrs){
   //   if(attrs.password){

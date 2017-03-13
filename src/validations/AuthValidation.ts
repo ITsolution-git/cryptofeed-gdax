@@ -30,5 +30,17 @@ export default {
       last_name: Joi.string(),
       facebook: Joi.string().required()
     }).unknown(false)
+  },
+
+  // POST auth/twitter
+  loginTwitter: {
+    body: Joi.object({
+      email: Joi.string().email().required(),
+      username: Joi.string(),
+      avatar_file: Joi.string(),
+      first_name: Joi.string(),
+      last_name: Joi.string(),
+      twitter: Joi.string().required()
+    }).unknown(false)
   }
 };

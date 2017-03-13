@@ -32,14 +32,18 @@ export class AuthRouter {
   public register(req: IRequest, res: Response, next: NextFunction) {
     return new User(req.body).save()
     .then((user) => {
-      req.user = user.toJSON();
-      delete req.user['password'];
-      return tokenHelpers.encodeToken(user.get('user_id'));
+      req.user = user;
+      return user.addDefaultGroup();
+    })
+    .then(groupuser=>{
+      return tokenHelpers.encodeToken(req.user.get('user_id'));
     })
     .then((token) => {
+      let filterPassword = req.user.toJSON();
+      delete filterPassword['password'];
       res.status(200).json({
         success: 1,
-        user: req.user,
+        user: filterPassword,
         token: token
       });
     })
@@ -93,6 +97,15 @@ export class AuthRouter {
     });
   }
 
+ /**
+  * Logs the user in with facebook. Expects email and facebook in request object.
+      When user has already registered, returns token
+      When user wasn't registred, register and returns token.
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
   public loginFacebook(req: IRequest, res: Response, next: NextFunction) {
     const email = req.body.email;
     return User.where({email : email}).fetch()
@@ -190,6 +203,52 @@ export class AuthRouter {
   // });
 
   }
+
+
+ /**
+  * Logs the user in with twitter. Expects email and password in request object.
+      When user has already registered, returns token
+      When user wasn't registred, register and returns token.
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public loginTwitter(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user){
+        return new User(req.body).save()
+        .then((user) => {
+          req.user = user.toJSON();
+          delete req.user['password'];
+          return user;
+        })
+      }
+      else{
+        req.user = user.toJSON();
+        delete req.user['password'];
+        return user;
+      }
+    })
+    .then((user) => {
+      return tokenHelpers.encodeToken(user.id);
+    })
+    .then((token) => {
+      res.status(200).json({
+        success: 1,
+        token: token,
+        user: req.user
+      });
+    })
+    .catch((err) => {
+      res.status(401).json({
+        success: 0,
+        message: err.message
+      });
+    });
+  }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -198,6 +257,7 @@ export class AuthRouter {
     this.router.post('/register', validate(AuthValidation.register), this.register);
     this.router.post('/login', validate(AuthValidation.login), this.login);
     this.router.post('/facebook', validate(AuthValidation.loginFacebook), this.loginFacebook);
+    this.router.post('/twitter', validate(AuthValidation.loginTwitter), this.loginTwitter);
   }
 
 }

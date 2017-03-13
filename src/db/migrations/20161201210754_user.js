@@ -14,6 +14,7 @@ exports.up = (knex, Promise) => {
     table.decimal('latitude',9,6).defaultTo(0);
     table.decimal('longitude',9,6).defaultTo(0);
     table.string('facebook').nullable();
+    table.string('twitter').nullable();
   });
 };
 
