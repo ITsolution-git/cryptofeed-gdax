@@ -221,16 +221,13 @@ export class AuthRouter {
       if(!user){
         return new User(req.body).save()
         .then((user) => {
-          req.user = user.toJSON();
-          delete req.user['password'];
-          return user;
+          req.user = user;
         })
       }
       else{
-        req.user = user.toJSON();
-        delete req.user['password'];
-        return user;
+        req.user = user;
       }
+      
     })
     .then((user) => {
       return tokenHelpers.encodeToken(user.id);

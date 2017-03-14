@@ -180,42 +180,8 @@ export class UserRouter {
         });
       });
     }
-    public putUserpassword(req: IRequest, res: Response, next: NextFunction) {
-      try{
-        req.user.authenticate(req.body.original_password);
-        
-        req.user.save({ 
-          password:req.body.new_password })
-        .then((user) => {
-          req.user = user;
-          return tokenHelper.encodeToken(user.get('user_id')); 
-        })
-        .then((token) => {
-          let filter = req.user.toJSON();
-          delete filter['password'];
-          res.status(200).json({
-            success: 1,
-            token: token,
-            user: filter,
-            message:"Success"
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            success: 0,
-            message:err.message,
-            data:err.data,
-          });
-        });
-      }catch(err){
-        res.status(400).json({
-          success: 0,
-          message: err.message,
-          data: []
-        })
-      }
-    }
-  
+
+
     /**
     * @description Gets list of actions user can perform
     *              skip = 0 and deleted_at=null
@@ -226,9 +192,9 @@ export class UserRouter {
 
     public getActions(req: IRequest, res: Response, next: NextFunction) {
 
-      var skipnfinishActionIDs = [];
+      var skipnfinishActionIDs = [];  
       var userGroupsIDs = [];
-      ActionUser.collection().query(function(qb) {
+      ActionUser.collection().query(function(qb) { //Actionuser table saves all skipped or completed actions.
         qb.where('user_id', '=', req.user.get('user_id'))
       }).fetch({columns:['action_id']})
       .then(skipnfinish=>{
@@ -241,7 +207,7 @@ export class UserRouter {
         userGroupsIDs = groups.toJSON().map((group)=>{return group.group_id});
 
         return Action.collection().query(function(qb) {
-          qb.whereIn('group_id', userGroupsIDs).whereNotIn('action_id', skipnfinishActionIDs)
+          qb.whereIn('group_id', userGroupsIDs).whereNotIn('action_id', skipnfinishActionIDs).where('deleted_at', null)
         }).fetch({withRelated:[
           {'creator':function(qb) {
             qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
@@ -290,6 +256,43 @@ export class UserRouter {
       //   })
       // })
     }
+
+    public putUserpassword(req: IRequest, res: Response, next: NextFunction) {
+      try{
+        req.user.authenticate(req.body.original_password);
+        
+        req.user.save({ 
+          password:req.body.new_password })
+        .then((user) => {
+          req.user = user;
+          return tokenHelper.encodeToken(user.get('user_id')); 
+        })
+        .then((token) => {
+          let filter = req.user.toJSON();
+          delete filter['password'];
+          res.status(200).json({
+            success: 1,
+            token: token,
+            user: filter,
+            message:"Success"
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            success: 0,
+            message:err.message,
+            data:err.data,
+          });
+        });
+      }catch(err){
+        res.status(400).json({
+          success: 0,
+          message: err.message,
+          data: []
+        })
+      }
+    }
+  
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
