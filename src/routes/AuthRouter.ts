@@ -92,6 +92,7 @@ export class AuthRouter {
         success: 0,
         user: {},
         token: "",
+        data: err.data,
         message: err.message
       });
     });
@@ -99,45 +100,47 @@ export class AuthRouter {
 
  /**
   * Logs the user in with facebook. Expects email and facebook in request object.
-      When user has already registered, returns token
-      When user wasn't registred, register and returns token.
+      Register new User
   * @param  req Request object
   * @param  res Response object
   * @param  next NextFunction that is called
   * @return 200 JSON of user object and auth token
   */
-  public loginFacebook(req: IRequest, res: Response, next: NextFunction) {
+  public facebookRegister(req: IRequest, res: Response, next: NextFunction) {
     const email = req.body.email;
     return User.where({email : email}).fetch()
     .then((user) => {
       if(!user){
         return new User(req.body).save()
         .then((user) => {
-          req.user = user.toJSON();
-          delete req.user['password'];
-          return user;
+          req.user = user;
+          return user.addDefaultGroup();
+        })
+        .then(groupuser=>{
+          return tokenHelpers.encodeToken(req.user.get('user_id'));
         })
       }
       else{
-        req.user = user.toJSON();
-        delete req.user['password'];
-        return user;
+        return res.status(403).json({
+          success: 0,
+          message: "You have already registed. Please log in."
+        });
       }
     })
-    .then((user) => {
-      return tokenHelpers.encodeToken(user.id);
-    })
     .then((token) => {
-      res.status(200).json({
+      let filterPassword = req.user.toJSON();
+      delete filterPassword['password'];
+      return res.status(200).json({
         success: 1,
-        token: token,
-        user: req.user
+        user: filterPassword,
+        token: token
       });
     })
     .catch((err) => {
-      res.status(401).json({
+      return res.status(401).json({
         success: 0,
-        message: err.message
+        message: err.message,
+        data: err.data
       });
     });
   //   var fields = ['id', 'email', 'first_name', 'last_name', 'link', 'name'];
@@ -206,15 +209,55 @@ export class AuthRouter {
 
 
  /**
-  * Logs the user in with twitter. Expects email and password in request object.
-      When user has already registered, returns token
-      When user wasn't registred, register and returns token.
+  * Logs the user in with facebook. Expects email and facebook in request object.
+      Register new User
   * @param  req Request object
   * @param  res Response object
   * @param  next NextFunction that is called
   * @return 200 JSON of user object and auth token
   */
-  public loginTwitter(req: IRequest, res: Response, next: NextFunction) {
+  public facebookLogin(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user){
+        return res.status(403).json({
+          success: 0,
+          message: "You are not registed. Please signup first"
+        });
+      }
+      else{
+        req.user = user;
+        return tokenHelpers.encodeToken(req.user.get('user_id'));
+      }
+    })
+    .then((token) => {
+      let filterPassword = req.user.toJSON();
+      delete filterPassword['password'];
+      return res.status(200).json({
+        success: 1,
+        user: filterPassword,
+        token: token
+      });
+    })
+    .catch((err) => {
+      return res.status(401).json({
+        success: 0,
+        message: err.message,
+        data: err.data
+      });
+    });
+  }
+ 
+ /**
+  * Logs the user in with facebook. Expects email and facebook in request object.
+      Register new User
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public twitterRegister(req: IRequest, res: Response, next: NextFunction) {
     const email = req.body.email;
     return User.where({email : email}).fetch()
     .then((user) => {
@@ -222,27 +265,75 @@ export class AuthRouter {
         return new User(req.body).save()
         .then((user) => {
           req.user = user;
+          return user.addDefaultGroup();
+        })
+        .then(groupuser=>{
+          return tokenHelpers.encodeToken(req.user.get('user_id'));
         })
       }
       else{
-        req.user = user;
+        return res.status(403).json({
+          success: 0,
+          message: "You have already registed. Please log in."
+        });
       }
-      
-    })
-    .then((user) => {
-      return tokenHelpers.encodeToken(user.id);
     })
     .then((token) => {
-      res.status(200).json({
+      let filterPassword = req.user.toJSON();
+      delete filterPassword['password'];
+      return res.status(200).json({
         success: 1,
-        token: token,
-        user: req.user
+        user: filterPassword,
+        token: token
       });
     })
     .catch((err) => {
-      res.status(401).json({
+      return res.status(401).json({
         success: 0,
-        message: err.message
+        message: err.message,
+        data: err.data
+      });
+    });
+  }
+
+
+ /**
+  * Logs the user in with facebook. Expects email and facebook in request object.
+      Register new User
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public twitterLogin(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user){
+        return res.status(403).json({
+          success: 0,
+          message: "You are not registed. Please signup first"
+        });
+      }
+      else{
+        req.user = user;
+        return tokenHelpers.encodeToken(req.user.get('user_id'));
+      }
+    })
+    .then((token) => {
+      let filterPassword = req.user.toJSON();
+      delete filterPassword['password'];
+      return res.status(200).json({
+        success: 1,
+        user: filterPassword,
+        token: token
+      });
+    })
+    .catch((err) => {
+      return res.status(401).json({
+        success: 0,
+        message: err.message,
+        data: err.data
       });
     });
   }
@@ -253,8 +344,10 @@ export class AuthRouter {
   init() {
     this.router.post('/register', validate(AuthValidation.register), this.register);
     this.router.post('/login', validate(AuthValidation.login), this.login);
-    this.router.post('/facebook', validate(AuthValidation.loginFacebook), this.loginFacebook);
-    this.router.post('/twitter', validate(AuthValidation.loginTwitter), this.loginTwitter);
+    this.router.post('/facebook/login', validate(AuthValidation.loginFacebook), this.facebookLogin);
+    this.router.post('/facebook/register', validate(AuthValidation.registerFacebook), this.facebookRegister);
+    this.router.post('/twitter/login', validate(AuthValidation.loginTwitter), this.twitterLogin);
+    this.router.post('/twitter/register', validate(AuthValidation.registerTwitter), this.twitterRegister);
   }
 
 }

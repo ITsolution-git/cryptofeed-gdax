@@ -66,35 +66,6 @@ export class GroupRouter {
     });
   }
 
-  /**
-   * @description GET group by id in request object
-   * @param Request
-   * @param Response
-   * @param Callback function (NextFunction)
-   * TODO: Need to make sure user is member of group, or group is public
-   */
-  //////////****getGroup will no longer need because the GET user/1/groups returns them */
-  // public getGroup(req: Request, res: Response, next: NextFunction) {
-  //   let groupId = parseInt(req.params.id);
-  //   return toolHelpers.getGroupById(groupId)
-  //   .asCallback((err, values) => {
-  //     if(err) {
-  //       res.status(404)
-  //         .send({
-  //           message: 'No group found with the given id.',
-  //           status: res.status
-  //         });
-  //     } else {
-  //       res.status(200)
-  //         .send({
-  //           message: 'Success',
-  //           status: res.status,
-  //           group: values
-  //         });
-  //     }
-  //   });
-  // }
-
     /**
     * @description Creates a new group
     * @param Request
@@ -157,6 +128,34 @@ export class GroupRouter {
       });
   }
 
+  /**
+   * @description GET group by id in request object
+   * @param Request
+   * @param Response
+   * @param Callback function (NextFunction)
+   * TODO: Need to make sure user is member of group, or group is public
+   */
+  //////////****getGroup will no longer need because the GET user/1/groups returns them */
+  // public getGroup(req: Request, res: Response, next: NextFunction) {
+  //   let groupId = parseInt(req.params.id);
+  //   return toolHelpers.getGroupById(groupId)
+  //   .asCallback((err, values) => {
+  //     if(err) {
+  //       res.status(404)
+  //         .send({
+  //           message: 'No group found with the given id.',
+  //           status: res.status
+  //         });
+  //     } else {
+  //       res.status(200)
+  //         .send({
+  //           message: 'Success',
+  //           status: res.status,
+  //           group: values
+  //         });
+  //     }
+  //   });
+  // }
 
   /**
   * @description Create GET /groups/:group_id/actions API Call

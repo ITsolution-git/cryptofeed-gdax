@@ -20,11 +20,19 @@ export default {
     }).unknown(false)
   },
 
-  // POST auth/facebook
+  // POST auth/facebook/login
   loginFacebook: {
     body: Joi.object({
       email: Joi.string().email().required(),
-      username: Joi.string(),
+      facebook: Joi.string()
+    }).unknown(false)
+  },
+
+  // POST auth/facebook/register
+  registerFacebook: {
+    body: Joi.object({
+      email: Joi.string().email().required(),
+      username: Joi.string().required(),
       avatar_file: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),
@@ -32,15 +40,23 @@ export default {
     }).unknown(false)
   },
 
-  // POST auth/twitter
-  loginTwitter: {
+  // POST auth/twitter/register
+  registerTwitter: {
     body: Joi.object({
       email: Joi.string().email().required(),
-      username: Joi.string(),
+      username: Joi.string().required(),
       avatar_file: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),
       twitter: Joi.string().required()
+    }).unknown(false)
+  }
+  ,
+  // POST auth/twitter/login
+  loginTwitter: {
+    body: Joi.object({
+      email: Joi.string().email().required(),
+      twitter: Joi.string()
     }).unknown(false)
   }
 };
