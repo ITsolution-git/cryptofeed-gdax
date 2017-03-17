@@ -59,12 +59,20 @@ export default {
       twitter: Joi.string()
     }).unknown(false)
   },
-  // POST /forget-password
+  // POST auth/forget-password
   forgetPassword: {  
     body: Joi.object({
       email: Joi.string().email().required(),
     }).unknown(false),
     params: Joi.object({
     }).unknown(false)
-  }
+  },
+
+  // PUT auth/password
+  changePassword: {
+    body: Joi.object({
+        reset_token: Joi.string().required(),
+        new_password: Joi.string().required().min(6)
+    }).unknown(false)
+  },
 };

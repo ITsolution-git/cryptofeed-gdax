@@ -40,6 +40,34 @@ function generateResetToken(req: IRequest, res: Response, next: NextFunction) {
 	})
 	.catch(err=>next(err));
 }
+/*
+  Check if the reset_token is valid and not expired
+  */
+function checkValidToken(req: IRequest, res: Response, next: NextFunction) {
+	const reset_token = req.body.reset_token;
+	return User.where({reset_password_token : reset_token}).fetch()
+	.then((user) => {
+		if(!user){
+      res.status(403).json({
+        success: 0,
+        message: "Sorry. The token is invalid"
+      });
+		}
+		else{
+			req.user = user;
+			let expire = req.user.get('reset_password_expires');
+			if(moment(expire) > moment())
+				res.status(403).json({
+					success: 0,
+					message: "Sorry. The token is expired"
+				});
+			else
+				next();
+		}
+	})
+	.catch(err=>next(err));
+}
 module.exports = {
   generateResetToken,
+	checkValidToken
 };

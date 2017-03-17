@@ -374,6 +374,49 @@ export class AuthRouter {
       });
     };
   }
+
+
+ /**
+  * Change password for unauthenticated users
+    Requires reset_token, new_password
+
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public changePassword(req: IRequest, res: Response, next: NextFunction) {
+    try{
+      req.user.save({ 
+        password:req.body.new_password 
+      }).then((user) => {
+        req.user = user;
+        return tokenHelpers.encodeToken(user.get('user_id')); 
+      }).then((token) => {
+        let filter = req.user.toJSON();
+        delete filter['password'];
+        res.status(200).json({
+          success: 1,
+          token: token,
+          user: filter,
+          message:"Success"
+        });
+      })
+      .catch((err) => {
+        res.status(500).json({
+          success: 0,
+          message:err.message,
+          data:err.data,
+        });
+      });
+    }catch(err){
+      res.status(400).json({
+        success: 0,
+        message: err.message,
+        data: []
+      });
+    }
+  }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -386,6 +429,8 @@ export class AuthRouter {
     this.router.post('/twitter/login', validate(AuthValidation.loginTwitter), this.twitterLogin);
     this.router.post('/twitter/register', validate(AuthValidation.registerTwitter), this.twitterRegister);
     this.router.post('/forget-password', validate(AuthValidation.forgetPassword), AuthHelpers.generateResetToken, this.forgetPassword);
+    this.router.put('/change-password', validate(AuthValidation.changePassword), AuthHelpers.checkValidToken, this.changePassword);
+  
   }
 
 }
