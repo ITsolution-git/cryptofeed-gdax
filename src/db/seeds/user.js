@@ -20,7 +20,7 @@ exports.seed = (knex, Promise) => {
       }),
       knex('user').insert({
         user_id: 2,
-        email: 'erwin@actodo.co',
+        email: 'roy.smith0820@gmail.com',
         username: 'erwin',
         password: hash,
         first_name: 'Erwin',

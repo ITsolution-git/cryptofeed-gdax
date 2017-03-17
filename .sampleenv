@@ -12,3 +12,7 @@ TEST_DB_PASSWORD=root
 
 CERTKEY=/etc/nginx/cert.key
 CERTCRT=/etc/nginx/cert.crt
+
+EMAIL_ADDRESS=test@test.com
+EMAIL_PASSWORD=password
+EXPIRE_MINS=10

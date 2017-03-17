@@ -1,14 +1,21 @@
+//Express Import
 import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
-const validate = require('../classes/ParamValidator');
+//Model Import
+import User from '../db/models/user';
+//Validation Import
 import AuthValidation from '../validations/AuthValidation';
-
+const validate = require('../classes/ParamValidator');
+//Npm Import
 var request = require('request');
-
+var util = require('util');
+//Helpers Import
 const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
-var util = require('util');
-import User from '../db/models/user';
+const AuthHelpers = require('../tools/auth_helpers');
+//Smpt Transfer
+import smtpTransport from '../config/smtpTransport';
+
 
 export class AuthRouter {
   router: Router
@@ -336,6 +343,37 @@ export class AuthRouter {
     });
   }
  
+ /**
+  * Email the token to the email on req.body. email is required
+
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public forgetPassword(req: IRequest, res: Response, next: NextFunction) {
+    try{
+      var mailOptions = {
+        to: req.user.get('email'),
+        from: 'roy.smith0820@gmail.com',
+        subject: 'Actodo.co Pasword Reset Token',
+        text: req.user.get('reset_password_token') + "\n" +
+              "Will expire in " + process.env.EXPIRE_MINS + "minutes."
+      };
+      smtpTransport.sendMail(mailOptions, function(err) {
+        res.status(401).json({
+          success: 1,
+          message: "Email was sent to " + req.user.get('email')  
+        });
+      })
+    }catch(err){    
+      return res.status(401).json({
+        success: 0,
+        message: err.message,
+        data: err.data
+      });
+    };
+  }
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -347,6 +385,7 @@ export class AuthRouter {
     this.router.post('/facebook/register', validate(AuthValidation.registerFacebook), this.facebookRegister);
     this.router.post('/twitter/login', validate(AuthValidation.loginTwitter), this.twitterLogin);
     this.router.post('/twitter/register', validate(AuthValidation.registerTwitter), this.twitterRegister);
+    this.router.post('/forget-password', validate(AuthValidation.forgetPassword), AuthHelpers.generateResetToken, this.forgetPassword);
   }
 
 }

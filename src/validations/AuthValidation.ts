@@ -58,5 +58,13 @@ export default {
       email: Joi.string().email().required(),
       twitter: Joi.string()
     }).unknown(false)
+  },
+  // POST /forget-password
+  forgetPassword: {  
+    body: Joi.object({
+      email: Joi.string().email().required(),
+    }).unknown(false),
+    params: Joi.object({
+    }).unknown(false)
   }
 };

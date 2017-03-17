@@ -15,6 +15,8 @@ exports.up = (knex, Promise) => {
     table.decimal('longitude',9,6).defaultTo(0);
     table.string('facebook').nullable();
     table.string('twitter').nullable();
+    table.string('reset_password_token').nullable();
+    table.dateTime('reset_password_expires', true).defaultTo();
   });
 };
 
