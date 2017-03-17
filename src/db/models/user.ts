@@ -153,6 +153,7 @@ export default bookshelf.Model.extend({
   //         .fetch({ withRelated: ['userGroup'] })
   //     ;
   // }
+  
   login: function(email, password) {
     if (!email || !password) throw new Error('Email and password are both required');
     return new this({email: email.toLowerCase().trim()}).fetch({require: true})
@@ -162,5 +163,37 @@ export default bookshelf.Model.extend({
           if (!res) throw new Error('Invalid password');
         });
     });
+  },
+  findUniqueUsername: function(base, number){
+    return User.where({username:base+number})
+    .fetch().then(user=>{
+      if(user)
+        return this.findUniqueUsername(base, number+1);
+      return new Promise(function (resolve, reject) {
+        resolve(base+number);
+      });
+    })
+  },
+  //newUser.email is a must and username is optional
+  generateUsernameFromEmail: function(newUser){
+    //If username already exist from request, returns it
+    if(newUser.username)
+        return new Promise(function (resolve, reject) {
+          resolve(newUser.username);
+        });
+    else{
+      let emailname = newUser.email.slice(0, newUser.email.indexOf('@'));
+
+      return User.where({username:emailname})
+      .fetch().then(user=>{
+        if(user)
+          return this.findUniqueUsername(emailname, 1);
+    
+        else
+          return new Promise(function (resolve, reject) {
+            resolve(emailname);
+          });
+      });
+    }
   }
 });

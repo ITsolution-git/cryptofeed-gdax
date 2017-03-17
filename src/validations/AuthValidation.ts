@@ -32,7 +32,7 @@ export default {
   registerFacebook: {
     body: Joi.object({
       email: Joi.string().email().required(),
-      username: Joi.string().required(),
+      username: Joi.string(),
       avatar_file: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),
@@ -44,7 +44,7 @@ export default {
   registerTwitter: {
     body: Joi.object({
       email: Joi.string().email().required(),
-      username: Joi.string().required(),
+      username: Joi.string(),
       avatar_file: Joi.string(),
       first_name: Joi.string(),
       last_name: Joi.string(),

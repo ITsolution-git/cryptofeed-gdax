@@ -40,10 +40,10 @@ export class GroupRouter {
         // {'settings':function(qb) {
         //   qb.select('allow_member_action','member_action_level', 'group_setting_id');
         // }}, 
-        // {'tags':function(qb) {
-        //   qb.select('group_tag_id', 'tag' );
-        // }}, 
-        'settings', 'tags',
+        {'tags':function(qb) {
+          qb.select('group_tag_id', 'tag', 'group_id');
+        }}, 
+        'setting',
         {'creator':function(qb) {
           qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
         }}]
@@ -55,23 +55,25 @@ export class GroupRouter {
           message: err.message
         });
       } else {
-        var tags = groups.related('tags').map(function(a) {
+        let tags = groups.related('tags').map(function(a) {
           return a.get('tag');
         });
+        let filtered = groups.toJSON();
+        filtered.tags = tags;
         res.status(200).json({
           success: 1,
-          groups: groups
+          groups: filtered
         });
       }
     });
   }
 
-    /**
-    * @description Creates a new group
-    * @param Request
-    * @param Response
-    * @param Callback Function
-    */
+  /**
+  * @description Creates a new group
+  * @param Request
+  * @param Response
+  * @param Callback Function
+  */
   public createGroup(req: IRequest, res: Response, next: NextFunction) {
     return new Group(req.body).save()
       .then((group) => {
