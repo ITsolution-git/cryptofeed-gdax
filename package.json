@@ -50,6 +50,7 @@
     "node-env-file": "^0.1.8",
     "nodemailer": "^3.1.7",
     "request": "^2.69.0",
+    "sendgrid": "^4.8.2",
     "yo": "^1.8.5"
   }
 }

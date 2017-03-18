@@ -14,7 +14,9 @@ const tokenHelpers = require('../tools/tokens');
 const toolHelpers = require('../tools/_helpers');
 const AuthHelpers = require('../tools/auth_helpers');
 //Smpt Transfer
-import smtpTransport from '../config/smtpTransport';
+// import smtpTransport from '../config/smtpTransport';
+const sendgrid = require('../config/config').sendgrid;
+const sghelper = require('sendgrid').mail;
 
 
 export class AuthRouter {
@@ -353,19 +355,46 @@ export class AuthRouter {
   */
   public forgetPassword(req: IRequest, res: Response, next: NextFunction) {
     try{
-      var mailOptions = {
-        to: req.user.get('email'),
-        from: 'roy.smith0820@gmail.com',
-        subject: 'Actodo.co Pasword Reset Token',
-        text: req.user.get('reset_password_token') + "\n" +
-              "Will expire in " + process.env.EXPIRE_MINS + "minutes."
-      };
-      smtpTransport.sendMail(mailOptions, function(err) {
-        res.status(401).json({
-          success: 1,
-          message: "Email was sent to " + req.user.get('email')  
-        });
-      })
+      // var mailOptions = {
+      //   to: req.user.get('email'),
+      //   from: 'roy.smith0820@gmail.com',
+      //   subject: 'Actodo.co Pasword Reset Token',
+      //   text: 
+      // };
+      // smtpTransport.sendMail(mailOptions, function(err) {
+      //   res.status(401).json({
+      //     success: 1,
+      //     message: "Email was sent to " + req.user.get('email')  
+      //   });
+      // })
+      // var email = new sendgrid.Email();
+
+      // email.addTo(req.user.get('email'));
+      // email.setFrom('roy.smith0820@gmail.com');
+      // email.setSubject('Actodo.co Pasword Reset Token');
+      // email.setHtml(req.user.get('reset_password_token') + "\n" +
+      //         "Will expire in " + process.env.EXPIRE_MINS + "minutes.");
+
+      // sendgrid.send(email);
+
+      var from_email = new sghelper.Email('test@example.com');
+      var to_email = new sghelper.Email('test@example.com');
+      var subject = 'Hello World from the SendGrid Node.js Library!';
+      var content = new sghelper.Content('text/plain', 'Hello, Email!');
+      var mail = new sghelper.Mail(from_email, subject, to_email, content);
+
+      var request = sendgrid.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: mail.toJSON(),
+      });
+
+      sendgrid.API(request, function(error, response) {
+        console.log(response.statusCode);
+        console.log(response.body);
+        console.log(response.headers);
+      });
+
     }catch(err){    
       return res.status(401).json({
         success: 0,

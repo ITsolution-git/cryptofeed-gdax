@@ -1,2 +1,1 @@
-exports.FACEBOOK_APPID="1747338372254947";
-exports.FACEBOOK_APPSECRET="7fcb050adbde1dbe6d50e00d144c3d0f";
+exports.sendgrid =  require("sendgrid")(process.env.SENDGRID_APIKEY);
