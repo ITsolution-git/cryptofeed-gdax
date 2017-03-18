@@ -393,6 +393,17 @@ export class AuthRouter {
         console.log(response.statusCode);
         console.log(response.body);
         console.log(response.headers);
+	if(error)
+	  res.status(403).json({
+	    status: 0,
+	    message: error
+	  });
+	else
+	  res.status(200).json({
+            status: 1,
+            message: "sent"
+          });
+
       });
 
     }catch(err){    
