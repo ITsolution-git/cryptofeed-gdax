@@ -355,32 +355,12 @@ export class AuthRouter {
   */
   public forgetPassword(req: IRequest, res: Response, next: NextFunction) {
     try{
-      // var mailOptions = {
-      //   to: req.user.get('email'),
-      //   from: 'roy.smith0820@gmail.com',
-      //   subject: 'Actodo.co Pasword Reset Token',
-      //   text: 
-      // };
-      // smtpTransport.sendMail(mailOptions, function(err) {
-      //   res.status(401).json({
-      //     success: 1,
-      //     message: "Email was sent to " + req.user.get('email')  
-      //   });
-      // })
-      // var email = new sendgrid.Email();
 
-      // email.addTo(req.user.get('email'));
-      // email.setFrom('roy.smith0820@gmail.com');
-      // email.setSubject('Actodo.co Pasword Reset Token');
-      // email.setHtml(req.user.get('reset_password_token') + "\n" +
-      //         "Will expire in " + process.env.EXPIRE_MINS + "minutes.");
-
-      // sendgrid.send(email);
-
-      var from_email = new sghelper.Email('test@example.com');
-      var to_email = new sghelper.Email('test@example.com');
-      var subject = 'Hello World from the SendGrid Node.js Library!';
-      var content = new sghelper.Content('text/plain', 'Hello, Email!');
+      var from_email = new sghelper.Email(process.env.ADMIN_EMAIL);
+      var to_email = new sghelper.Email(req.user.get('email'));
+      var subject = 'Actodo.co Pasword Reset Token';
+      var content = new sghelper.Content('text/plain', req.user.get('reset_password_token') + "\n" +
+               "Will expire in " + process.env.EXPIRE_MINS + "minutes.");
       var mail = new sghelper.Mail(from_email, subject, to_email, content);
 
       var request = sendgrid.emptyRequest({
@@ -390,20 +370,16 @@ export class AuthRouter {
       });
 
       sendgrid.API(request, function(error, response) {
-        console.log(response.statusCode);
-        console.log(response.body);
-        console.log(response.headers);
-	if(error)
-	  res.status(403).json({
-	    status: 0,
-	    message: error
-	  });
-	else
-	  res.status(200).json({
+        if(error)
+          res.status(403).json({
+            status: 0,
+            message: error.errors
+          });
+        else
+          res.status(200).json({
             status: 1,
             message: "sent"
           });
-
       });
 
     }catch(err){    

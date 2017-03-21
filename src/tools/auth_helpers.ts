@@ -29,8 +29,8 @@ function generateResetToken(req: IRequest, res: Response, next: NextFunction) {
 			req.user = user;
 			return crypto.randomBytes(2, function(err, buf) {
 				var token = buf.toString('hex');
-				return req.user.save({reset_password_token: token, 
-							reset_password_expires: moment().add(process.env.EXPIRE_MINS, 'minutes').format("YYYY-MM-DD HH:MM:SS")
+					return req.user.save({reset_password_token: token, 
+								reset_password_expires: moment().add(parseInt(process.env.EXPIRE_MINS), 'minutes').format("YYYY-MM-DD HH:mm:ss")
 				})
 				.then(user=>{
 					next();
@@ -56,7 +56,7 @@ function checkValidToken(req: IRequest, res: Response, next: NextFunction) {
 		else{
 			req.user = user;
 			let expire = req.user.get('reset_password_expires');
-			if(moment(expire) > moment())
+			if(moment(expire) < moment())
 				res.status(403).json({
 					success: 0,
 					message: "Sorry. The token is expired"

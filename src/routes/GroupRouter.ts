@@ -211,8 +211,8 @@ export class GroupRouter {
         message: "EndDate cannot be earlier than StartDate"
       })
     }
-    req.body.start_at = req.body.start_at ? req.body.start_at : moment().format("YYYY-MM-DD HH:MM:SS");
-    req.body.end_at = req.body.end_at ? req.body.end_at : moment(req.body.start_at).add(7, 'days').format("YYYY-MM-DD HH:MM:SS");
+    req.body.start_at = req.body.start_at ? req.body.start_at : moment().format("YYYY-MM-DD HH:mm:ss");
+    req.body.end_at = req.body.end_at ? req.body.end_at : moment(req.body.start_at).add(7, 'days').format("YYYY-MM-DD HH:mm:ss");
     req.body.points = req.body.points ? req.body.points : req.action_type.get('default_points');
     req.body.created_by_user_id = req.user.get('user_id');
     req.body.group_id = req.params.group_id;

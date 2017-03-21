@@ -11,3 +11,4 @@ src/data.json
 
 #Ignored Files Needed For Server
 .env
+.sendgrid.env

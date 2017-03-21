@@ -44,14 +44,14 @@ export default bookshelf.Model.extend({
       qb.whereNull('deleted_at')
         .where(function(){ 
           this.where(function(){
-            this.where('end_at', '>', moment().month(-2).format("YYYY-MM-DD HH:MM:SS"))
-            .where('end_at', '<', moment().format("YYYY-MM-DD HH:MM:SS"))
+            this.where('end_at', '>', moment().month(-2).format("YYYY-MM-DD HH:mm:ss"))
+            .where('end_at', '<', moment().format("YYYY-MM-DD HH:mm:ss"))
           })
           .orWhere(function(){
-            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:MM:SS")).where('end_at', '>', moment().format("YYYY-MM-DD HH:MM:SS"))
+            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:mm:ss")).where('end_at', '>', moment().format("YYYY-MM-DD HH:mm:ss"))
           })
           .orWhere(function(){
-            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:MM:SS")).whereNull('end_at')
+            this.where('start_at', '<', moment().format("YYYY-MM-DD HH:mm:ss")).whereNull('end_at')
           })});
     });
   },
