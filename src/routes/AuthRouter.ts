@@ -359,8 +359,12 @@ export class AuthRouter {
       var from_email = new sghelper.Email(process.env.ADMIN_EMAIL);
       var to_email = new sghelper.Email(req.user.get('email'));
       var subject = 'Actodo.co Pasword Reset Token';
-      var content = new sghelper.Content('text/plain', req.user.get('reset_password_token') + "\n" +
-               "Will expire in " + process.env.EXPIRE_MINS + "minutes.");
+      var content = new sghelper.Content('text/html', 
+               `<h2><img src="https://actodo.co:3000/assets/actodo.png" />Actodo.co</h2>
+                <p> Thank you for reaching us </p>
+                <p> Here's your token to reset password </p>
+                <p> <a href="https://actodo.co">`+req.user.get('reset_password_token') + `</a></p>
+                <p> This will expire in `+ process.env.EXPIRE_MINS +` minutes </p>`);
       var mail = new sghelper.Mail(from_email, subject, to_email, content);
 
       var request = sendgrid.emptyRequest({
