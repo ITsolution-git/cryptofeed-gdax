@@ -77,7 +77,10 @@ export default bookshelf.Model.extend({
     }
   },
   groups: function() {
-    return this.belongsToMany(Group, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id');
+    return this.belongsToMany(Group, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id').query(function(qb){
+      qb.whereNull('deleted_at');
+      qb.whereNot('group_id', 1);
+    });
   },
   actions: function() {
     return this.belongsToMany(Action, 'action_user', 'user_id', 'action_id', 'user_id', 'action_id');

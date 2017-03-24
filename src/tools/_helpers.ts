@@ -91,7 +91,6 @@ function createGroupCode() {
   return text;
 }
 
-
 module.exports = {
   getBaseUrl,
   ensureAuthenticated,

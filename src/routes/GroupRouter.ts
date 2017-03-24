@@ -15,9 +15,11 @@ var CSV = require('csv-string');
 var moment = require('moment');
 var path = require('path'),
     fs = require('fs');
-
-import Group from '../db/models/group';
 var util = require('util');
+
+//Model Import
+import User from '../db/models/user';
+import Group from '../db/models/group';
 
 export class GroupRouter {
   router: Router
@@ -34,6 +36,8 @@ export class GroupRouter {
    * @description GET 
    *                - all public and non-deleted groups.
    *                - Exclude group ID 1 from data set (always)
+   * 
+   *              PLUS any groups the user belongs to only if user is authenticated
    * @param Request
    * @param Response
    * @param Callback (NextFunction)
@@ -60,11 +64,41 @@ export class GroupRouter {
         return false;
       });
     }
-    res.json({  
-      success: 1,
-      groups: req.publicGroups
+    //PLUS any groups the user belongs to only if user is authenticated
+    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+      if(!err) {
+        return User.where({user_id: user_id}).fetch({withRelated:['groups']})
+        .then((user) => {
+          if(user != null)
+          {
+            //Include user groups if authenticated
+            let merged = req.publicGroups;
+            let IDs = req.publicGroups.map(function (e) {
+                return e.id;
+            });
+            user.related('groups').models.forEach(group=>{
+              if( IDs.indexOf(group.id) == -1 )  //remove duplications
+                merged.push(group);
+            })
+            return res.json({  
+              success: 1,
+              groups: merged
+            });
+          }
+          return res.json({  
+            success: 1,
+            groups: req.publicGroups
+          });
+        })
+      }
+      else{
+        // On error cases, just return public/non-deleted/filtered groups
+        res.json({  
+          success: 1,
+          groups: req.publicGroups
+        });
+      }
     });
-    
   }
 
   /**
