@@ -67,7 +67,15 @@ export class GroupRouter {
     //PLUS any groups the user belongs to only if user is authenticated
     tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
       if(!err) {
-        return User.where({user_id: user_id}).fetch({withRelated:['groups']})
+        return User.where({user_id: user_id}).fetch({withRelated: [ 
+          {'groups.tags':function(qb) {
+            qb.select('group_tag_id', 'tag', 'group_id');
+          }},
+          'groups.setting',
+          {'groups.creator':function(qb) {
+            qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+          }}]
+        })
         .then((user) => {
           if(user != null)
           {
@@ -90,6 +98,12 @@ export class GroupRouter {
             groups: req.publicGroups
           });
         })
+        .catch(err => {
+          res.json({  
+            success: 0,
+            message: err.message
+          });
+        });
       }
       else{
         // On error cases, just return public/non-deleted/filtered groups
@@ -98,7 +112,7 @@ export class GroupRouter {
           groups: req.publicGroups
         });
       }
-    });
+    })
   }
 
   /**
