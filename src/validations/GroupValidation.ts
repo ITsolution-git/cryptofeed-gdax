@@ -1,6 +1,17 @@
 const Joi = require('joi');
 
 export default {
+  // GET /groups
+  getPublicGroups: {
+    query: Joi.object({
+        lat: Joi.number().optional(),
+        long: Joi.number().optional(),
+        distance: Joi.number().optional(),
+        tag: Joi.string().regex(/[0-9a-zA-Z]+(,[0-9a-zA-Z]+)*/).optional(),
+        group_code: Joi.string().token().optional()
+    }).with('lat', 'long', 'distance').unknown(false)
+  },
+
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({

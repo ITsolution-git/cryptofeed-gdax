@@ -360,7 +360,9 @@ export class AuthRouter {
       var to_email = new sghelper.Email(req.user.get('email'));
       var subject = 'Actodo.co Pasword Reset Token';
       var content = new sghelper.Content('text/html', 
-               `<h2><img src="https://actodo.co:3000/assets/actodo.png" />Actodo.co</h2>
+               `<div style="height:100px; line-height:100px">
+                  <img src="https://actodo.co:3000/assets/actodo.png" style="max-height:100px"/>
+                </div>
                 <p> Thank you for reaching us </p>
                 <p> Here's your token to reset password </p>
                 <p> <a href="https://actodo.co">`+req.user.get('reset_password_token') + `</a></p>

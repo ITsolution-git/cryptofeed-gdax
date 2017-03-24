@@ -5,5 +5,6 @@ export interface IRequest extends Request{
   files: any,
   current_action: any,
   current_group: any,
-  action_type:any
+  action_type:any,
+  publicGroups: any
 }

@@ -1,15 +1,18 @@
+//Express Import
 import {Router, Request, Response, NextFunction} from 'express';
-
-let tokenHelper = require('../tools/tokens');
-let toolHelpers = require('../tools/_helpers');
-const groupHelper = require('../tools/group_helpers');
 import {IRequest} from '../classes/IRequest';
+
+//Validation Import
 const validate = require('../classes/ParamValidator');
 import GroupValidation from '../validations/GroupValidation';
 import Action from '../db/models/action';
-
+//Helpers Import
+let tokenHelper = require('../tools/tokens');
+let toolHelpers = require('../tools/_helpers');
+const groupHelper = require('../tools/group_helpers');
+//Npm Import
+var CSV = require('csv-string');
 var moment = require('moment');
-
 var path = require('path'),
     fs = require('fs');
 
@@ -28,44 +31,40 @@ export class GroupRouter {
   }
 
   /**
-   * @description GET all public and non-deleted groups.
+   * @description GET 
+   *                - all public and non-deleted groups.
+   *                - Exclude group ID 1 from data set (always)
    * @param Request
    * @param Response
    * @param Callback (NextFunction)
    */
-  public getPublicGroups(req: Request, res: Response, next: NextFunction) {
-
-    Group.where({'private':0, 'deleted_at':null}).fetch({
-      withRelated: [ 
-        // {'settings':function(qb) {
-        //   qb.select('allow_member_action','member_action_level', 'group_setting_id');
-        // }}, 
-        {'tags':function(qb) {
-          qb.select('group_tag_id', 'tag', 'group_id');
-        }}, 
-        'setting',
-        {'creator':function(qb) {
-          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
-        }}]
-    })
-    .asCallback((err, groups) => {
-      if(err) {
-          res.status(400).json({
-          success: 0,
-          message: err.message
-        });
-      } else {
-        let tags = groups.related('tags').map(function(a) {
+  public getPublicGroups(req: IRequest, res: Response, next: NextFunction) {
+    if(req.query.tag){ // Look for the groups with the tags
+      let queryTags = CSV.parse(req.query.tag.replace(/ /g,''))[0];// Remove space and select first tag group in the tag list
+      
+      req.publicGroups = req.publicGroups.filter(function(group){
+        let tags = group.related('tags').map(function(a) {
           return a.get('tag');
         });
-        let filtered = groups.toJSON();
-        filtered.tags = tags;
-        res.status(200).json({
-          success: 1,
-          groups: filtered
-        });
-      }
+        return tags.filter(tag=>{
+          return queryTags.indexOf(tag) > -1;
+        }).length == tags.length;
+        
+      });
+    }
+
+    if(req.query.lat && req.query.long && req.query.distance){ // Look for the groups in diameter with lat and long
+      req.publicGroups = req.publicGroups.filter(function(group){
+        if(toolHelpers.getDistanceFromLatLonInMile(group.get('latitude'), group.get('longitude'), req.query.lat, req.query.long) <= req.query.distance)
+         return true;
+        return false;
+      });
+    }
+    res.json({  
+      success: 1,
+      groups: req.publicGroups
     });
+    
   }
 
   /**
@@ -520,7 +519,10 @@ export class GroupRouter {
    * endpoints.
    */
   init() {
-    this.router.get('/', this.getPublicGroups);
+    this.router.get('/', 
+                    groupHelper.publicGroups,
+                    validate(GroupValidation.getPublicGroups),
+                    this.getPublicGroups);
     this.router.post('/', toolHelpers.ensureAuthenticated, this.createGroup);
     // this.router.get('/:id', this.getGroup);
       // this.router.put('/:id', this.putGroup);

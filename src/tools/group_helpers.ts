@@ -104,6 +104,46 @@ function checkUserBelongsToGroup(req: IRequest, res: Response, next: NextFunctio
     }
   });
 }
+
+/*
+  GET 
+   *                - all public and non-deleted groups.
+   *                - Exclude group ID 1 from data set (always)
+  */
+function publicGroups(req: IRequest, res: Response, next: NextFunction) {
+  Group.collection().query(function(qb){
+    if(req.query.group_code){  // IF querystring contains group_code
+      qb.where('group_code', req.query.group_code);
+      qb.whereNot('group_id', 1);
+    }
+    else{ //In other case.
+      qb.where('private', '=', 0);
+      qb.whereNull('deleted_at');
+      qb.whereNot('group_id', 1);
+    }
+  }).fetch({
+    withRelated: [ 
+      // {'settings':function(qb) {
+      //   qb.select('allow_member_action','member_action_level', 'group_setting_id');
+      // }}, 
+      {'tags':function(qb) {
+        qb.select('group_tag_id', 'tag', 'group_id');
+      }},
+      'setting',
+      {'creator':function(qb) {
+        qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+      }}]
+  })
+  .asCallback((err, groups) => {
+    if(err) {
+      throw err;
+    } else {
+      req.publicGroups = groups;
+      next();
+    }
+  });
+}
+
 /*
   must ensure req.group exist.
   Check  
@@ -147,5 +187,6 @@ module.exports = {
   checkUserPermissionAccessGroup,
   checkUserBelongsToGroup,
   checkActionType,
-  checkUserPermissionModifyGroupActions
+  checkUserPermissionModifyGroupActions,
+  publicGroups
 };
