@@ -1,10 +1,17 @@
+//Express Import
 import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
+//DB Import
 import bookshelf from '../db/bookshelf';
+//NPM Import
 var util = require('util');
+//Models Import
 import User from '../db/models/user';
 import Group from '../db/models/group';
 import ActionType from '../db/models/action_type';
+//Helpers Import
+let toolHelpers = require('../tools/_helpers');
+let tokenHelper = require('../tools/tokens');
 
 /* Check  
     - Group exists?
@@ -111,37 +118,60 @@ function checkUserBelongsToGroup(req: IRequest, res: Response, next: NextFunctio
    *                - Exclude group ID 1 from data set (always)
   */
 function publicGroups(req: IRequest, res: Response, next: NextFunction) {
-  Group.collection().query(function(qb){
-    if(req.query.group_code){  // IF querystring contains group_code
-      qb.where('group_code', req.query.group_code);
-      qb.whereNot('group_id', 1);
+  tokenHelper.getUserIdFromRequest(req)
+  .then(({err, user_id}) => {
+    if(!err) {
+      return User.where({user_id: user_id}).fetch()
+      .then((user) => {
+        if(user != null){
+          return user.getGroupIDs();  //Returns user groupsID if authenicated
+        }else{
+          return new Promise((resolve, reject)=>{
+            resolve([]);    //Retuns empty if error
+          })
+        }
+
+      })
+      .catch(err => {
+        res.json({  
+          success: 0,
+          message: err.message
+        });
+      });
     }
-    else{ //In other case.
-      qb.where('private', '=', 0);
-      qb.whereNull('deleted_at');
-      qb.whereNot('group_id', 1);
+    else{
+      // On error cases, just return public/non-deleted/filtered groups
+      return new Promise((resolve, reject)=>{
+        resolve([]);    //Retuns empty if error
+      })
     }
-  }).fetch({
-    withRelated: [ 
-      // {'settings':function(qb) {
-      //   qb.select('allow_member_action','member_action_level', 'group_setting_id');
-      // }}, 
-      {'tags':function(qb) {
-        qb.select('group_tag_id', 'tag', 'group_id');
-      }},
-      'setting',
-      {'creator':function(qb) {
-        qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
-      }}]
   })
-  .asCallback((err, groups) => {
-    if(err) {
-      throw err;
-    } else {
-      req.publicGroups = groups;
-      next();
-    }
-  });
+  .then(userGroupIDs=>{
+    Group.collection().query(function(qb){
+      qb.where(function(){
+        this.where('private', '=', 0);
+        this.whereNull('deleted_at');
+        this.whereNot('group_id', 1);
+      }).orWhereIn('group.group_id', userGroupIDs);
+    }).fetch({
+      withRelated: [ 
+        {'tags':function(qb) {
+          qb.select('group_tag_id', 'tag', 'group_id');
+        }},
+        'setting',
+        {'creator':function(qb) {
+          qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+        }}]
+    })
+    .asCallback((err, groups) => {
+      if(err) {
+        throw err;
+      } else {
+        req.publicGroups = groups;
+        next();
+      }
+    });
+  })
 }
 
 /*

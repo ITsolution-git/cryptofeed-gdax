@@ -24,31 +24,46 @@ function decodeToken(token: String, callback) {
   const payload = jwt.decode(token, process.env.TOKEN_SECRET);
   const now = moment().unix();
   // check if the token has expired
-  if (now > payload.exp) callback('Token has expired.');
-  else callback(null, payload);
+  if (now > payload.exp)
+    return new Promise((resolve,reject)=>{
+      resolve({'err':'Token has expired.'});
+    });
+  else 
+    return new Promise((resolve,reject)=>{
+      resolve({cb: payload});
+    });
 }
 
 /**
 * @description returns the user_id based on the headers in the Request
 * @param Request object
 */
-function getUserIdFromRequest(req, callback) {
+function getUserIdFromRequest(req) {
   if('authorization' in req.headers) {
     try{
-    var header = req.headers.authorization.split(' ');
-    var token = header[1];
-    this.decodeToken(token, (err, cb) => {
-      if(err) {
-        callback(err);
-      } else {
-        callback(null, cb.sub);
-      }
-    });
+      var header = req.headers.authorization.split(' ');
+      var token = header[1];
+      return this.decodeToken(token)
+      .then(({err, cb})=>{
+        if(err) {
+          return new Promise((resolve,reject)=>{
+            resolve({err:err});
+          });
+        } else {
+          return new Promise((resolve,reject)=>{
+            resolve({user_id:cb.sub});
+          });
+        }
+      });
     }catch(err){
-      callback(err);
+      return new Promise((resolve,reject)=>{
+        resolve({err:err});
+      });
     }
   } else {
-    callback(new Error("Authentication required"));
+    return new Promise((resolve,reject)=>{
+      resolve({err:new Error("Authentication required")});
+    });
   }
 }
 

@@ -43,6 +43,11 @@ export class GroupRouter {
    * @param Callback (NextFunction)
    */
   public getPublicGroups(req: IRequest, res: Response, next: NextFunction) {
+    if(req.query.group_code){ // Look for the group with group_code
+      req.publicGroups = req.publicGroups.filter(group=>{
+        return group.get('group_code') == req.query.group_code;
+      });
+    }
     if(req.query.tag){ // Look for the groups with the tags
       let queryTags = CSV.parse(req.query.tag.replace(/ /g,''))[0];// Remove space and select first tag group in the tag list
       
@@ -64,55 +69,59 @@ export class GroupRouter {
         return false;
       });
     }
-    //PLUS any groups the user belongs to only if user is authenticated
-    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-      if(!err) {
-        return User.where({user_id: user_id}).fetch({withRelated: [ 
-          {'groups.tags':function(qb) {
-            qb.select('group_tag_id', 'tag', 'group_id');
-          }},
-          'groups.setting',
-          {'groups.creator':function(qb) {
-            qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
-          }}]
-        })
-        .then((user) => {
-          if(user != null)
-          {
-            //Include user groups if authenticated
-            let merged = req.publicGroups;
-            let IDs = req.publicGroups.map(function (e) {
-                return e.id;
-            });
-            user.related('groups').models.forEach(group=>{
-              if( IDs.indexOf(group.id) == -1 )  //remove duplications
-                merged.push(group);
-            })
-            return res.json({  
-              success: 1,
-              groups: merged
-            });
-          }
-          return res.json({  
-            success: 1,
-            groups: req.publicGroups
-          });
-        })
-        .catch(err => {
-          res.json({  
-            success: 0,
-            message: err.message
-          });
-        });
-      }
-      else{
-        // On error cases, just return public/non-deleted/filtered groups
-        res.json({  
-          success: 1,
-          groups: req.publicGroups
-        });
-      }
-    })
+    // //PLUS any groups the user belongs to only if user is authenticated
+    // tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+    //   if(!err) {
+    //     return User.where({user_id: user_id}).fetch({withRelated: [ 
+    //       {'groups.tags':function(qb) {
+    //         qb.select('group_tag_id', 'tag', 'group_id');
+    //       }},
+    //       'groups.setting',
+    //       {'groups.creator':function(qb) {
+    //         qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
+    //       }}]
+    //     })
+    //     .then((user) => {
+    //       if(user != null)
+    //       {
+    //         //Include user groups if authenticated
+    //         let merged = req.publicGroups;
+    //         let IDs = req.publicGroups.map(function (e) {
+    //             return e.id;
+    //         });
+    //         user.related('groups').models.forEach(group=>{
+    //           if( IDs.indexOf(group.id) == -1 )  //remove duplications
+    //             merged.push(group);
+    //         })
+    //         return res.json({  
+    //           success: 1,
+    //           groups: merged
+    //         });
+    //       }
+    //       return res.json({  
+    //         success: 1,
+    //         groups: req.publicGroups
+    //       });
+    //     })
+    //     .catch(err => {
+    //       res.json({  
+    //         success: 0,
+    //         message: err.message
+    //       });
+    //     });
+    //   }
+    //   else{
+    //     // On error cases, just return public/non-deleted/filtered groups
+    //     res.json({  
+    //       success: 1,
+    //       groups: req.publicGroups
+    //     });
+    //   }
+    // })
+    res.json({  
+      success: 1,
+      groups: req.publicGroups
+    });
   }
 
   /**
