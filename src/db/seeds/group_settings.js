@@ -21,5 +21,15 @@ exports.seed = function(knex, Promise) {
         member_action_level: 5000
       })
     );
+  })
+  .then(() => {
+    return Promise.join(
+      knex('group_settings').insert({
+        group_setting_id: 12,
+        group_id: 3,
+        allow_member_action: 1,
+        member_action_level: 5000
+      })
+    );
   });
 };

@@ -201,6 +201,29 @@ exports.seed = function(knex, Promise) {
                   Let’s head back to the dashboard for more!`,
             start_at: new Date(2017, 1, 1) 
         }),
+
+        knex('action').insert({
+            action_id: 10,
+            group_id: 3,
+            created_by_user_id: 2,
+            title: 'Skip this action',
+            subtitle: 'Swipe left to reveal the skip button. Then tap it.',
+            action_type_id: 3,
+            description: `
+                  Oops. Looks like you tapped the action, rather than swiped it.
+
+                  No worries. Just tap the “Skip” button in the header instead.
+
+                  Or if you just want to ignore these instructions completely, go ahead and tap the button to do this action.
+                  `,
+            points: 132,
+            param1: `
+                  Well, instead of skipping it, you’re doing it. That’s cool. You go, Glen Coco!`,
+            thanks_msg: `Thanks for completing this act.
+
+                  Let’s head back to the dashboard for more!`,
+            start_at: new Date(2017, 1, 1) 
+        }),
       ]);
     });
 };
