@@ -24,7 +24,8 @@ function getBaseUrl(req: Request) {
 * @param next: Callback function (NextFunction)
 */
 function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
-  tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+  tokenHelper.getUserIdFromRequest(req)
+  .then(({err, user_id}) => {
     if(err) {
         res.status(401).json({
         success: 0,

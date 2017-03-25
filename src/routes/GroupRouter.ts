@@ -48,6 +48,12 @@ export class GroupRouter {
         return group.get('group_code') == req.query.group_code;
       });
     }
+    if(req.query.query){ // Look for the group with group_code
+      req.publicGroups = req.publicGroups.filter(group=>{
+        return group.get('group_code') == req.query.query   //exactly matches to group_code
+            || group.get('name').indexOf(req.query.query) > -1; //partially matches to name
+      });
+    }
     if(req.query.tag){ // Look for the groups with the tags
       let queryTags = CSV.parse(req.query.tag.replace(/ /g,''))[0];// Remove space and select first tag group in the tag list
       
@@ -55,9 +61,9 @@ export class GroupRouter {
         let tags = group.related('tags').map(function(a) {
           return a.get('tag');
         });
-        return tags.filter(tag=>{
-          return queryTags.indexOf(tag) > -1;
-        }).length == tags.length;
+        return queryTags.filter(tag=>{
+          return tags.indexOf(tag) > -1;
+        }).length == queryTags.length;
         
       });
     }
