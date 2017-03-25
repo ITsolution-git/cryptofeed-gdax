@@ -8,7 +8,8 @@ export default {
         long: Joi.number().optional(),
         distance: Joi.number().optional(),
         tag: Joi.string().regex(/[0-9a-zA-Z]+(,[0-9a-zA-Z]+)*/).optional(),
-        group_code: Joi.string().token().optional()
+        group_code: Joi.string().token().optional(),
+        query: Joi.any().optional()
     }).with('lat', 'long', 'distance').unknown(false)
   },
 
