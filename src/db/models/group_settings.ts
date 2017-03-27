@@ -16,10 +16,10 @@ export default bookshelf.Model.extend({
     this.on('saving', this.validateOnSave);
   },
   validations : {
-    allow_member_action: [
-        { method: 'isRequired', error: 'Allow member actions is required'}, 
+    // allow_member_action: [
+    //     { method: 'isRequired', error: 'Allow member actions is required'}, 
   
-    ],
+    // ],
   },
   group: function() {
     return this.belongsTo(Group, 'group_id', 'group_id');

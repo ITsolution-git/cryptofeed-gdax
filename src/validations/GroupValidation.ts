@@ -13,6 +13,21 @@ export default {
     }).with('lat', 'long', 'distance').unknown(false)
   },
 
+  // POST /groups
+  createGroup: {
+    body: Joi.object({
+        name: Joi.string().required(),
+        private: Joi.boolean().required(),
+        description: Joi.string(),
+        welcome: Joi.string(),
+        latitude: Joi.number().optional(),
+        longitude: Joi.number().optional(),
+        banner_image_file: Joi.any(),
+        // allow_member_action: Joi.boolean().optional(),
+        // member_action_level: Joi.number().optional()
+    }).unknown(false)
+  },
+
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({

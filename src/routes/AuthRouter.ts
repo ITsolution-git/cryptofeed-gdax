@@ -10,8 +10,7 @@ const validate = require('../classes/ParamValidator');
 var request = require('request');
 var util = require('util');
 //Helpers Import
-const tokenHelpers = require('../tools/tokens');
-const toolHelpers = require('../tools/_helpers');
+const tokenHelpers = require('../tools/tokens'); 
 const AuthHelpers = require('../tools/auth_helpers');
 //Smpt Transfer
 // import smtpTransport from '../config/smtpTransport';
@@ -353,7 +352,7 @@ export class AuthRouter {
   * @param  next NextFunction that is called
   * @return 200 JSON of user object and auth token
   */
-  public forgetPassword(req: IRequest, res: Response, next: NextFunction) {
+  public forgotPassword(req: IRequest, res: Response, next: NextFunction) {
     try{
 
       var from_email = new sghelper.Email(process.env.ADMIN_EMAIL);
@@ -450,7 +449,7 @@ export class AuthRouter {
     this.router.post('/facebook/register', validate(AuthValidation.registerFacebook), this.facebookRegister);
     this.router.post('/twitter/login', validate(AuthValidation.loginTwitter), this.twitterLogin);
     this.router.post('/twitter/register', validate(AuthValidation.registerTwitter), this.twitterRegister);
-    this.router.post('/forget-password', validate(AuthValidation.forgetPassword), AuthHelpers.generateResetToken, this.forgetPassword);
+    this.router.post('/forgot-password', validate(AuthValidation.forgotPassword), AuthHelpers.generateResetToken, this.forgotPassword);
     this.router.put('/change-password', validate(AuthValidation.changePassword), AuthHelpers.checkValidToken, this.changePassword);
   
   }

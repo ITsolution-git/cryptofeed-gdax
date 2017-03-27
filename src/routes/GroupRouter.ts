@@ -7,8 +7,8 @@ const validate = require('../classes/ParamValidator');
 import GroupValidation from '../validations/GroupValidation';
 import Action from '../db/models/action';
 //Helpers Import
-let tokenHelper = require('../tools/tokens');
-let toolHelpers = require('../tools/_helpers');
+const tokenHelper = require('../tools/tokens');
+const toolHelpers = require('../tools/_helpers');
 const groupHelper = require('../tools/group_helpers');
 //Npm Import
 var CSV = require('csv-string');
@@ -132,12 +132,19 @@ export class GroupRouter {
 
   /**
   * @description Creates a new group
+        Call that creates a new group, based on data params:
+          Required: name, private, created_by_id (from auth)
+          Call should auto-generate a group_code as a 6-digit alpha-numeric code
+        Call should automatically create associated group_setting record
+          set allow_member_action to 0 (false)
+        Call should automatically add a group_user record for the user creating the group
+          Set following fields as true: admin_settings, admin_members, mod_actions, mod_comments, submit_action
   * @param Request
   * @param Response
   * @param Callback Function
   */
   public createGroup(req: IRequest, res: Response, next: NextFunction) {
-    return new Group(req.body).save()
+    return new Group({...req.body, created_by_user_id: req.user.id}).save()
       .then((group) => {
         if(req.files){
           try{
@@ -175,11 +182,20 @@ export class GroupRouter {
         }
       })
       .then((group) => {
-        res.status(200).json({
+        req.group = group;
+        return group.related('setting').save({allow_member_action: false, member_action_level:0});
+      })
+      .then((group_setting)=>{
+        return req.group.saveCreator();
+      })
+      .then(()=>{
+        return req.group.generateGroupCodeAndSave();
+      })
+      .then((group) => {
+        res.status(201).json({
             success: 1,
             token: tokenHelper.encodeToken(req.user.get('user_id')),
-            user: req.user,
-            group: group,
+            group: req.group,
             message:"Success"
           });
       })
@@ -190,7 +206,7 @@ export class GroupRouter {
           data:err.data,  
         });
       });
-  }
+    }
 
   /**
    * @description GET group by id in request object
@@ -586,7 +602,10 @@ export class GroupRouter {
                     groupHelper.publicGroups,
                     validate(GroupValidation.getPublicGroups),
                     this.getPublicGroups);
-    this.router.post('/', toolHelpers.ensureAuthenticated, this.createGroup);
+    this.router.post('/', 
+                    toolHelpers.ensureAuthenticated, 
+                    validate(GroupValidation.createGroup),
+                    this.createGroup);
     // this.router.get('/:id', this.getGroup);
       // this.router.put('/:id', this.putGroup);
       // this.router.get('/:id/members', this.getGroupMembers);

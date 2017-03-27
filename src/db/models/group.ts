@@ -10,6 +10,9 @@ import Action from './action';
 
 var moment = require('moment');
 const ValidationError = require('bookshelf-validate/lib/errors').ValidationError;
+//Helpers Import
+const toolHelpers = require('../../tools/_helpers');
+
 export default bookshelf.Model.extend({
   tableName: 'group',
   hasTimestamps: true,
@@ -96,9 +99,53 @@ export default bookshelf.Model.extend({
         });
     }
   },
+  //When the group is created, give the creator full access to this group on group_user table
+  saveCreator: function(){
+    return new GroupUser({
+      group_id: this.id,
+      user_id: this.get('created_by_user_id'),
+      admin_settings: true,
+      admin_members: true,
+      mod_actions: true,  
+      mod_comments: true,
+      submit_action: true,
+    }).save();
+  },
+
+  generateGroupCodeAndSave: function(){
+    return Group.findUniqueGroupCode(Group.randomGroupCode())
+    .then(group_code=>{
+      return this.save({group_code: group_code});
+    });
+  }
 }, {
  
   getGroupWithRelated: function(group_id: number, withRelated: any){
     return this.where({group_id:group_id}).fetch({withRelated:withRelated})
+  },
+  //Find unique group code
+  findUniqueGroupCode: function(randomCode){
+    return Group.where({group_code: randomCode})
+    .fetch().then(group=>{
+      if(group)
+        return this.findUniqueGroupCode(Group.ramdomGroupCode());
+      return new Promise(function (resolve, reject) {
+        resolve(randomCode);
+      });
+    })
+  },
+
+
+
+  /**
+  * @description Creates a unique group code and returns it
+  */
+  randomGroupCode: function() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( var i=0; i < 6; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
   }
+
 });

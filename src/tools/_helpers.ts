@@ -83,17 +83,17 @@ function deg2rad(deg) {
 /**
 * @description Creates a unique group code and returns it
 */
-function createGroupCode() {
+function randomGroupCode() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for( var i=0; i < 9; i++ )
+  for( var i=0; i < 6; i++ )
       text += possible.charAt(Math.floor(Math.random() * possible.length));
-  //TODO: check that code doesn't already exist in database
   return text;
 }
 
 module.exports = {
   getBaseUrl,
   ensureAuthenticated,
-  getDistanceFromLatLonInMile
+  getDistanceFromLatLonInMile,
+  randomGroupCode
 };
