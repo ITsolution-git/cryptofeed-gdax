@@ -337,32 +337,89 @@ export class GroupRouter {
 
   /**
   * @description updates details of a group
+        Call that updates the group info & settings
+        Call should validate that the user has the group_user.admin_settings permission
+        If user doesn't have access to admin group, return 401 unauthorized
+        Only data params sent to the call are updated
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
-  * TODO: need to remove any data that shouldn't be updateable
-  * TODO: need to ensure user has proper permissions to udpate group
   */
-  public putGroup(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-      if(err) {
-          res.status(401).json({
-          status: 'Token has expired',
-          message: 'Your token has expired.'
-        });
-      } else {
-        let group_id = parseInt(req.params.id);
-        toolHelpers.updateGroup(group_id, req.body, function(err, count) {
-          toolHelpers.getGroupById(group_id)
-            .then((group) => {
-              res.status(200).json({
-                status: 'success',
-                token: tokenHelper.encodeToken(user_id),
-                group: group
-              });
-          });
-        });
+  public putGroup(req: IRequest, res: Response, next: NextFunction) {
+    let settingParam:any = {};
+    if(req.body.allow_member_action){   //If allow_member_action param exists
+      settingParam.allow_member_action = req.body.allow_member_action; //set to settingParam
+      delete req.body.allow_member_action;// ensure it's not sent to update group info
+    }
+    if(req.body.member_action_level){
+      settingParam.member_action_level = req.body.member_action_level;
+      delete req.body.member_action_level;
+    }
+
+    req.user.isGroupAdminSetting(req.current_group.id)
+    .then((hasAdminSetting)=>{
+      if(!hasAdminSetting)
+        res.status(401).json({
+          success: 0,
+          message: "Sorry, You don't have permission to update the group"
+        })
+      else{
+        return req.current_group.save(req.body);
       }
+    })
+    .then((group) => {
+      if(req.files){
+        try{
+          let file = req.files.banner_image_file;
+          let relativepath = './public/uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
+          var targetPath = path.resolve(relativepath);
+          if ((path.extname(file.name).toLowerCase() === '.jpg')||
+              (path.extname(file.name).toLowerCase() === '.png')) { 
+
+            file.mv(targetPath, function(err) {
+              if (err) {
+                err.message = "Upload failed";
+                throw err;
+              }
+              else {
+                return true;
+              }
+            });
+            let image_url = toolHelpers.getBaseUrl(req) + 'uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
+            return group.save({banner_image_file:image_url });
+
+          } else {
+            let err = new Error();
+            err.message = "Only jpg/png are acceptable";
+            throw err;
+          }
+        }catch(err){
+          if(!err.message) err.message = "Unknown error prevented from uploading";
+          throw err;
+        }
+      }
+      else{
+        return group;
+        
+      }
+    })
+    .then((group) => {
+      return req.current_group.related('setting').save(settingParam);
+    })
+    .then(()=>{
+      res.status(200).json({
+        success: 1,
+        token: tokenHelper.encodeToken(req.user.get('user_id')),
+        group: req.current_group,
+        message:"Success"
+      });
+    })
+    .catch((err) => {
+      return res.status(500).json({
+        success: 0,
+        message:err.message,
+        data:err.data,  
+      });
     });
   }
 
@@ -632,7 +689,11 @@ export class GroupRouter {
                     validate(GroupValidation.getGroup),
                     groupHelper.checkGroup,
                     this.getGroup);
-      // this.router.put('/:id', this.putGroup);
+    this.router.put('/:group_id', 
+                    validate(GroupValidation.putGroup),
+                    toolHelpers.ensureAuthenticated, 
+                    groupHelper.checkGroup,
+                    this.putGroup);
       // this.router.get('/:id/members', this.getGroupMembers);
       // this.router.post('/:id/members', this.joinGroup);
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);

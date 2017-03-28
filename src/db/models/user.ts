@@ -141,6 +141,20 @@ export default bookshelf.Model.extend({
       else
         throw new Error('Adding user to default group failed');
     })
+  },
+
+  /** Return true or false accroding to whether user had admin_setting on group or not
+   * @param group_id
+   * @return true or false
+  */
+  isGroupAdminSetting: function(group_id){
+    return GroupUser.where({user_id: this.id, group_id: group_id}).fetch({})
+    .then((group_user)=>{
+      if(group_user && group_user.get('admin_settings'))
+        return true;
+      else
+        return false;
+    });
   }
 }, {
   // saveUser: function(attrs){

@@ -36,6 +36,24 @@ export default {
     }).unknown(false)
   },
 
+
+  // PUT /groups
+  putGroup: {
+    body: Joi.object({
+        name: Joi.string().required(),
+        private: Joi.boolean().required(),
+        description: Joi.string(),
+        welcome: Joi.string(),
+        latitude: Joi.number().optional(),
+        longitude: Joi.number().optional(),
+        banner_image_file: Joi.any(),
+        allow_member_action: Joi.boolean().optional(),
+        member_action_level: Joi.number().optional()
+    }).unknown(false),
+    params: Joi.object({
+        group_id: Joi.number().integer().required()
+    }).unknown(false)
+  },
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({
