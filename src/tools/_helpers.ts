@@ -57,6 +57,33 @@ function ensureAuthenticated(req: IRequest, res: Response, next: NextFunction) {
 }
 
 /**
+* @description Returns true or false according to whether user is authenticated or not.
+* @param req: Request
+* @param res: Response
+* @param next: Callback function (NextFunction)
+*/
+function isAuthenticated(req: IRequest) {
+  return tokenHelper.getUserIdFromRequest(req)
+  .then(({err, user_id}) => {
+    if(err) {
+      return false;
+    } else {
+      // check if the user still exists in the db
+      return User.where({user_id: user_id}).fetch()
+      .then((user) => {
+        if(user == null)
+          return false;
+        req.user = user;
+        return user;
+      })
+      .catch((err) => {
+        return false;
+      });
+    }
+  });
+}
+
+/**
  * get distance between (lat1, lon1) and (lat2, lon2) in mile
  */
 function getDistanceFromLatLonInMile(lat1,lon1,lat2,lon2) {
@@ -91,9 +118,11 @@ function randomGroupCode() {
   return text;
 }
 
+
 module.exports = {
   getBaseUrl,
   ensureAuthenticated,
   getDistanceFromLatLonInMile,
-  randomGroupCode
+  randomGroupCode,
+  isAuthenticated
 };

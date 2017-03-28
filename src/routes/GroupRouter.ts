@@ -210,32 +210,54 @@ export class GroupRouter {
 
   /**
    * @description GET group by id in request object
+   *          If group is public, return group data
+                  group, group_settings, group_user[]
+                  creator (user profile info for created_by_user_id)
+                  call should be public and not require authorization
+              If group is private, only return group data if
+                  authorization token is sent with call and user is member of group
+                  otherwise return 401 unauthorized
    * @param Request
    * @param Response
    * @param Callback function (NextFunction)
-   * TODO: Need to make sure user is member of group, or group is public
    */
-  //////////****getGroup will no longer need because the GET user/1/groups returns them */
-  // public getGroup(req: Request, res: Response, next: NextFunction) {
-  //   let groupId = parseInt(req.params.id);
-  //   return toolHelpers.getGroupById(groupId)
-  //   .asCallback((err, values) => {
-  //     if(err) {
-  //       res.status(404)
-  //         .send({
-  //           message: 'No group found with the given id.',
-  //           status: res.status
-  //         });
-  //     } else {
-  //       res.status(200)
-  //         .send({
-  //           message: 'Success',
-  //           status: res.status,
-  //           group: values
-  //         });
-  //     }
-  //   });
-  // }
+  public getGroup(req: IRequest, res: Response, next: NextFunction) {
+    if(req.current_group.get('private') == 1){ //if private
+      toolHelpers.isAuthenticated(req)
+      .then((user)=>{
+        if(user != false){    // If user is authenticated 
+          user.getGroupIDs().then(function(groupIDs){  //and member of group
+            if(groupIDs.indexOf(req.current_group.get('group_id')) == -1){
+              //If user is not a member of group
+              return res.status(403).json({
+                success: 0,
+                message: "You are not member of this group"
+              }); 
+            }
+            else{
+              res.status(200).json({
+                success: 1,
+                group: req.current_group
+              });
+            }
+          });
+        }else{
+          //Not authenticated
+          return res.status(401).json({
+            success: 0,
+            message: "You are not allowed to access private group"
+          }); 
+        }
+      })
+    }
+    //Otherwise  -groups is public or user belongs to private group
+    else{
+      res.status(200).json({
+        success: 1,
+        group: req.current_group
+      });
+    }
+  }
 
   /**
   * @description Create GET /groups/:group_id/actions API Call
@@ -606,7 +628,10 @@ export class GroupRouter {
                     toolHelpers.ensureAuthenticated, 
                     validate(GroupValidation.createGroup),
                     this.createGroup);
-    // this.router.get('/:id', this.getGroup);
+    this.router.get('/:group_id', 
+                    validate(GroupValidation.getGroup),
+                    groupHelper.checkGroup,
+                    this.getGroup);
       // this.router.put('/:id', this.putGroup);
       // this.router.get('/:id/members', this.getGroupMembers);
       // this.router.post('/:id/members', this.joinGroup);

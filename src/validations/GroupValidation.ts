@@ -13,6 +13,14 @@ export default {
     }).with('lat', 'long', 'distance').unknown(false)
   },
 
+
+  // GET /groups/:group_id
+  getGroup: {
+    params: Joi.object({
+        group_id: Joi.number().integer().required()
+    }).unknown(false)
+  },
+  
   // POST /groups
   createGroup: {
     body: Joi.object({
