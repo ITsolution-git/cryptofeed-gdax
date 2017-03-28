@@ -26,7 +26,7 @@ exports.seed = (knex, Promise) => {
         welcome: 'Welcome to the action group! Get started by completing our current actions',
         latitude: '51.5032520',
         longitude: '-0.1278990',
-        private: 0,
+        private: 1,
         banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: 'ZYXW0987'
       })
@@ -41,7 +41,7 @@ exports.seed = (knex, Promise) => {
         welcome: 'Welcome to Test Group 3',
         latitude: '51.5032520',
         longitude: '-0.1278990',
-        private: 0,
+        private: 1,
         banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
         group_code: '2345GH',
       })

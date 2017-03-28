@@ -27,81 +27,134 @@ describe('********* routes : group *********', function(){
   after(() => {
     return knex.migrate.rollback();
   });
+  //Depends on seed: User sunil, group_id 3, group : private:1
+  //Should get group_id:1 (private:0) without token.
+  describe('GET /groups/{group_id}', () => {
+    var token = "";
+    it('should return success login with sunil and /groups/3', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'sunil@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        token = response.body.token;
+        chai.request(app)
+        .get('/api/v1/groups/3')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(1);
+          res.body.should.have.property('group');
+          token = response.body.token;
+          done();
+        });
+      });
+    });
+    it('should return 401 with wrong token', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups/3')
+      .set('authorization', 'Bearer ' + "wrong token")
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(401);
+        res.type.should.eql('application/json');
+        res.body.success.should.eql(0);
+        done();
+      });
+    });
 
-	describe('GET /groups/{group_id}/actions', () => {
-		var token = "";
-		it('should return success login with jasonh and /groups/1/actions', (done) => {
-			chai.request(app)
-			.post('/api/v1/auth/login')
-			.send({
-				email: 'jasonh@actodo.co',
-				password: 'letmein'
-			})
-			.end((error, response) => {
-				should.not.exist(error);
-				token = response.body.token;
-				chai.request(app)
-				.get('/api/v1/groups/1/actions')
-				.set('authorization', 'Bearer ' + response.body.token)
-				.end((err, res) => {
-					should.not.exist(err);
-					res.status.should.eql(200);
-					res.type.should.eql('application/json');
-					res.body.success.should.eql(1);
-					res.body.should.have.property('actions');
-					done();
-				});
-			});
-		});
-		it('should return No permission /groups/2/actions; 2 is private group', (done) => {
-			chai.request(app)
-			.get('/api/v1/groups/2/actions')
-			.set('authorization', 'Bearer ' + token)
-			.end((err, res) => {
-				should.exist(err);
-				res.status.should.eql(403);
-				res.type.should.eql('application/json');
-				res.body.success.should.eql(0);
-				done();
-			});
-		});
+    it('GET /groups/1 should return success without token ', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups/1')
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.should.have.property('group');
+        res.body.success.should.eql(1);
+        done();
+      });
+    });
+  });
+  describe('GET /groups/{group_id}/actions', () => {
+    var token = "";
+    it('should return success login with jasonh and /groups/1/actions', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        token = response.body.token;
+        chai.request(app)
+        .get('/api/v1/groups/1/actions')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(1);
+          res.body.should.have.property('actions');
+          done();
+        });
+      });
+    });
+    it('should return No permission /groups/2/actions; 2 is private group', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups/2/actions')
+      .set('authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(403);
+        res.type.should.eql('application/json');
+        res.body.success.should.eql(0);
+        done();
+      });
+    });
 
-		it('should return Not Found /groups/6/actions; 6 is non-exist', (done) => {
-			chai.request(app)
-			.get('/api/v1/groups/6/actions')
-			.set('authorization', 'Bearer ' + token)
-			.end((err, res) => {
-				should.exist(err);
-				res.status.should.eql(404);
-				res.type.should.eql('application/json');
-				res.body.success.should.eql(0);
-				done();
-			});
-		});
+    it('should return Not Found /groups/226/actions; 6 is non-exist', (done) => {
+      chai.request(app)
+      .get('/api/v1/groups/6/actions')
+      .set('authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(404);
+        res.type.should.eql('application/json');
+        res.body.success.should.eql(0);
+        done();
+      });
+    });
 
-		it('should return success log in with erwin and /groups/2/actions', (done) => {
-			chai.request(app)
-			.post('/api/v1/auth/login')
-			.send({
-				email: 'erwin@actodo.co',
-				password: 'letmein'
-			})
-			.end((error, response) => {
-				should.not.exist(error);
-				token = response.body.token;
-				chai.request(app)
-				.get('/api/v1/groups/2/actions')
-				.set('authorization', 'Bearer ' + response.body.token)
-				.end((err, res) => {
-					should.not.exist(err);
-					res.status.should.eql(200);
-					res.type.should.eql('application/json');
-					res.body.success.should.eql(1);
-					res.body.should.have.property('actions');
-					done();
-				});
-			});
-		});
+    it('should return success log in with erwin and /groups/2/actions', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'erwin@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        token = response.body.token;
+        chai.request(app)
+        .get('/api/v1/groups/2/actions')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(1);
+          res.body.should.have.property('actions');
+          done();
+        });
+      });
+    });
 	});
 	describe('POST /groups/{group_id}/actions', () => {
 		var token = "";
