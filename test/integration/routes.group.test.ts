@@ -279,6 +279,157 @@ describe('********* routes : group *********', function(){
 			});
 		});
 	});
+
+
+  // describe('POST /api/v1/groups', () => {
+  //   it('should create a new group', (done) => {
+  //     chai.request(app)
+  //     .post('/api/v1/auth/login')
+  //     .send({
+  //       email: 'seed1@test.net',
+  //       password: 'password'
+  //     })
+  //     .end((error, response) => {
+  //       should.not.exist(error);
+  //       chai.request(app)
+  //       .post('/api/v1/groups')
+  //       .set('authorization', 'Bearer ' + response.body.token)
+  //       .send({
+  //         created_by_user_id: 1,
+  //         name: 'TEST CREATE GROUP',
+  //         private: 0,
+  //         description: 'TEST CREATE GROUP DESCRIPTION',
+  //         welcome: 'WELCOME TO THE TEST CREATE GROUP',
+  //         banner_image_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
+  //         latitude: '51.5032520',
+  //         longitude: '-0.1278990'
+  //       })
+  //       .end((err, res) => {
+  //         should.not.exist(err);
+  //         res.status.should.eql(200);
+  //         res.type.should.eql('application/json');
+  //         res.body.status.should.eql('success');
+  //         res.body.should.have.property('group');
+  //         res.body.group.should.have.property('name');
+  //         res.body.group.name.should.equal('TEST CREATE GROUP');
+  //         res.body.group.created_by_user_id.should.equal(1);
+  //         done();
+  //       });
+  //     });
+  //   });
+  // });
+
+  describe('PUT /api/v1/groups', () => {
+    let token = "";
+    it('should login with erwin and update group_id 2', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'erwin@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .put('/api/v1/groups/2')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .send({
+          name: 'TEST CREATE GROUP',
+          private: 0,
+          description: 'TEST CREATE GROUP DESCRIPTION',
+          welcome: 'WELCOME TO THE TEST CREATE GROUP',
+          latitude: '51.5032520',
+          longitude: '-0.1278990'
+        })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.status.should.eql(200);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(1);
+          res.body.should.have.property('group');
+          res.body.group.should.have.property('name');
+          res.body.group.name.should.equal('TEST CREATE GROUP');
+          token = response.body.token;
+          done();
+        });
+      });
+    });
+    console.log(token);
+    it('should update group_id 2 setting :allow_member_action and member_action_level', (done) => {
+      chai.request(app)
+      .put('/api/v1/groups/2')
+      .set('authorization', 'Bearer ' + token)
+      .send({
+        name: 'TEST CREATE GROUP',
+        private: 0,
+        description: 'TEST CREATE GROUP DESCRIPTION',
+        welcome: 'WELCOME TO THE TEST CREATE GROUP',
+        latitude: '51.5032520',
+        longitude: '-0.1278990',
+        member_action_level: 4444,
+        allow_memeber_action: true
+      })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.status.should.eql(200);
+        res.type.should.eql('application/json');
+        res.body.success.should.eql(1);
+        res.body.should.have.property('group');
+        res.body.group.should.have.property('name');
+        res.body.group.name.should.equal('TEST CREATE GROUP');
+        done();
+      });
+    });
+
+    it('should return 401 with jasonh and update group_id 2', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .put('/api/v1/groups/2')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .send({
+          name: 'TEST CREATE GROUP',
+          private: 0,
+          description: 'TEST CREATE GROUP DESCRIPTION',
+          welcome: 'WELCOME TO THE TEST CREATE GROUP',
+          latitude: '51.5032520',
+          longitude: '-0.1278990'
+        })
+        .end((err, res) => {
+          should.exist(err);
+          res.status.should.eql(500);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(0);
+          done();
+        });
+      });
+    });
+    it('return 401 unauthorized PUT /groups/2 without token', (done) => {
+      chai.request(app)
+      .put('/api/v1/groups/2')
+      .send({
+        created_by_user_id: 1,
+        name: 'TEST CREATE GROUP',
+        private: 0,
+        description: 'TEST CREATE GROUP DESCRIPTION',
+        welcome: 'WELCOME TO THE TEST CREATE GROUP',
+        banner_image_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
+        latitude: '51.5032520',
+        longitude: '-0.1278990'
+      })
+      .end((err, res) => {
+        should.exist(err);
+        res.status.should.eql(400);
+        done();
+      });
+    });
+  });
 //   describe('GET /api/v1/groups', () => {
 //     it('should return a success', (done) => {
 //       chai.request(app)

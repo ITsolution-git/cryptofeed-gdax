@@ -359,10 +359,7 @@ export class GroupRouter {
     req.user.isGroupAdminSetting(req.current_group.id)
     .then((hasAdminSetting)=>{
       if(!hasAdminSetting)
-        res.status(401).json({
-          success: 0,
-          message: "Sorry, You don't have permission to update the group"
-        })
+        throw new Error("Sorry, You don't have permission to update the group");
       else{
         return req.current_group.save(req.body);
       }
