@@ -85,7 +85,12 @@ export default bookshelf.Model.extend({
   actions: function() {
     return this.belongsToMany(Action, 'action_user', 'user_id', 'action_id', 'user_id', 'action_id');
   },
-  
+  //Seems not working because bookshelf doesn't support to get 
+  //middle db field in m:n relationship
+  group_user: function() {
+    return this.belongToMany(GroupUser, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id');
+  },
+
   authenticate: function(password){
     const bool = bcrypt.compareSync(password, this.get('password'));
     if (!bool) throw new Error('Invalid password');
@@ -212,5 +217,15 @@ export default bookshelf.Model.extend({
           });
       });
     }
+  },
+
+  // Remove critial information from user
+  getSafeUserFromJS: function(user){
+    delete user['password'];
+    delete user['facebook'];
+    delete user['twitter'];
+    delete user['reset_password_token'];
+    delete user['reset_password_expires'];
+    return user;
   }
 });

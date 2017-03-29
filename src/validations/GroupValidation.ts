@@ -51,13 +51,21 @@ export default {
         member_action_level: Joi.number().optional()
     }).unknown(false),
     params: Joi.object({
-        group_id: Joi.number().integer().required()
+      group_id: Joi.number().integer().required()
     }).unknown(false)
   },
+  
+  // GET /groups/:group_id/members
+  getGroupMembers: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required()
+    }).unknown(false)
+  },
+
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({
-        group_id: Joi.number().integer().required()
+      group_id: Joi.number().integer().required()
     }).unknown(false)
   },
 

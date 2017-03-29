@@ -20,6 +20,7 @@ var util = require('util');
 //Model Import
 import User from '../db/models/user';
 import Group from '../db/models/group';
+import GroupUser from '../db/models/group_user';
 
 export class GroupRouter {
   router: Router
@@ -420,36 +421,36 @@ export class GroupRouter {
     });
   }
 
-  /**
-  * @description Allows user to join a group
-  * @param Request
-  * @param Response
-  * @param Callback function (NextFunction)
-  * TODO: need to ensure group is public, or member has group add code
-  */
-  public joinGroup(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-      if(err) {
-          res.status(401).json({
-          status: 'Token has expired',
-          message: 'Your token has expired.'
-        });
-      } else {
-        let group_id = parseInt(req.params.id);
-        // TODO: ensure user is not a current member of the group
-        toolHelpers.joinGroup(group_id, user_id, function() {
-          toolHelpers.getGroupById(group_id)
-            .then((group) => {
-              res.status(200).json({
-                status: 'success',
-                token: tokenHelper.encodeToken(user_id),
-                group: group
-              });
-          });
-        });
-      }
-    });
-  }
+  // /**
+  // * @description Allows user to join a group
+  // * @param Request
+  // * @param Response
+  // * @param Callback function (NextFunction)
+  // * TODO: need to ensure group is public, or member has group add code
+  // */
+  // public joinGroup(req: Request, res: Response, next: NextFunction) {
+  //   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
+  //     if(err) {
+  //         res.status(401).json({
+  //         status: 'Token has expired',
+  //         message: 'Your token has expired.'
+  //       });
+  //     } else {
+  //       let group_id = parseInt(req.params.id);
+  //       // TODO: ensure user is not a current member of the group
+  //       toolHelpers.joinGroup(group_id, user_id, function() {
+  //         toolHelpers.getGroupById(group_id)
+  //           .then((group) => {
+  //             res.status(200).json({
+  //               status: 'success',
+  //               token: tokenHelper.encodeToken(user_id),
+  //               group: group
+  //             });
+  //         });
+  //       });
+  //     }
+  //   });
+  // }
 
   /**
   * @description Allows user to join a group
@@ -458,30 +459,27 @@ export class GroupRouter {
   * @param Callback function (NextFunction)
   * TODO: Need to ensure user is member of group, or group is public
   */
-  public getGroupMembers(req: Request, res: Response, next: NextFunction) {
-    tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-      if(err) {
-          res.status(401).json({
-            status: 'Token has expired',
-            message: 'Your token has expired.'
-          });
-      } else {
-        let group_id = parseInt(req.params.id);
-        var members = toolHelpers.getGroupMembers(group_id, function(err, members) {
-          if(err) {
-            res.status(400).json({
-              status: 'error',
-              message: 'Something went wrong.'
-            });
-          } else {
-            res.status(200).json({
-              status: 'success',
-              token: tokenHelper.encodeToken(user_id),
-              members: members
-            });
-          }
-        });
-      }
+  public getGroupMembers(req: IRequest, res: Response, next: NextFunction) {
+
+    Promise.all(req.current_group.related('users').map((user)=>{
+      return GroupUser.where({user_id: user.id, group_id: req.current_group.id}).fetch()
+      .then((groupuser)=>{
+        let ret = user.toJSON();
+        ret.group_user = groupuser;
+        return User.getSafeUserFromJS(ret);
+      });
+    }))
+    .then((users)=>{
+      res.status(200).json({
+        success: 0,
+        members: users
+      });
+    })
+    .catch(err=>{
+      res.status(500).json({
+        success: 0,
+        message: err.message
+      });
     });
   }
 
@@ -691,7 +689,12 @@ export class GroupRouter {
                     toolHelpers.ensureAuthenticated, 
                     groupHelper.checkGroup,
                     this.putGroup);
-      // this.router.get('/:id/members', this.getGroupMembers);
+    this.router.get('/:group_id/members', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.getGroupMembers),
+                    groupHelper.checkGroup,
+                    groupHelper.checkUserBelongsToGroup,
+                    this.getGroupMembers);
       // this.router.post('/:id/members', this.joinGroup);
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);
       // this.router.get('/:id/actions/types', this.getActionTypes);
