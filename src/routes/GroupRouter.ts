@@ -453,7 +453,10 @@ export class GroupRouter {
   // }
 
   /**
-  * @description Allows user to join a group
+  * @description 
+            - Returns an array of group members, and their individual permissions
+            - Call should ensure caller is a member of the group, otherwise return 401 unauthorized
+
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
@@ -695,7 +698,6 @@ export class GroupRouter {
                     groupHelper.checkGroup,
                     groupHelper.checkUserBelongsToGroup,
                     this.getGroupMembers);
-      // this.router.post('/:id/members', this.joinGroup);
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);
       // this.router.get('/:id/actions/types', this.getActionTypes);
     this.router.get('/:group_id/actions', 
