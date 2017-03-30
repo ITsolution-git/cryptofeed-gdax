@@ -108,6 +108,22 @@ export default {
     body: Joi.object({
 
     }).unknown(false)
-  }
+  },
 
+  //PUT /groups/:group_id/members/:user_id
+  updateGroupMember: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required(),
+      user_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+      admin_settings: Joi.boolean().optional(),
+      admin_members: Joi.boolean().optional(),
+      mod_actions: Joi.boolean().optional(),
+      mod_comments: Joi.boolean().optional(),
+      submit_action: Joi.boolean().optional(),
+      banned: Joi.boolean().optional(),
+      banned_reason: Joi.string().optional(),
+    }).unknown(false)
+  }
 };

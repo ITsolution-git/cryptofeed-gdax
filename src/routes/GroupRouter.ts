@@ -654,6 +654,48 @@ export class GroupRouter {
     });
   }
 
+
+  /**
+  * @description Updates group member
+                    Call updates permissions for the specific group member user_id
+                    Call updates the existing group_user record for the user
+                    Only data params sent to the call are updated
+                    Return error if user does not have group_user.admin_members as true
+
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  public updateGroupMember(req: IRequest, res: Response, next: NextFunction) {
+    req.user.isGroupAdminMember(req.current_group.id)
+    .then((hasAdminMember)=>{
+      if(!hasAdminMember)
+        throw new Error("Sorry, You don't have permission to update the group member.");
+      else{
+        return GroupUser.where({  user_id: req.current_user.id, 
+                                  group_id: req.current_group.id  }).save(req.body);
+      }
+    })
+    .then((group_user)=>{
+      return GroupUser.where({  user_id: req.current_user.id, 
+                                  group_id: req.current_group.id  }).fetch();
+    })
+    .then((group_user)=>{                         
+      let user = User.getSafeUserFromJS(req.current_user.toJSON());
+      user.permissions = group_user;
+      res.status(200).json({
+        success: 1,
+        user: user
+      });
+    })
+    .catch(err=>{
+      res.status(500).json({
+        success: 0,
+        message: err.message
+      });
+    });
+  }
+
   /**
   * @description sets the deleted_at flag for the specified group
                     Deletes the specified group, by setting the deleted_at 
@@ -668,7 +710,7 @@ export class GroupRouter {
     req.user.isGroupAdminSetting(req.current_group.id)
     .then((hasAdminSetting)=>{
       if(!hasAdminSetting)
-        throw new Error("Sorry, You don't have permission to update the group member.");
+        throw new Error("Sorry, You don't have permission to delete the group.");
       else{
         return req.current_group.deleteBy(req.user.id);
       }
@@ -759,6 +801,12 @@ export class GroupRouter {
                     validate(GroupValidation.joinGroup),
                     groupHelper.checkGroup,
                     this.joinGroup);
+    this.router.put('/:group_id/members/:user_id', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.updateGroupMember),
+                    groupHelper.checkGroup,
+                    groupHelper.checkUser,
+                    this.updateGroupMember);
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);
       // this.router.get('/:id/actions/types', this.getActionTypes);
     this.router.get('/:group_id/actions', 
