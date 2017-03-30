@@ -62,6 +62,16 @@ export default {
     }).unknown(false)
   },
 
+  // POST /groups/:group_id/members
+  joinGroup: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+      group_code: Joi.string().optional()
+    }).unknown(false)
+  },
+
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({
@@ -89,5 +99,15 @@ export default {
         group_id: Joi.number().integer().required()
     }).unknown(false)
   },
+
+  // DELETE  /groups/:group_id
+  deleteGroup: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+
+    }).unknown(false)
+  }
 
 };

@@ -160,6 +160,14 @@ export default bookshelf.Model.extend({
       else
         return false;
     });
+  },
+
+  /** Creat new group_user record with default value to add user to a group
+   * @param group_id
+   * @return group_user
+  */
+  joinGroup: function(group_id){
+    return new GroupUser({group_id: group_id, user_id: this.id}).save();
   }
 }, {
   // saveUser: function(attrs){
