@@ -474,7 +474,7 @@ export class GroupRouter {
     }))
     .then((users)=>{
       res.status(200).json({
-        success: 0,
+        success: 1,
         members: users
       });
     })
