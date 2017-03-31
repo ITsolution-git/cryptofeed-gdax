@@ -99,6 +99,16 @@ export default bookshelf.Model.extend({
         });
     }
   },
+
+  /** @description Delete group and set deleted_by_user_id to user_id
+   *  @param user_id
+   *  @returns group
+  */
+  deleteBy: function(user_id){
+    return this.save({  deleted_at: moment().format("YYYY-MM-DD HH:mm:ss"), 
+                        deleted_by_user_id: user_id });
+
+  },
   //When the group is created, give the creator full access to this group on group_user table
   saveCreator: function(){
     return new GroupUser({

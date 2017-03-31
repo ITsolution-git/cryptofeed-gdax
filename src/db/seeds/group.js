@@ -12,7 +12,7 @@ exports.seed = (knex, Promise) => {
         longitude: '-0.1278990',
         private: 0,
         banner_image_file: 'https://theinquisitiveloon.files.wordpress.com/2013/04/avatar-the-last-airbender-the-gang-in-earth-colors.jpg',
-        group_code: 'ABCD1234'
+        group_code: 'ABCD12'
       })
     );
   })
@@ -28,7 +28,7 @@ exports.seed = (knex, Promise) => {
         longitude: '-0.1278990',
         private: 1,
         banner_image_file: 'https://content-oars.netdna-ssl.com/wp-content/uploads/2015/12/Yosemite.Fran_.jpg',
-        group_code: 'ZYXW0987'
+        group_code: 'ZYXW09'
       })
     );
   })

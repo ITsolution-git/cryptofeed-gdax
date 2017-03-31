@@ -62,6 +62,16 @@ export default {
     }).unknown(false)
   },
 
+  // POST /groups/:group_id/members
+  joinGroup: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+      group_code: Joi.string().optional()
+    }).unknown(false)
+  },
+
   // GET /groups/:group_id/actions
   getGroupActions: {
     params: Joi.object({
@@ -90,4 +100,30 @@ export default {
     }).unknown(false)
   },
 
+  // DELETE  /groups/:group_id
+  deleteGroup: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+
+    }).unknown(false)
+  },
+
+  //PUT /groups/:group_id/members/:user_id
+  updateGroupMember: {
+    params: Joi.object({
+      group_id: Joi.number().integer().required(),
+      user_id: Joi.number().integer().required()
+    }).unknown(false),
+    body: Joi.object({
+      admin_settings: Joi.boolean().optional(),
+      admin_members: Joi.boolean().optional(),
+      mod_actions: Joi.boolean().optional(),
+      mod_comments: Joi.boolean().optional(),
+      submit_action: Joi.boolean().optional(),
+      banned: Joi.boolean().optional(),
+      banned_reason: Joi.string().optional(),
+    }).unknown(false)
+  }
 };

@@ -160,6 +160,29 @@ export default bookshelf.Model.extend({
       else
         return false;
     });
+  },
+
+
+  /** Return true or false accroding to whether user had admin_setting on group or not
+   * @param group_id
+   * @return true or false
+  */
+  isGroupAdminMember: function(group_id){
+    return GroupUser.where({user_id: this.id, group_id: group_id}).fetch({})
+    .then((group_user)=>{
+      if(group_user && group_user.get('admin_members'))
+        return true;
+      else
+        return false;
+    });
+  },
+
+  /** Creat new group_user record with default value to add user to a group
+   * @param group_id
+   * @return group_user
+  */
+  joinGroup: function(group_id){
+    return new GroupUser({group_id: group_id, user_id: this.id}).save();
   }
 }, {
   // saveUser: function(attrs){

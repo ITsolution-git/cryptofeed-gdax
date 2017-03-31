@@ -40,6 +40,30 @@ function checkGroup(req: IRequest, res: Response, next: NextFunction) {
 }
 
 
+/* Check  user with user_id: params(user_id)
+    - User exists?
+    - User deleted?
+  */
+function checkUser(req: IRequest, res: Response, next: NextFunction) {
+  return User.where({user_id:req.params.user_id,}).fetch({withRelated: []})
+  .then(user=>{
+    if(user==null)
+      res.status(404).json({
+        success: 0,
+        message: "user not found"
+      });
+    else if(user.get('deleted_at') != null)
+      res.status(404).json({
+        success: 0,
+        message: "The user was deleted"
+      });
+    else{
+      req.current_user = user;
+      return next();
+    }
+  }).catch(err=>next(err));
+}
+
 /*
   must ensure req.group exist.
   Check  
@@ -214,6 +238,7 @@ function checkUserPermissionModifyGroupActions(req: IRequest, res: Response, nex
 
 module.exports = {
   checkGroup,
+  checkUser,
   checkUserPermissionAccessGroup,
   checkUserBelongsToGroup,
   checkActionType,

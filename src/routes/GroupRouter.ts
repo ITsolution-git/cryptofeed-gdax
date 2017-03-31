@@ -421,36 +421,62 @@ export class GroupRouter {
     });
   }
 
-  // /**
-  // * @description Allows user to join a group
-  // * @param Request
-  // * @param Response
-  // * @param Callback function (NextFunction)
-  // * TODO: need to ensure group is public, or member has group add code
-  // */
-  // public joinGroup(req: Request, res: Response, next: NextFunction) {
-  //   tokenHelper.getUserIdFromRequest(req, (err, user_id, token) => {
-  //     if(err) {
-  //         res.status(401).json({
-  //         status: 'Token has expired',
-  //         message: 'Your token has expired.'
-  //       });
-  //     } else {
-  //       let group_id = parseInt(req.params.id);
-  //       // TODO: ensure user is not a current member of the group
-  //       toolHelpers.joinGroup(group_id, user_id, function() {
-  //         toolHelpers.getGroupById(group_id)
-  //           .then((group) => {
-  //             res.status(200).json({
-  //               status: 'success',
-  //               token: tokenHelper.encodeToken(user_id),
-  //               group: group
-  //             });
-  //         });
-  //       });
-  //     }
-  //   });
-  // }
+  /**
+  * @description Allows user to join a group
+                      Call allows the user to join a group, 
+                          based on the supplied group ID
+                      Call creates a new group_user record for the auth user
+                  Return error if user is already a member of the group
+                      If the group is private, require the group code as part 
+                        of the payload and validate it matches group.group_code, 
+                      otherwise return 401 unauthorized
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  * TODO: need to ensure group is public, or member has group add code
+  */
+  public joinGroup(req: IRequest, res: Response, next: NextFunction) {
+    //Check if you has already joined this group
+    req.user.getGroupIDs().then(function(groupIDs){
+      if(groupIDs.indexOf(req.current_group.get('group_id')) != -1){
+        throw new Error('Sorry. You have already joined this group.');
+      }
+      else{
+        return groupIDs;
+      }
+    })
+    .then(()=>{
+      //Check if group is private and requires group_code
+      if(req.current_group.get('private') == true){
+        if(req.body.group_code){
+          if(req.body.group_code == req.current_group.get('group_code')){
+            return req.user.joinGroup(req.current_group.id);
+          }
+          else{
+            throw new Error('Sorry. Group Code does not match');
+          }
+        }
+        else{
+          throw new Error('Sorry. Please send Group Code.');
+        }
+      }
+      else{
+        return req.user.joinGroup(req.current_group.id);
+      }
+    })  
+    .then((group_user)=>{
+      res.status(204).json({
+        // success: 1,
+        // group_user: group_user
+      });
+    })
+    .catch(err => {
+      res.status(400).json({
+        success: 0,
+        message: err.message
+      })
+    })
+  }
 
   /**
   * @description 
@@ -581,7 +607,6 @@ export class GroupRouter {
           });
         })
         .catch((err) => {
-          console.log(util.inspect(err));
           res.status(401).json({
             status: 'error',
             message: 'Something went wrong, and we didn\'t retreive the action types. :('
@@ -626,6 +651,78 @@ export class GroupRouter {
           });
         });
       }
+    });
+  }
+
+
+  /**
+  * @description Updates group member
+                    Call updates permissions for the specific group member user_id
+                    Call updates the existing group_user record for the user
+                    Only data params sent to the call are updated
+                    Return error if user does not have group_user.admin_members as true
+
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  public updateGroupMember(req: IRequest, res: Response, next: NextFunction) {
+    req.user.isGroupAdminMember(req.current_group.id)
+    .then((hasAdminMember)=>{
+      if(!hasAdminMember)
+        throw new Error("Sorry, You don't have permission to update the group member.");
+      else{
+        return GroupUser.where({  user_id: req.current_user.id, 
+                                  group_id: req.current_group.id  }).save(req.body);
+      }
+    })
+    .then((group_user)=>{
+      return GroupUser.where({  user_id: req.current_user.id, 
+                                  group_id: req.current_group.id  }).fetch();
+    })
+    .then((group_user)=>{                         
+      let user = User.getSafeUserFromJS(req.current_user.toJSON());
+      user.permissions = group_user;
+      res.status(200).json({
+        success: 1,
+        user: user
+      });
+    })
+    .catch(err=>{
+      res.status(500).json({
+        success: 0,
+        message: err.message
+      });
+    });
+  }
+
+  /**
+  * @description sets the deleted_at flag for the specified group
+                    Deletes the specified group, by setting the deleted_at 
+                      timestamp and deleted_by_user_id
+                    Call should verify caller has the admin_settings group 
+                      permission, otherwise return 401 unauthorized
+  * @param Request
+  * @param Response
+  * @param Callback function (NextFunction)
+  */
+  public deleteGroup(req: IRequest, res: Response, next: NextFunction) {
+    req.user.isGroupAdminSetting(req.current_group.id)
+    .then((hasAdminSetting)=>{
+      if(!hasAdminSetting)
+        throw new Error("Sorry, You don't have permission to delete the group.");
+      else{
+        return req.current_group.deleteBy(req.user.id);
+      }
+    })
+    .then(()=>{
+      res.status(204).json({});
+    })
+    .catch(err=>{
+      res.status(500).json({
+        success: 0,
+        message: err.message
+      });
     });
   }
 
@@ -698,6 +795,18 @@ export class GroupRouter {
                     groupHelper.checkGroup,
                     groupHelper.checkUserBelongsToGroup,
                     this.getGroupMembers);
+
+    this.router.post('/:group_id/members', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.joinGroup),
+                    groupHelper.checkGroup,
+                    this.joinGroup);
+    this.router.put('/:group_id/members/:user_id', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.updateGroupMember),
+                    groupHelper.checkGroup,
+                    groupHelper.checkUser,
+                    this.updateGroupMember);
       // this.router.put('/:id/members/:user_id', this.updateGroupMember);
       // this.router.get('/:id/actions/types', this.getActionTypes);
     this.router.get('/:group_id/actions', 
@@ -714,9 +823,16 @@ export class GroupRouter {
                     groupHelper.checkUserBelongsToGroup,
                     groupHelper.checkUserPermissionModifyGroupActions,
                     this.createGroupAction);
+
+    this.router.delete('/:group_id', 
+                    toolHelpers.ensureAuthenticated,
+                    validate(GroupValidation.deleteGroup),
+                    groupHelper.checkGroup,
+                    this.deleteGroup);
+
+      // this.router.delete('/:id/actions/:action_id', this.deleteGroupAction);
       // this.router.get('/:id/actions/:action_id', this.getGroupAction);
       // this.router.put('/:id/actions/:action_id', this.updateGroupAction);
-      // this.router.delete('/:id/actions/:action_id', this.deleteGroupAction);
       // this.router.post('/:id/actions/:action_id/complete', this.markGroupActionComplete);
   }
 }

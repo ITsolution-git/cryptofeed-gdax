@@ -7,5 +7,6 @@ export interface IRequest extends Request{
   current_group: any,
   action_type: any,
   publicGroups: any,
-  group: any
+  group: any,
+  current_user: any
 }
