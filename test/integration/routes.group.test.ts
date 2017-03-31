@@ -608,6 +608,29 @@ describe('********* routes : group *********', function(){
   });
 
   describe('POST /api/v1/groups', () => {
+
+    it('should return error without login', (done) => {
+      chai.request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'jasonh@actodo.co',
+        password: 'letmein'
+      })
+      .end((error, response) => {
+        should.not.exist(error);
+        chai.request(app)
+        .post('/api/v1/groups')
+        .set('authorization', 'Bearer ' + response.body.token)
+        .end((err, res) => {
+          should.exist(err);
+          res.status.should.eql(400);
+          res.type.should.eql('application/json');
+          res.body.success.should.eql(0);
+          done();
+        });
+      });
+    });
+
     it('should create a new group', (done) => {
       chai.request(app)
       .post('/api/v1/auth/login')
@@ -632,7 +655,7 @@ describe('********* routes : group *********', function(){
           should.not.exist(err);
           res.status.should.eql(201);
           res.type.should.eql('application/json');
-          res.body.status.should.eql('success');
+          res.body.success.should.eql(1);
           res.body.should.have.property('group');
           res.body.group.should.have.property('name');
           res.body.group.name.should.equal('TEST CREATE GROUP');
@@ -641,19 +664,16 @@ describe('********* routes : group *********', function(){
         });
       });
     });
-  });
 
-  describe('POST /api/v1/groups', () => {
+
     it('return 401 unauthorized', (done) => {
       chai.request(app)
       .post('/api/v1/groups')
       .send({
-        created_by_user_id: 1,
         name: 'TEST CREATE GROUP',
         private: 0,
         description: 'TEST CREATE GROUP DESCRIPTION',
         welcome: 'WELCOME TO THE TEST CREATE GROUP',
-        banner_image_url: 'https://upload.wikimedia.org/wikipedia/en/8/86/Avatar_Aang.png',
         latitude: '51.5032520',
         longitude: '-0.1278990'
       })
@@ -664,6 +684,7 @@ describe('********* routes : group *********', function(){
       });
     });
   });
+
 //   describe('GET /api/v1/groups', () => {
 //     it('should return a success', (done) => {
 //       chai.request(app)
