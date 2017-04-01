@@ -483,13 +483,14 @@ export class GroupRouter {
             - Returns an array of group members, and their individual permissions
             - Call should ensure caller is a member of the group, otherwise return 401 unauthorized
 
+             ** For now do not return banned user **
   * @param Request
   * @param Response
   * @param Callback function (NextFunction)
   * TODO: Need to ensure user is member of group, or group is public
   */
   public getGroupMembers(req: IRequest, res: Response, next: NextFunction) {
-
+    // Get all members in this group with permission field included.
     Promise.all(req.current_group.related('users').map((user)=>{
       return GroupUser.where({user_id: user.id, group_id: req.current_group.id}).fetch()
       .then((groupuser)=>{
@@ -499,9 +500,14 @@ export class GroupRouter {
       });
     }))
     .then((users)=>{
+      //Just Remove this code to return banned user
+      let notBanned = users.filter((user)=>{
+        return user['group_user'].get('banned') == false;
+      });
+      //   **    //
       res.status(200).json({
         success: 1,
-        members: users
+        members: notBanned
       });
     })
     .catch(err=>{
@@ -605,6 +611,7 @@ export class GroupRouter {
       if(!hasAdminMember)
         throw new Error("Sorry, You don't have permission to update the group member.");
       else{
+        // This record must be exist as checkUserBelongsToGroup was passed
         return GroupUser.where({  user_id: req.current_user.id, 
                                   group_id: req.current_group.id  }).fetch();
       }
@@ -613,10 +620,12 @@ export class GroupRouter {
       return group_user.save(req.body);
     })
     .then((group_user)=>{
+      // Get group_user again because saved group_user only include updated fields(in req.body)
       return GroupUser.where({  user_id: req.current_user.id, 
                                   group_id: req.current_group.id  }).fetch();
     })
     .then((group_user)=>{                         
+      // Get Safe User with removed password, token, reset_token..
       let user = User.getSafeUserFromJS(req.current_user.toJSON());
       user.permissions = group_user;
       res.status(200).json({
