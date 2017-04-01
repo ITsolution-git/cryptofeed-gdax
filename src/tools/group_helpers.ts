@@ -172,11 +172,14 @@ function publicGroups(req: IRequest, res: Response, next: NextFunction) {
   })
   .then(userGroupIDs=>{
     Group.collection().query(function(qb){
-      qb.where(function(){
+      qb.where(function(){  
         this.where('private', '=', 0);
         this.whereNull('deleted_at');
         this.whereNot('group_id', 1);
-      }).orWhereIn('group.group_id', userGroupIDs);
+      }).orWhere(function(){
+        this.whereIn('group.group_id', userGroupIDs);
+        this.whereNot('group.group_id', 1);
+      });
     }).fetch({
       withRelated: [ 
         {'tags':function(qb) {
