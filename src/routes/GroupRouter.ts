@@ -606,8 +606,11 @@ export class GroupRouter {
         throw new Error("Sorry, You don't have permission to update the group member.");
       else{
         return GroupUser.where({  user_id: req.current_user.id, 
-                                  group_id: req.current_group.id  }).save(req.body);
+                                  group_id: req.current_group.id  }).fetch();
       }
+    })
+    .then((group_user)=>{
+      return group_user.save(req.body);
     })
     .then((group_user)=>{
       return GroupUser.where({  user_id: req.current_user.id, 
