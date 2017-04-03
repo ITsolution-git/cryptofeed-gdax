@@ -40,8 +40,8 @@ export default {
   // PUT /groups
   putGroup: {
     body: Joi.object({
-        name: Joi.string().required(),
-        private: Joi.boolean().required(),
+        name: Joi.string().optional(),
+        private: Joi.boolean().optional(),
         description: Joi.string(),
         welcome: Joi.string(),
         latitude: Joi.number().optional(),

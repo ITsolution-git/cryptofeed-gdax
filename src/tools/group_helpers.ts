@@ -45,23 +45,24 @@ function checkGroup(req: IRequest, res: Response, next: NextFunction) {
     - User deleted?
   */
 function checkUser(req: IRequest, res: Response, next: NextFunction) {
-  return User.where({user_id:req.params.user_id,}).fetch({withRelated: []})
-  .then(user=>{
-    if(user==null)
-      res.status(404).json({
-        success: 0,
-        message: "user not found"
-      });
-    else if(user.get('deleted_at') != null)
-      res.status(404).json({
-        success: 0,
-        message: "The user was deleted"
-      });
-    else{
-      req.current_user = user;
-      return next();
-    }
-  }).catch(err=>next(err));
+  if(req.current_group.get('private') == 1){ //if private
+    req.user.getGroupIDs().then(function(groupIDs){
+      if(groupIDs.indexOf(req.current_group.get('group_id')) == -1){
+        //If user is not a member of group
+        return res.status(403).json({
+          success: 0,
+          message: "You are not allowed to access private group"
+        }); 
+      }
+      else{
+        return next();
+      }
+    });
+  }
+  //Otherwise  -groups is public or user belongs to private group
+  else{
+    return next();
+  }
 }
 
 /*
@@ -84,6 +85,20 @@ function checkUserPermissionAccessGroup(req: IRequest, res: Response, next: Next
       }
     });
   }
+
+  ActionType.where({action_type_id: req.body.action_type_id}).fetch()
+  .then(action_type=>{
+    if(action_type == null){
+      res.status(404).json({
+        success: 0,
+        message: "No Action Type exist"
+      })
+    }
+    else{
+      req.action_type = action_type;
+      next();
+    }
+  })
   //Otherwise  -groups is public or user belongs to private group
   else{
     return next();

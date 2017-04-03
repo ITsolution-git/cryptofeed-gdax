@@ -26,10 +26,6 @@ export default bookshelf.Model.extend({
     //       { isEmail: {allow_display_name: true} }, // Options object passed to node-validator
     //       // { method: 'isLength', error: 'Username 4-32 characters long.', args: [4, 32] } // Custom error message
     //     ],
-    //     password: [
-    //       { method: 'isRequired', error:'Password Required'},
-    //       { method: 'isLength', error: 'Password shoud be longer than 6.', args: [6] }, // Custom error message
-    //     ]
     //   };
     // else
     //   this.validations =  {
@@ -79,7 +75,7 @@ export default bookshelf.Model.extend({
   groups: function() {
     return this.belongsToMany(Group, 'group_user', 'user_id', 'group_id', 'user_id', 'group_id').query(function(qb){
       qb.whereNull('deleted_at');
-      // qb.whereNot('group.  ac', 1);
+      // qb.whereNot('group.  ac', 1);    Just uncomment when group is to delete id 1
     });
   },
   actions: function() {

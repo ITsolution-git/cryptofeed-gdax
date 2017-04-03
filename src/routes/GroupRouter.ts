@@ -145,67 +145,39 @@ export class GroupRouter {
   * @param Callback Function
   */
   public createGroup(req: IRequest, res: Response, next: NextFunction) {
-    return new Group({...req.body, created_by_user_id: req.user.id}).save()
-      .then((group) => {
-        if(req.files){
-          try{
-            let file = req.files.banner_image_file;
-            let relativepath = './public/uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
-            var targetPath = path.resolve(relativepath);
-            if ((path.extname(file.name).toLowerCase() === '.jpg')||
-                (path.extname(file.name).toLowerCase() === '.png')) { 
-
-              file.mv(targetPath, function(err) {
-                if (err) {
-                  err.message = "Upload failed";
-                  throw err;
-                }
-                else {
-                  return true;
-                }
-              });
-              let image_url = toolHelpers.getBaseUrl(req) + 'uploads/groups/banners/'+group.get('group_id')+path.extname(file.name).toLowerCase();
-              return group.save({banner_image_file:image_url });
-
-            } else {
-              let err = new Error();
-              err.message = "Only jpg/png are acceptable";
-              throw err;
+    if(req.current_group.get('private') == 1){ //if private
+      toolHelpers.isAuthenticated(req)
+      .then((user)=>{
+        if(user != false){    // If user is authenticated 
+          user.getGroupIDs().then(function(groupIDs){  //and member of group
+            if(groupIDs.indexOf(req.current_group.get('group_id')) == -1){
+              //If user is not a member of group
+              return res.status(403).json({
+                success: 0,
+                message: "You are not member of this group"
+              }); 
             }
-          }catch(err){
-            if(!err.message) err.message = "Unknown error prevented from uploading";
-            throw err;
-          }
-        }
-        else{
-          return group;
-          
-        }
-      })
-      .then((group) => {
-        req.group = group;
-        return group.related('setting').save({allow_member_action: false, member_action_level:0});
-      })
-      .then((group_setting)=>{
-        return req.group.saveCreator();
-      })
-      .then(()=>{
-        return req.group.generateGroupCodeAndSave();
-      })
-      .then((group) => {
-        res.status(201).json({
-            success: 1,
-            token: tokenHelper.encodeToken(req.user.get('user_id')),
-            group: req.group,
-            message:"Success"
+            else{
+              res.status(200).json({
+                success: 1,
+                group: req.current_group
+              });
+            }
           });
+        }else{
+          //Not authenticated
+          return res.status(401).json({
+            success: 0,
+            message: "You are not allowed to access private group"
+          }); 
+        }
       })
-      .catch((err) => {
-        return res.status(500).json({
-          success: 0,
-          message:err.message,
-          data:err.data,  
-        });
+    }
+    //Otherwise  -groups is public or user belongs to private group
+    else{
+      res.status(200).json({
+        success: 1,
+        group: req.current_group
       });
     }
 
@@ -516,6 +488,49 @@ export class GroupRouter {
         message: err.message
       });
     });
+
+    //Check if you has already joined this group
+    req.user.getGroupIDs().then(function(groupIDs){
+      if(groupIDs.indexOf(req.current_group.get('group_id')) != -1){
+        throw new Error('Sorry. You have already joined this group.');
+      }
+      else{
+        return groupIDs;
+      }
+    })
+    .then(()=>{
+      //Check if group is private and requires group_code
+      if(req.current_group.get('private') == true){
+        if(req.body.group_code){
+          if(req.body.group_code == req.current_group.get('group_code')){
+            return req.user.joinGroup(req.current_group.id);
+          }
+          else{
+            throw new Error('Sorry. Group Code does not match');
+          }
+        }
+        else{
+          throw new Error('Sorry. Please send Group Code.');
+        }
+      }
+      else{
+        return req.user.joinGroup(req.current_group.id);
+      }
+    })  
+    .then((group_user)=>{
+      res.status(204).json({
+        // success: 1,
+        // group_user: group_user
+      });
+    })
+    .catch(err => {
+      res.status(400).json({
+        success: 0,
+        message: err.message
+      })
+    })
+  }
+
   }
 
 
