@@ -2,13 +2,53 @@ import * as path from 'path';
 import * as express from 'express';
 import * as logger from 'morgan';
 import * as bodyParser from 'body-parser';
+import {IRequest} from './classes/IRequest';
+
 const toolHelpers = require('./tools/_helpers');
-import GroupRouter from './routes/GroupRouter';
+
 import AuthRouter from './routes/AuthRouter';
 import UserRouter from './routes/UserRouter';
-import ActionRouter from './routes/ActionRouter';
+import BitcoinRouter from './routes/BitcoinRouter';
 var fileUpload = require('express-fileupload');
+
+let morgan = require('morgan')
+let uuid = require('node-uuid')
+let rp = require('request-promise')
+morgan.token('id', function getId (req) {
+  return req.id
+})
 var moment = require('moment');
+global.btcUsd = 7000 // initial
+global.btcAud = 10000
+
+
+let updateExchangeRate = async function (pair) {
+  let json
+  try {
+    json = await rp.get({url: 'https://www.bitstamp.net/api/v2/ticker/' + pair, json: true})  
+  } catch (err) {
+    return console.log(err.message)
+  }
+  switch (pair) {
+    case 'btcusd': global.btcUsd = json.ask; break
+  }
+}
+
+let updateExchangeRateAUD = async function () {
+  let json
+  try {
+    json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
+  } catch (err) {
+    return console.log(err.message)
+  }
+  
+  global.btcAud = json;
+   
+}
+updateExchangeRate('btcusd').then(()=>updateExchangeRateAUD())
+setInterval(() => updateExchangeRate('btcusd').then(()=>updateExchangeRateAUD()), 5 * 60 * 1000)
+
+require('./bitcoin_test')
 // Creates and configures an ExpressJS web server.
 class App {
 
@@ -29,6 +69,15 @@ class App {
     this.express.use(bodyParser.json());
     this.express.use(bodyParser.urlencoded({ extended: false }));
     this.express.use(express.static(__dirname + '/../public')); 
+
+    this.express.use(function (req: IRequest, res, next) {
+      req.id = uuid.v4()
+      next()
+    })
+    this.express.use(morgan(':id :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
+
+    this.express.set('trust proxy', 'loopback')
+
   }
 
   // Configure API endpoints.
@@ -41,16 +90,16 @@ class App {
     router.get('/', (req, res, next) => {
       res.status(200).json({
         success: 1,
-        message: 'Action Now API v1.0',
-        lastChange: '02/20/2017 08:25 pm'
+        message: 'Reloadable CARD v1.0',
+        lastChange: '02/21/2018 08:25 pm',
+        btcAud: global.btcAud
       });
     });
 
     this.express.use('/api/:version', router);
-    this.express.use('/api/v1/groups', GroupRouter);
-    this.express.use('/api/v1/auth', AuthRouter);
-    this.express.use('/api/v1/user', toolHelpers.ensureAuthenticated, UserRouter);
-    this.express.use('/api/v1/actions', toolHelpers.ensureAuthenticated, ActionRouter);
+    this.express.use('/api/v1/auth', AuthRouter.router);
+    this.express.use('/api/v1/user', toolHelpers.ensureAuthenticated, UserRouter.router);
+    this.express.use('/api/v1/bitcoin',  BitcoinRouter.router);
 
   }
 

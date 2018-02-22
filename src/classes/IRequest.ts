@@ -9,4 +9,5 @@ export interface IRequest extends Request{
   publicGroups: any,
   group: any,
   current_user: any
+  id: any;
 }

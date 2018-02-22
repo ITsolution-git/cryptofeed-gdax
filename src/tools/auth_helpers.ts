@@ -9,7 +9,7 @@ var moment = require('moment');
 //Model Import
 import bookshelf from '../db/bookshelf';
 import User from '../db/models/user';
-import Action from '../db/models/action';
+
 //Helper Import
 const toolHelpers = require('./_helpers');
 /*

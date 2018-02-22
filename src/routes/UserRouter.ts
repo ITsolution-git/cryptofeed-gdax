@@ -8,10 +8,7 @@ import UserValidation from '../validations/UserValidation';
 import bluebird from 'bluebird';
 var util = require('util');
 import User from '../db/models/user';
-import Group from '../db/models/group';
-import ActionUser from '../db/models/action_user';
-import GroupUser from '../db/models/group_user';
-import Action from '../db/models/action';
+
 
 var path = require('path'),
     fs = require('fs');
@@ -40,12 +37,10 @@ export class UserRouter {
         return User.where({user_id:parseInt(req.params.id)}).fetch({
           columns: ['user_id',
                     'created_at',
-                    'username',
+                    'updated_at',
                     'first_name',
-                    'avatar_file',
-                    'bio',
-                    'longitude',
-                    'latitude',
+                    'last_name',
+                    'email'
                    ]
         })
         .asCallback((err, user) => {
@@ -154,109 +149,6 @@ export class UserRouter {
       });
     }
 
-    /**
-    * @description Gets list of groups user belongs to
-    * @param Request
-    * @param Response
-    * @param Callback function (NextFunction)
-    */
-    public getGroups(req: IRequest, res: Response, next: NextFunction) {
-      let uid;
-
-      if(!req.params.id) {
-        uid = req.user.id;
-      }
-      else
-        uid = parseInt(req.params.id);
-      User.where({user_id: uid}).fetch({
-        withRelated: [ 'groups']
-      })
-      .asCallback((err, user) => {
-        if(err) return res.status(500).json({success: 0, message:err.message, token:"", groups:[]});
-        if(user == null)  return res.status(500).json({success:0, message:"Invalid userid"});
-        return res.status(200).json({
-          success: 1,
-          groups: user.related('groups')  
-        });
-      });
-    }
-
-
-    /**
-    * @description Gets list of actions user can perform
-    *              skip = 0 and deleted_at=null
-    * @param Request
-    * @param Response
-    * @param Callback function (NextFunction)
-    */
-
-    public getActions(req: IRequest, res: Response, next: NextFunction) {
-
-      var skipnfinishActionIDs = [];  
-      var userGroupsIDs = [];
-      ActionUser.collection().query(function(qb) { //Actionuser table saves all skipped or completed actions.
-        qb.where('user_id', '=', req.user.get('user_id'))
-      }).fetch({columns:['action_id']})
-      .then(skipnfinish=>{
-        skipnfinishActionIDs = skipnfinish.toJSON().map((actionuser)=>{return actionuser.action_id});
-        return GroupUser.collection().query(function(qb) {
-          qb.where('user_id', '=', req.user.get('user_id'))
-        }).fetch({columns:['group_id']});
-      })
-      .then(groups=>{
-        userGroupsIDs = groups.toJSON().map((group)=>{return group.group_id});
-
-        return Action.collection().query(function(qb) {
-          qb.whereIn('group_id', userGroupsIDs).whereNotIn('action_id', skipnfinishActionIDs).where('deleted_at', null)
-        }).fetch({withRelated:[
-          {'creator':function(qb) {
-            qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
-          }},
-          'action_type']})
-      })
-      .then(actions=>{
-        res.status(200).json({
-          success: 1,
-          actions:actions
-        });
-      })
-      .catch(err=>{
-        res.status(400).json({
-          success: 0,
-          message: err.message,
-        })
-      })
-      // var nonskipIDs = [];
-      // ActionUser.collection().query(function(qb) {
-      //   qb.where('user_id', '=', req.user.get('user_id')).andWhere('skip', '=', false)
-      // }).fetch({columns:['action_id']})
-      // .then(nonskip=>{
-      //   nonskipIDs = nonskip.toJSON().map((actionuser)=>{return actionuser.action_id});
-      //   return User.where(function(qb) {
-      //     qb.where('user_id', '=', req.user.get('user_id'))
-      //   }).fetch({withRelated:[
-      //     {'actions.creator':function(qb) {
-      //       qb.column('user_id', 'first_name', 'last_name', 'avatar_file');
-      //     }},
-      //     'actions.action_type']})
-      // })
-      // .then(user=>{
-      //   return user.related('actions').query(function(qb){
-      //     qb.whereIn('action.action_id', nonskipIDs)
-      //   }).fetch().then(result=>{
-      //     res.status(200).json({
-      //       actions:result
-      //     });
-      //   })
-      // })
-      // .catch(err=>{
-      //   res.status(400).json({
-      //     success: 0,
-      //     message: err.message,
-      //   })
-      // })
-    }
-
     public putUserpassword(req: IRequest, res: Response, next: NextFunction) {
       try{
         req.user.authenticate(req.body.original_password);
@@ -302,16 +194,13 @@ export class UserRouter {
     this.router.get('/', this.getUser);
     this.router.put('/', validate(UserValidation.putUser), this.putUser);
     this.router.put('/password', validate(UserValidation.putUserpassword), this.putUserpassword);
-    this.router.get('/groups',  this.getGroups);
-    this.router.get('/actions',  this.getActions);
     this.router.get('/:id', validate(UserValidation.getUser), this.getUser);
-    this.router.get('/:id/groups', validate(UserValidation.getUserGroups), this.getGroups);
   }
 
 }
 
 // Create the AuthRouter, and export its configured Express.Router
-const authRoutes = new UserRouter();
-authRoutes.init();
+const userRoutes = new UserRouter();
+userRoutes.init();
 
-export default authRoutes.router;
+export default userRoutes;

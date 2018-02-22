@@ -1,1 +1,1 @@
-exports.sendgrid =  require("sendgrid")(process.env.SENDGRID_API_KEY);
+exports.sendgrid = require("sendgrid")(process.env.SENDGRID_API_KEY);

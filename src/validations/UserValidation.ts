@@ -19,13 +19,6 @@ export default {
     }
   },
   
-  // GET user/groups
-  getUserGroups: {
-    params: {
-        id: Joi.number().integer().required()
-    }
-  },
-
   // PUT user/password
   putUserpassword: {
     body: Joi.object({
