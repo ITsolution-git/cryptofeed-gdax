@@ -9,6 +9,11 @@ const toolHelpers = require('./tools/_helpers');
 import AuthRouter from './routes/AuthRouter';
 import UserRouter from './routes/UserRouter';
 import BitcoinRouter from './routes/BitcoinRouter';
+import StaticRouter from './routes/StaticRouter';
+import CouponRouter from './routes/CouponRouter';
+import CustomerRouter from './routes/CustomerRouter';
+import OrderRouter from './routes/OrderRouter';
+
 var fileUpload = require('express-fileupload');
 
 let morgan = require('morgan')
@@ -95,11 +100,16 @@ class App {
         btcAud: global.btcAud
       });
     });
+    this.express.use('/', StaticRouter.router);
 
     this.express.use('/api/:version', router);
     this.express.use('/api/v1/auth', AuthRouter.router);
     this.express.use('/api/v1/user', toolHelpers.ensureAuthenticated, UserRouter.router);
     this.express.use('/api/v1/bitcoin',  BitcoinRouter.router);
+    //CRUD
+    this.express.use('/api/v1/coupons', CouponRouter.router);
+    this.express.use('/api/v1/customers', CustomerRouter.router);
+    this.express.use('/api/v1/orders', OrderRouter.router);
 
   }
 
