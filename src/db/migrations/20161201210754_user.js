@@ -8,6 +8,9 @@ exports.up = (knex, Promise) => {
     table.string('password').defaultTo();
     table.string('first_name').defaultTo('');
     table.string('last_name').defaultTo('');
+
+    table.string('role').defaultTo('customer');
+    table.string('customer_id').defaultTo('');
     
     table.string('reset_password_token').nullable();
     table.dateTime('reset_password_expires', true).defaultTo();

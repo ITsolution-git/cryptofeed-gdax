@@ -19,7 +19,7 @@ exports.up = function(knex, Promise) {
     table.string('card_amount').defaultTo('');
     table.string('btc_amount').defaultTo('');
 
-    table.string('discount').defaultTo('');
+    table.string('discount').defaultTo(0);
 
     table.string('exchange_rate').defaultTo('');
 
@@ -30,6 +30,7 @@ exports.up = function(knex, Promise) {
     table.string('callback_url').defaultTo('');
     table.string('transaction_hash').defaultTo('{}');
     table.string('shipping_number').defaultTo('');
+    
     table.string('status').defaultTo('');
     
   });

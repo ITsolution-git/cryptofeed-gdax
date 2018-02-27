@@ -39,19 +39,23 @@ let updateExchangeRate = async function (pair) {
   }
 }
 
-let updateExchangeRateAUD = async function () {
+let updateExchangeRateBitpay = async function (note) {
   let json
   try {
-    json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
+    // json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
+    json = await rp.get({url: 'https://bitpay.com/rates/' + note , json: true})  
+    
   } catch (err) {
     return console.log(err.message)
   }
-  
-  global.btcAud = json;
-   
+  if( note == 'usd')
+    global.btcUsd = json;
+  else if( note == 'aud' )
+    global.btcAud = json;
 }
-updateExchangeRate('btcusd').then(()=>updateExchangeRateAUD())
-setInterval(() => updateExchangeRate('btcusd').then(()=>updateExchangeRateAUD()), 5 * 60 * 1000)
+
+updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud'))
+setInterval(() => updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud')), 5 * 60 * 1000)
 
 require('./bitcoin_test')
 // Creates and configures an ExpressJS web server.
@@ -97,7 +101,8 @@ class App {
         success: 1,
         message: 'Reloadable CARD v1.0',
         lastChange: '02/21/2018 08:25 pm',
-        btcAud: global.btcAud
+        btcAud: global.btcAud,
+        btcUsd: global.btcUsd
       });
     });
     this.express.use('/', StaticRouter.router);

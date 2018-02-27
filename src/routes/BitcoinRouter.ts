@@ -23,6 +23,7 @@ const blockchain = require('../tools/blockchain');
 
 declare const storage;
 declare const btcAud;
+declare const btcUsd;
 export class BitcoinRouter {
   router: Router
 
@@ -35,7 +36,7 @@ export class BitcoinRouter {
   }
 
   public current_price(req: IRequest, res: Response, next: NextFunction) {
-    res.json(btcAud.bpi);
+    res.json({btcAud: btcAud, btcUsd: btcUsd});
   }
 
   public request_payment(req: IRequest, res: Response, next: NextFunction) {
