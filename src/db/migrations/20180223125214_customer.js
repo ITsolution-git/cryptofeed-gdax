@@ -7,6 +7,7 @@ exports.up = function(knex, Promise) {
     table.dateTime('updated_at', true).defaultTo();
 
     table.increments('customer_id');
+    
     table.string('membership_number', 80);
     table.string('title').defaultTo('');
     table.string('first_name').defaultTo('');

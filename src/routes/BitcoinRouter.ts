@@ -4,8 +4,11 @@ import {IRequest} from '../classes/IRequest';
 //Model Import
 import User from '../db/models/user';
 import Order from '../db/models/order';
+import Customer from '../db/models/customer';
 //Validation Import
 import AuthValidation from '../validations/AuthValidation';
+import BitcoinValidation from '../validations/BitcoinValidation';
+
 const validate = require('../classes/ParamValidator');
 //Npm Import
 var request = require('request');
@@ -41,8 +44,9 @@ export class BitcoinRouter {
 
   public request_payment(req: IRequest, res: Response, next: NextFunction) {
     let exchangeRate, btcToAsk, satoshiToAsk
-    let customer_id = req.body.customer_id;
-
+    
+    let card_type = req.body.card_type;
+	  
 	  switch (req.body.currency) {
 	    case 'BTC': exchangeRate = 1
       	break
@@ -56,9 +60,8 @@ export class BitcoinRouter {
 	  btcToAsk = satoshiToAsk / 100000000
 
 	  let address = signer.generateNewSegwitAddress()
-
-	  let invoiceData = {
-	    'customer_id': customer_id,
+	  let invoiceData:any = {
+	    
 	    'currency': req.body.currency,
 	    'exchange_rate': exchangeRate,
 
@@ -85,38 +88,59 @@ export class BitcoinRouter {
 	    'order_id': 0
 	  };
 
-	  (async function () {
-	    // console.log(req.id, 'checking seller existance...')
-	    // if (typeof responseBody.error !== 'undefined') { // seller doesnt exist
-	    //   console.log(req.id, 'seller doesnt exist. creating...')
-	    //   let address = signer.generateNewSegwitAddress()
-	    //   let sellerData = {
-	    //     'WIF': address.WIF,
-	    //     'address': address.address,
-	    //     'timestamp': Date.now(),
-	    //     'seller': req.body.seller,
-	    //     '_id': req.body.seller,
-	    //     'doctype': 'seller'
-	    //   }
-	    //   console.log(req.id, 'created', req.body.seller, '(', sellerData.address, ')')
-	    //   await storage.saveSellerPromise(req.body.seller, sellerData)
-	    //   await blockchain.importaddress(sellerData.address)
-	    // } else { // seller exists
-	    //   console.log(req.id, 'seller already exists')
-	    // }
+	  if( card_type == 'single' ) {
+		  (async function () {
+		    console.log(req.id, 'created address', invoiceData.address)
 
-	    console.log(req.id, 'created address', invoiceData.address)
+		    let order = await new Order(invoiceData).save()
+		    answer.order_id = order.id;
 
-	    let order = await new Order(invoiceData).save()
-	    answer.order_id = order.id;
+		    await blockchain.importaddress(invoiceData.address)
 
-	    await blockchain.importaddress(invoiceData.address)
+		    res.send(answer)
+		  })().catch((error) => {
+		    console.log(req.id, error)
+		    res.send({error: error.message})
+		  })
 
-	    res.send(answer)
-	  })().catch((error) => {
-	    console.log(req.id, error)
-	    res.send({error: error.message})
-	  })
+
+		} else if(card_type == 'reload') {    // when the card is reloadable
+		  (async function () {
+
+				let token = await tokenHelpers.getUserIdFromRequest(req);
+				var user: any;
+
+				if(!token.user_id) {
+					user = await new User(req.body.user).save();
+				} else {
+					user = await User.find({user_id: token.user_id}).fetch();
+				}
+				
+				if(user.customer_id) { //Which mean user has customer fill in
+					invoiceData.customer_id = user.customer_id;
+				} else {
+					let customer = await new Customer(req.body.customer).save();
+					user.customer_id = customer.customer_id;
+					user = user.save();
+
+					invoiceData.customer_id = user.customer_id;
+				}
+
+		    console.log(req.id, 'created address', invoiceData.address)
+
+		    let order = await new Order(invoiceData).save()
+		    answer.order_id = order.id;
+
+		    await blockchain.importaddress(invoiceData.address)
+
+		    res.send(answer)
+		  })().catch((error) => {
+		    console.log(req.id, error)
+		    res.send({error: error.message})
+		  })
+		} else {
+			res.status(404).send({success: 0, message:'Card Type should be reload or single.'})
+		}
   }
 
   public check_payment(req: IRequest, res: Response, next: NextFunction) {
@@ -215,7 +239,7 @@ export class BitcoinRouter {
   init() {
     this.router.get('/check_payment/:order_id',  this.check_payment);
 
-    this.router.post('/request_payment',  this.request_payment);
+    this.router.post('/request_payment', validate (BitcoinValidation.requestPayment), this.request_payment);
     this.router.get('/current_price',  this.current_price);
     
   }

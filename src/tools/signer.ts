@@ -154,7 +154,7 @@ exports.URI = function (paymentInfo) {
   let uri = 'bitcoin:'
   uri += paymentInfo.address
   uri += '?amount='
-  uri += parseFloat((paymentInfo.amount / 100000000))
+  uri += paymentInfo.amount / 100000000.0
   uri += '&message='
   uri += encodeURIComponent(paymentInfo.message)
   if (paymentInfo.label) {
