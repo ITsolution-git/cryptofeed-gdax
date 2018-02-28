@@ -5,10 +5,12 @@ export default {
   register: {
     body: Joi.object({
       email: Joi.string().email().required(),
-      password: Joi.string().required().min(6),
+      password: Joi.string().min(6),
       username: Joi.string(),
       first_name: Joi.string(),
-      last_name: Joi.string()
+      last_name: Joi.string(),
+      google_id: Joi.string(),
+      faceboook_id: Joi.string()
     }).unknown(false)
   },
 
