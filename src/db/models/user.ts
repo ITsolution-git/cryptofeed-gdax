@@ -35,7 +35,7 @@ export default bookshelf.Model.extend({
         .query('where', 'email', this.get('email'))
         .fetch({})
         .then(function (existing) {
-          if (existing) throw new ValidationError('Choose Another Email');
+          if (existing) throw new ValidationError('User Email Duplicated. Choose Another Email');
         });
     }
   },

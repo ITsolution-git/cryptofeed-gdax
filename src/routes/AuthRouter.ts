@@ -103,6 +103,86 @@ export class AuthRouter {
     });
   }
 
+ /**
+  * Logs the user in. Expects email in request object.
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public loginFacebook(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user)
+        throw Error("Invalid email address");
+      if(!user.get('facebook_id'))
+        throw Error("You are log logged in through Facebook.");
+      req.user = user.toJSON();
+      delete req.user['password'];
+      return user;
+    })
+    .then((response) => {
+      return tokenHelpers.encodeToken(response.id);
+    })
+    .then((token) => {
+      res.status(200).json({
+        success: 1,
+        token: token,
+        user: req.user
+      });
+    })
+    .catch((err) => {
+      res.status(401).json({
+        success: 0,
+        user: {},
+        token: "",
+        data: err.data,
+        message: err.message
+      });
+    });
+  }
+
+ /**
+  * Logs the user in. Expects email in request object.
+  * @param  req Request object
+  * @param  res Response object
+  * @param  next NextFunction that is called
+  * @return 200 JSON of user object and auth token
+  */
+  public loginGoogle(req: IRequest, res: Response, next: NextFunction) {
+    const email = req.body.email;
+    return User.where({email : email}).fetch()
+    .then((user) => {
+      if(!user)
+        throw Error("Invalid email address");
+      if(!user.get('google_id'))
+        throw Error("You are log logged in through Google.");
+      req.user = user.toJSON();
+      delete req.user['password'];
+      return user;
+    })
+    .then((response) => {
+      return tokenHelpers.encodeToken(response.id);
+    })
+    .then((token) => {
+      res.status(200).json({
+        success: 1,
+        token: token,
+        user: req.user
+      });
+    })
+    .catch((err) => {
+      res.status(401).json({
+        success: 0,
+        user: {},
+        token: "",
+        data: err.data,
+        message: err.message
+      });
+    });
+  }
+
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
@@ -110,6 +190,8 @@ export class AuthRouter {
   init() {
     this.router.post('/register', validate(AuthValidation.register), this.register);
     this.router.post('/login', validate(AuthValidation.login), this.login);
+    this.router.post('/facebook/login', validate(AuthValidation.loginFacebook), this.loginFacebook);
+    this.router.post('/google/login', validate(AuthValidation.loginGoogle), this.loginGoogle);
     
   }
 
