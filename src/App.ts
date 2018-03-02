@@ -13,6 +13,7 @@ import StaticRouter from './routes/StaticRouter';
 import CouponRouter from './routes/CouponRouter';
 import CustomerRouter from './routes/CustomerRouter';
 import OrderRouter from './routes/OrderRouter';
+import NewsRouter from './routes/NewsRouter';
 
 var fileUpload = require('express-fileupload');
 
@@ -115,6 +116,7 @@ class App {
     this.express.use('/api/v1/coupons', CouponRouter.router);
     this.express.use('/api/v1/customers', CustomerRouter.router);
     this.express.use('/api/v1/orders', OrderRouter.router);
+    this.express.use('/api/v1/news', NewsRouter.router);
 
   }
 

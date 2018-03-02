@@ -21,6 +21,29 @@ export class CouponRouter {
   }
 
 
+  public validateCoupon(req: IRequest, res: Response, next: NextFunction) {
+
+    return Coupon.where({code:req.body.code}).fetch()
+    .then((coupon) => {        
+      if(coupon)
+        res.status(200).json({
+          success: 1,
+          data: coupon
+        });
+      else 
+        res.status(404).json({
+          success: 0,
+          message: "Coupon Not Exist"
+        });
+    })
+    .catch(function(err){
+      res.status(400).json({
+        success: 0,
+        message: err.message
+      })
+    });
+  }
+  
   public postCoupon(req: IRequest, res: Response, next: NextFunction) {
     
     return new Coupon(req.body).save()
@@ -155,11 +178,13 @@ export class CouponRouter {
    */
   init() {  
     // Routes for /api/v1/user
-    this.router.post('/', validate(CouponValidation.postCoupon), this.postCoupon);
-    this.router.get('/:id', this.getCoupon);
-    this.router.get('/', this.getCoupons);
-    this.router.put('/:id', this.putCoupon);
-    this.router.delete('/:id', this.deleteCoupon);
+
+    this.router.post('/validate', validate(CouponValidation.validateCoupon), this.validateCoupon);
+    this.router.post('/', toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, validate(CouponValidation.postCoupon), this.postCoupon);
+    this.router.get('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getCoupon);
+    this.router.get('/',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getCoupons);
+    this.router.put('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.putCoupon);
+    this.router.delete('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.deleteCoupon);
   }
 
 }

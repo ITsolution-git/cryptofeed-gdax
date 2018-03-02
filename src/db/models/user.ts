@@ -17,8 +17,6 @@ export default bookshelf.Model.extend({
     this.on('saving', this.cryptPassword);
   },
 
- 
-
   cryptPassword: function(model, attributes, options) {
     if (this.hasChanged('password')) {
       const salt = bcrypt.genSaltSync();

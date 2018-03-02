@@ -11,6 +11,11 @@ export default {
     }).unknown(false)
   },
 
+  validateCoupon: {
+    body: Joi.object({
+      code: Joi.string().required(),
+    }).unknown(false)
+  },
   // // POST auth/login
   // login: {
   //   body: Joi.object({
