@@ -4,13 +4,20 @@ export default {
   
   requestPayment: {
     body: Joi.object({
-      card_type: Joi.string().required(),
       currency: Joi.string(),
-      expect: Joi.string().required(),
       message: Joi.string(),
-      callback_url: Joi.string(),
 
-      
+      amount: Joi.string().required(),
+      exchange_rate: Joi.string().required(),
+      card_amount: Joi.string().required(),
+      discount: Joi.string().required(),
+      btc_amount: Joi.string().required(),
+
+      customer: Joi.object({
+        first_name: Joi.string().required(),
+        last_name: Joi.string().required(),
+        email: Joi.string().required()
+      })
     }).unknown(true)
   },
 
