@@ -52,9 +52,9 @@ export class BitcoinRouter {
 	    'message': req.body.message ? req.body.message : '',
 
 	    'exchange_rate': req.body.exchange_rate,
-	    'amount': req.body.exchange_rate,
-	    'card_amount': req.body.exchange_rate,
-	    'discount': req.body.exchange_rate,
+	    'amount': req.body.amount,
+	    'card_amount': req.body.card_amount,
+	    'discount': req.body.discount,
 	    'btc_amount': req.body.btc_amount,
 
 	    'WIF': address.WIF,
@@ -74,7 +74,7 @@ export class BitcoinRouter {
 	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
 	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
 	    'address': invoiceData.address,
-	    'amount': req.body.btc_amount
+	    'btc_amount': req.body.btc_amount
 	  };
 
 		(async function () {
@@ -83,7 +83,7 @@ export class BitcoinRouter {
 			invoiceData.customer_id = customer.get('customer_id');
 
 			let order = await new Order(invoiceData).save()
-			
+
 			answer.customer = customer;
 			answer.order = order;
 

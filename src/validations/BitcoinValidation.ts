@@ -7,7 +7,7 @@ export default {
       currency: Joi.string(),
       message: Joi.string(),
 
-      amount: Joi.string().required(),
+      amount: Joi.number().required(),
       exchange_rate: Joi.string().required(),
       card_amount: Joi.string().required(),
       discount: Joi.string().required(),
