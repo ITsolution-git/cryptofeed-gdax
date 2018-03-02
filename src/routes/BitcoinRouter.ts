@@ -97,66 +97,100 @@ export class BitcoinRouter {
 		});
 
 
-		// } else if(card_type == 'reload') {    // when the card is reloadable
-		// 	let user: any;
-		// 	let userCreated = false;
-		// 	let customerCreated = false;
-		// 	let customer: any;
-		//   (async function () {
-
-		// 		let token = await tokenHelpers.getUserIdFromRequest(req);
-		// 		if(!token.user_id) {
-		// 			if (!req.body.user)
-		// 				throw new Error('User Object should be set in request');
-						
-		// 			user = await new User(req.body.user).save();
-		// 			userCreated = true;
-		// 			req.user = user;
-
-		// 			answer.token = tokenHelpers.encodeToken(req.user.get('user_id'));
-					
-		// 		} else {
-		// 			user = await User.where({user_id: token.user_id}).fetch();
-		// 		}
-
-		// 		answer.user = User.getSafeUserFromJS(user);
-				
-		// 		if(user.get('customer_id')) { //Which mean user has customer fill in
-		// 			invoiceData.customer_id = user.get('customer_id');
-		// 			customer = await Customer.where({customer_id: user.get('customer_id')}).fetch();
-		// 			answer.customer = customer;
-		// 		} else {
-		// 			customer = await new Customer(req.body.customer).save();
-		// 			customerCreated = true;
-		// 			user.set('customer_id', customer.get('customer_id'));
-		// 			user = await user.save();
-
-		// 			invoiceData.customer_id = customer.get('customer_id');
-		// 			answer.customer = customer;
-		// 		}
-
-		//     console.log(req.id, 'created address', invoiceData.address)
-
-		//     let order = await new Order(invoiceData).save()
-		//     answer.order_id = order.id;
-
-		//     await blockchain.importaddress(invoiceData.address)
-
-		//     res.send(answer)
-		//   })().catch((error) => {
-		// 		(async function () {
-		// 			if(customerCreated)
-		// 				await customer.destroy();
-		// 			if(userCreated)
-		// 				await user.destroy();
-		// 			console.log(req.id, error)
-		// 			res.status(400).send({success: 0, error: error.message})
-		// 		})();
-		//   })
-		// } else {
-		// 	res.status(404).send({success: 0, message:'Card Type should be reload or single.'})
-		// }
   }
+
+  public reload_request_payment(req: IRequest, res: Response, next: NextFunction) {
+
+	  let address = signer.generateNewSegwitAddress()
+	  let invoiceData:any = {
+	    'card_type': 'single',
+	    'currency': req.body.currency ? req.body.currency : 'BTC',
+
+	    'message': req.body.message ? req.body.message : '',
+
+	    'exchange_rate': req.body.exchange_rate,
+	    'amount': req.body.amount,
+	    'card_amount': req.body.card_amount,
+	    'discount': req.body.discount,
+	    'btc_amount': req.body.btc_amount,
+
+	    'WIF': address.WIF,
+	    'address': address.address,
+			'status': 'unpaid'
+	  }
+
+	  let paymentInfo = {
+	    address: invoiceData.address,
+	    message: req.body.message,
+	    label: 'Btc card',
+	    amount: req.body.btc_amount
+	  }
+
+	  let answer:any = {
+	    'link': signer.URI(paymentInfo),
+	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
+	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
+	    'address': invoiceData.address,
+	    'btc_amount': req.body.btc_amount
+	  };
+
+		let userCreated = false, customerCreated = false;
+		let user: any;
+		let customer: any;
+		(async function () {
+			console.log(req.id, 'created address', invoiceData.address)
+
+			let token = await tokenHelpers.getUserIdFromRequest(req);
+			if(!token.user_id) {
+				if (!req.body.user)
+					throw new Error('User Object should be set in request');
+				
+				user = await new User(req.body.user).save();
+				userCreated = true;
+				req.user = user;
+				answer.user = user;
+				answer.token = tokenHelpers.encodeToken(req.user.get('user_id'));
+				
+			} else {
+				user = await User.where({user_id: token.user_id}).fetch();
+			}
+
+			answer.user = User.getSafeUserFromJS(user);
+			
+			if(user.get('customer_id')) { //Which mean user has customer fill in
+				invoiceData.customer_id = user.get('customer_id');
+				customer = await Customer.where({customer_id: user.get('customer_id')}).fetch();
+				answer.customer = customer;
+			} else {
+				customer = await new Customer(req.body.customer).save();
+				customerCreated = true;
+				user.set('customer_id', customer.get('customer_id'));
+				user = await user.save();
+
+				invoiceData.customer_id = customer.get('customer_id');
+				answer.customer = customer;
+			}
+
+	    console.log(req.id, 'created address', invoiceData.address)
+
+	    let order = await new Order(invoiceData).save()
+	    answer.order = order;
+
+	    await blockchain.importaddress(invoiceData.address)
+
+	    res.send(answer)
+	  })().catch((error) => {
+			(async function () {
+				if(customerCreated)
+					await customer.destroy();
+				if(userCreated)
+					await user.destroy();
+				console.log(req.id, error)
+				res.status(400).send({success: 0, error: error.message})
+			})();
+	  })
+	}
+
 
   public check_payment(req: IRequest, res: Response, next: NextFunction) {
 
@@ -254,7 +288,8 @@ export class BitcoinRouter {
   init() {
     this.router.get('/check_payment/:order_id',  this.check_payment);
 
-    this.router.post('/single_card/request_payment', validate (BitcoinValidation.requestPayment), this.single_request_payment);
+		this.router.post('/single_card/request_payment', validate (BitcoinValidation.requestSinglePayment), this.single_request_payment);
+    this.router.post('/reload_card/request_payment', validate (BitcoinValidation.requestReloadPayment), this.reload_request_payment);
     this.router.get('/current_price',  this.current_price);
     
   }
