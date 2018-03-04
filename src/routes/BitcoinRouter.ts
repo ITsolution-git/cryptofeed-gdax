@@ -212,8 +212,11 @@ export class BitcoinRouter {
 					break;
 				}
 				
-				if(order.get('status') == 'paid')
+				if(order.get('status') == 'paid'){
 					res.send({success: 1, order: order});
+					break;
+				}
+					
 				tryCount --;
 				await wait(3000);
 			}
