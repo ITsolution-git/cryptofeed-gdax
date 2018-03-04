@@ -11,10 +11,11 @@ function importaddress (address) {
   return client.request('importaddress', [address, address, false])
 }
 
+// [adress, confirmed_count]  0 for unconfirmed and , 1 is counted automatically by  me.
 function getreceivedbyaddress (address) {
   let reqs = [
     client.request('getreceivedbyaddress', [address, 0]),
-    client.request('getreceivedbyaddress', [address, 3])
+    client.request('getreceivedbyaddress', [address, 1])
   ]
 
   return Promise.all(reqs)

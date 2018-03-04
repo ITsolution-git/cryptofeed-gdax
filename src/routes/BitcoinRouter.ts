@@ -195,27 +195,30 @@ export class BitcoinRouter {
   public check_payment(req: IRequest, res: Response, next: NextFunction) {
 
 	  (async function () {
-		  let order_id = req.params.order_id;
-		  let order;
-		  try {
-		  	order = await Order.where({order_id : order_id}).fetch()
-		  } catch(err) {
-		  	res.status(500).json(err)
-		  }
-		  
-		  try {
+    	let wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+			let order_id = req.params.order_id;
+			let order;
+			let tryCount = 30;
 
-		  	let received = await blockchain.getreceivedbyaddress(order.get('address'))
-	      let answer = {
-	        'btc_expected': order.get('btc_amount'),
-	        'btc_actual': received[1].result,
-	        'btc_unconfirmed': received[0].result
-	      }
-	      res.send(JSON.stringify(answer))
-		  } catch(err) {
-		  	console.log(err);
-		  	res.status(500).json(err)
-		  }
+			while(tryCount) {
+				try {
+					order = await Order.where({order_id : order_id}).fetch()	
+				} catch(err) {
+					res.status(500).json(err)
+				}
+				
+				if(!order) {
+					res.status(404).json({success: 0, message: "No Order Exist!!"});
+					break;
+				}
+				
+				if(order.get('status') == 'paid')
+					res.send({success: 1, order: order});
+				tryCount --;
+				await wait(3000);
+			}
+			if(!tryCount)
+				res.send({success: 0, message:'Tried 30 Times, Sorry, Payment not proceed yet.'});
 
 	  })().catch((error) => {
 	    console.log(req.id, error)

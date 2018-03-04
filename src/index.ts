@@ -6,6 +6,8 @@ import App from './App';
 
 var fs = require('fs');
 
+require("./cron/check-payment");
+
 const port = normalizePort(process.env.PORT || 3000);
 App.set('port', port);
 
@@ -42,3 +44,5 @@ function onListening(): void {
   let bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;
   debug(`Listening on ${bind}`);
 }
+
+
