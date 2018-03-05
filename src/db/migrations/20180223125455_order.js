@@ -33,6 +33,11 @@ exports.up = function(knex, Promise) {
     table.string('shipping_number').defaultTo('');
     
     table.string('status').defaultTo('');
+
+    table.text('transaction').defaultTo('{}');
+    table.text('broadcast_result').defaultTo('{}');
+    
+    
     
   });
 };

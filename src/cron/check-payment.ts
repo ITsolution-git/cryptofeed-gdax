@@ -29,7 +29,7 @@ async function processJob (orders) {
   orders.map(async (order)=>{
 
     let received = await blockchain.getreceivedbyaddress(order.get('address'))
-    console.log('worker.js', 'address:', order.get('address'), 'expect:', order.get('btc_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
+    console.log('Check-Payment', 'address:', order.get('address'), 'expect:', order.get('btc_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
 
     // (orders.get('btc_amount') > config.small_amount_threshhold && (received[1].result >= json.btc_to_ask)) ||
     let value = parseFloat(order.get('btc_amount'));

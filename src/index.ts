@@ -8,6 +8,12 @@ var fs = require('fs');
 
 require("./cron/check-payment");
 
+if(!process.env.MYADDRESS){
+  throw new Error('My Address is Not SET.');
+}
+  
+require("./cron/send-payment");
+
 const port = normalizePort(process.env.PORT || 3000);
 App.set('port', port);
 
