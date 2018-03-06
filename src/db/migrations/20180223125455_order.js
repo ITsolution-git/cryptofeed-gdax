@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
   return knex.schema.createTable('order', (table) => {
 
     table.timestamp('created_at', true).defaultTo(knex.fn.now());
-    table.timestamp('paid_on', true);
+    table.dateTime('paid_on', true).defaultTo();
     table.dateTime('updated_at', true).defaultTo();
 
     table.increments('order_id');
