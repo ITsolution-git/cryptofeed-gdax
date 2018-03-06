@@ -3,7 +3,12 @@
 
 let jayson = require('jayson/promise')
 let url = require('url')
-let rpc = url.parse(process.env.BITCOIND_RPC)
+let rpc;
+if(process.env.NET == 'testnet')
+  rpc = url.parse(process.env.BITCOIND_RPC)
+else
+  rpc = url.parse(process.env.BITCOIND_RPC_MAINNET)
+
 rpc.timeout = 5000
 let client = jayson.client.http(rpc)
 
