@@ -9,6 +9,7 @@ const toolHelpers = require('./tools/_helpers');
 import AuthRouter from './routes/AuthRouter';
 import UserRouter from './routes/UserRouter';
 import BitcoinRouter from './routes/BitcoinRouter';
+import NanoRouter from './routes/NanoRouter';
 import StaticRouter from './routes/StaticRouter';
 import CouponRouter from './routes/CouponRouter';
 import CustomerRouter from './routes/CustomerRouter';
@@ -78,6 +79,8 @@ class App {
     this.express.use('/api/v1/auth', AuthRouter.router);
     this.express.use('/api/v1/user', toolHelpers.ensureAuthenticated, UserRouter.router);
     this.express.use('/api/v1/bitcoin',  BitcoinRouter.router);
+    this.express.use('/api/v1/nano',  NanoRouter.router);
+    
     //CRUD
     this.express.use('/api/v1/coupons', CouponRouter.router);
     this.express.use('/api/v1/customers', CustomerRouter.router);
@@ -91,7 +94,7 @@ class App {
 export default new App().express;
   
 
-  global.btcUsd = {
+global.btcUsd = {
     "data": {
         "code": "USD",
         "name": "US Dollar",
@@ -167,8 +170,9 @@ let updateExchangeRateCoinMarket = async function (note) {
     return console.log(err.message)
   }
   if( note == 'nano')
-    global.nano = json;
+    global.nano = json.length > 0 && json[0];
 }
+updateExchangeRateCoinMarket('nano')
 setInterval(() => updateExchangeRateCoinMarket('nano'), 5 * 60 * 1000)
 
 

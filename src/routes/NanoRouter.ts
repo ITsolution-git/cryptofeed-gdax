@@ -25,9 +25,10 @@ const AuthHelpers = require('../tools/auth_helpers');
 const signer = require('../tools/signer');
 const blockchain = require('../tools/blockchain');
 
-declare const storage;
+
 declare const btcAud;
 declare const btcUsd;
+declare const nano;
 export class NanoRouter {
   router: Router
 
@@ -40,7 +41,7 @@ export class NanoRouter {
   }
 
   public current_price(req: IRequest, res: Response, next: NextFunction) {
-    res.json({btcAud: btcAud, btcUsd: btcUsd});
+    res.json({nano: nano});
   }
 
   public single_request_payment(req: IRequest, res: Response, next: NextFunction) {
@@ -60,7 +61,7 @@ export class NanoRouter {
 
 	    'WIF': address.WIF,
 	    'address': address.address,
-			'status': 'unpaid'
+		'status': 'unpaid'
 	  }
 
 	  let paymentInfo = {
@@ -300,7 +301,7 @@ export class NanoRouter {
   init() {
     this.router.get('/check_payment/:order_id',  this.check_payment);
 
-		this.router.post('/single_card/request_payment', validate (NanoValidation.requestSinglePayment), this.single_request_payment);
+    this.router.post('/single_card/request_payment', validate (NanoValidation.requestSinglePayment), this.single_request_payment);
     this.router.post('/reload_card/request_payment', validate (NanoValidation.requestReloadPayment), this.reload_request_payment);
     this.router.get('/current_price',  this.current_price);
     
