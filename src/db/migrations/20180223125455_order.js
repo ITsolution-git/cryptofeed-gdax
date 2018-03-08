@@ -18,7 +18,7 @@ exports.up = function(knex, Promise) {
 
     table.integer('amount');
     table.string('card_amount').defaultTo('');
-    table.string('btc_amount').defaultTo('');
+    table.string('crypto_amount').defaultTo('');
 
     table.string('discount').defaultTo(0);
 

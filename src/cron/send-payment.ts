@@ -19,10 +19,12 @@ if(!process.env.PAID_WATCH_PERIOD_IN_HOURS) {
 
     try{
       
-      let orders = await Order.query(function(qb) {
-        qb.where('status', '=', 'paid').andWhere('created_at', '>=', moment().subtract(process.env.PAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'));
+      let btcorders = await Order.query(function(qb) {
+        qb.where('status', '=', 'paid')
+        .andWhere('created_at', '>=', moment().subtract(process.env.PAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'))
+        .andWhere('currency', '=', 'BTC');
       }).fetchAll();
-      await processJob(orders)
+      await processJobBTC(btcorders)
       await wait(1000 * 60)
 
     } catch (err) {
@@ -31,11 +33,11 @@ if(!process.env.PAID_WATCH_PERIOD_IN_HOURS) {
   }
 })()
 
-async function processJob (orders) {
+async function processJobBTC (orders) {
 
   orders.map(async (order)=>{
     let received = await blockchain.getreceivedbyaddress(order.get('address'))
-    console.log('Send-Payment', 'address:', order.get('address'), 'expect:', order.get('btc_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
+    console.log('Send-Payment', 'address:', order.get('address'), 'expect:', order.get('crypto_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
 
     if (+received[1].result === +received[0].result && received[0].result > 0) { // balance is ok, need to transfer it
     

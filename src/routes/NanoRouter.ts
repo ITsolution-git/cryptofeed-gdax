@@ -9,11 +9,12 @@ import Customer from '../db/models/customer';
 import AuthValidation from '../validations/AuthValidation';
 import NanoValidation from '../validations/NanoValidation';
 
+const rainode = require('../tools/rainode')
 const moment = require('moment');
 const validate = require('../classes/ParamValidator');
 //Npm Import
 var request = require('request');
-var util = require('util');
+var util = require('../tools/util');
 //Helpers Import
 const tokenHelpers = require('../tools/tokens'); 
 const AuthHelpers = require('../tools/auth_helpers');
@@ -46,40 +47,42 @@ export class NanoRouter {
 
   public single_request_payment(req: IRequest, res: Response, next: NextFunction) {
 
-	  let address = signer.generateNewSegwitAddress()
-	  let invoiceData:any = {
-	    'card_type': 'single',
-	    'currency': req.body.currency ? req.body.currency : 'BTC',
-
-	    'message': req.body.message ? req.body.message : '',
-
-	    'exchange_rate': req.body.exchange_rate,
-	    'amount': req.body.amount,
-	    'card_amount': req.body.card_amount,
-	    'discount': req.body.discount,
-	    'btc_amount': req.body.btc_amount,
-
-	    'WIF': address.WIF,
-	    'address': address.address,
-		'status': 'unpaid'
-	  }
-
-	  let paymentInfo = {
-	    address: invoiceData.address,
-	    message: req.body.message,
-	    label: 'Btc card',
-	    amount: req.body.btc_amount
-	  }
-
-	  let answer:any = {
-	    'link': signer.URI(paymentInfo),
-	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
-	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
-	    'address': invoiceData.address,
-	    'btc_amount': req.body.btc_amount
-	  };
-
 		(async function () {
+		  let address = await rainode.payment_begin({wallet: process.env.MYNANOWALLET})
+		  address = address.account;
+		  let invoiceData:any = {
+		    'card_type': 'single',
+		    'currency': 'NANO',
+
+		    'message': req.body.message ? req.body.message : '',
+
+		    'exchange_rate': req.body.exchange_rate,
+		    'amount': req.body.amount,
+		    'card_amount': req.body.card_amount,
+		    'discount': req.body.discount,
+		    'crypto_amount': req.body.crypto_amount,
+
+		    'WIF': '',
+		    'address': address,
+				'status': 'unpaid'
+		  }
+
+		  let paymentInfo = {
+		    address: invoiceData.address,
+		    message: req.body.message,
+		    label: 'Nano card',
+		    amount: req.body.crypto_amount,
+		    currency: 'NANO'
+		  }
+
+		  let answer:any = {
+		    'link': util.URI(paymentInfo),
+		    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(util.URI(paymentInfo)),
+		    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
+		    'address': invoiceData.address,
+		    'crypto_amount': req.body.crypto_amount
+		  };
+
 			console.log(req.id, 'created address', invoiceData.address)
 			let customer = await new Customer(req.body.customer).save();
 			invoiceData.customer_id = customer.get('customer_id');
@@ -88,9 +91,6 @@ export class NanoRouter {
 
 			answer.customer = customer;
 			answer.order = order;
-
-
-			await blockchain.importaddress(invoiceData.address)
 
 			res.send(answer)
 		})().catch((error) => {
@@ -103,43 +103,45 @@ export class NanoRouter {
 
   public reload_request_payment(req: IRequest, res: Response, next: NextFunction) {
 
-	  let address = signer.generateNewSegwitAddress()
-	  let invoiceData:any = {
-	    'card_type': 'single',
-	    'currency': req.body.currency ? req.body.currency : 'BTC',
-
-	    'message': req.body.message ? req.body.message : '',
-
-	    'exchange_rate': req.body.exchange_rate,
-	    'amount': req.body.amount,
-	    'card_amount': req.body.card_amount,
-	    'discount': req.body.discount,
-	    'btc_amount': req.body.btc_amount,
-
-	    'WIF': address.WIF,
-	    'address': address.address,
-			'status': 'unpaid'
-	  }
-
-	  let paymentInfo = {
-	    address: invoiceData.address,
-	    message: req.body.message,
-	    label: 'Btc card',
-	    amount: req.body.btc_amount
-	  }
-
-	  let answer:any = {
-	    'link': signer.URI(paymentInfo),
-	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
-	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
-	    'address': invoiceData.address,
-	    'btc_amount': req.body.btc_amount
-	  };
-
 		let userCreated = false, customerCreated = false;
 		let user: any;
 		let customer: any;
 		(async function () {
+		  let address = await rainode.payment_begin({wallet: process.env.MYNANOWALLET})
+		  address = address.account;
+		  let invoiceData:any = {
+		    'card_type': 'single',
+		    'currency': 'NANO',
+
+		    'message': req.body.message ? req.body.message : '',
+
+		    'exchange_rate': req.body.exchange_rate,
+		    'amount': req.body.amount,
+		    'card_amount': req.body.card_amount,
+		    'discount': req.body.discount,
+		    'crypto_amount': req.body.crypto_amount,
+
+		    'WIF': '',
+		    'address': address,
+				'status': 'unpaid'
+		  }
+
+		  let paymentInfo = {
+		    address: invoiceData.address,
+		    message: req.body.message,
+		    label: 'Btc card',
+		    amount: req.body.crypto_amount,
+		    currency: 'NANO'
+		  }
+
+		  let answer:any = {
+		    'link': util.URI(paymentInfo),
+		    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(util.URI(paymentInfo)),
+		    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
+		    'address': invoiceData.address,
+		    'crypto_amount': req.body.crypto_amount
+		  };
+
 			console.log(req.id, 'created address', invoiceData.address)
 
 			let token = await tokenHelpers.getUserIdFromRequest(req);
@@ -178,8 +180,6 @@ export class NanoRouter {
 	    let order = await new Order(invoiceData).save()
 	    answer.order = order;
 
-	    await blockchain.importaddress(invoiceData.address)
-
 	    res.send(answer)
 	  })().catch((error) => {
 			(async function () {
@@ -200,35 +200,52 @@ export class NanoRouter {
     	let wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 			let order_id = req.params.order_id;
 			let order;
-			let tryCount = 30;
+			let tryCount = 3;
 
-			while(tryCount) {
-				try {
-					order = await Order.where({order_id : order_id}).fetch()	
-				} catch(err) {
-					res.status(500).json(err)
-				}
-				
-				if(!order) {
-					res.status(404).json({success: 0, message: "No Order Exist!!"});
-					break;
-				}
-				
-				if(order.get('status') == 'paid'){
-					res.send({success: 1, order: order});
-					break;
-				}
-					
-				if(order.get('status') == 'unpaid' && (moment(order.get('created_at')).isBefore(moment().subtract( process.env.PAID_WATCH_PERIOD_IN_HOURS, 'hours') )) ) {
-					res.send({success: 0, message:'The payment request is expired.'});
-					break;
-				}
-					
-				tryCount --;
-				await wait(3000);
+			try {
+				order = await Order.where({order_id : order_id}).fetch()	
+			} catch(err) {
+				res.status(500).json(err)
 			}
-			if(!tryCount)
-				res.send({success: 0, message:'Tried 30 Times, Sorry, Payment not proceed yet.'});
+
+			if(!order) {
+				res.status(404).json({success: 0, message: "No Order Exist!!"});
+				return;
+			}
+			//If paid or sweeped skip
+			if(order.get('status') != 'unpaid') 
+				return res.send({success: 1, order: order});				
+
+			//Check the status of balance
+			let status = await rainode.account_balance({account: order.get('address')})
+			//If paid
+			if( +status.balance >= +order.get('crypto_amount') ) {
+	      order.set('status', 'paid');
+	      order.set('paid_on', moment().format('YYYY-MM-DD HH-mm-ss'));
+	      await order.save();
+
+				res.send({success: 1, order: order});
+				return;
+
+			} else {  //If not try 3 times with 3 seconds timeout
+
+				while(tryCount) {
+					status = await rainode.payment_wait({account: order.get('address'), amount: order.get('crypto_amount'), timeout: 10000})
+
+					status = await rainode.account_balance({account: order.get('address')})
+					if( +status.balance >= +order.get('crypto_amount') ){
+			      order.set('status', 'paid');
+			      order.set('paid_on', moment().format('YYYY-MM-DD HH-mm-ss'));
+			      await order.save();
+
+						return res.send({success: 1, order: order});
+					} 
+					
+					tryCount --;
+				}
+				if(!tryCount)
+					res.send({success: 0, message:'Tried 3 Times, Sorry, Payment not proceed yet.'});
+			}
 
 	  })().catch((error) => {
 	    console.log(req.id, error)

@@ -70,7 +70,8 @@ class App {
         message: 'Reloadable CARD v1.0',
         lastChange: '02/21/2018 08:25 pm',
         btcAud: global.btcAud,
-        btcUsd: global.btcUsd
+        btcUsd: global.btcUsd,
+        nano: global.nano
       });
     });
     this.express.use('/', StaticRouter.router);
@@ -87,6 +88,9 @@ class App {
     this.express.use('/api/v1/orders', OrderRouter.router);
     this.express.use('/api/v1/news', NewsRouter.router);
 
+    this.express.use(function(req, res, next){
+      res.status(404).json({error: 'NOT FOUND'});
+    });
   }
 
 }

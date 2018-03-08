@@ -17,10 +17,12 @@ if(!process.env.UNPAID_WATCH_PERIOD_IN_HOURS) {
 
     try{
       
-      let orders = await Order.query(function(qb) {
-        qb.where('status', '=', 'unpaid').andWhere('created_at', '>=', moment().subtract(process.env.UNPAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'));
+      let btcorders = await Order.query(function(qb) {
+        qb.where('status', '=', 'paid')
+        .andWhere('created_at', '>=', moment().subtract(process.env.PAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'))
+        .andWhere('currency', '=', 'BTC');
       }).fetchAll();
-      await processJob(orders)
+      await processJobBTC(btcorders)
       await wait(1000 * 60)
 
     } catch (err) {
@@ -29,15 +31,15 @@ if(!process.env.UNPAID_WATCH_PERIOD_IN_HOURS) {
   }
 })()
 
-async function processJob (orders) {
+async function processJobBTC (orders) {
 
   orders.map(async (order)=>{
 
     let received = await blockchain.getreceivedbyaddress(order.get('address'))
-    console.log('Check-Payment', 'address:', order.get('address'), 'expect:', order.get('btc_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
+    console.log('Check-Payment', 'address:', order.get('address'), 'expect:', order.get('crypto_amount'), 'confirmed:', received[1].result, 'unconfirmed:', received[0].result)
 
-    // (orders.get('btc_amount') > config.small_amount_threshhold && (received[1].result >= json.btc_to_ask)) ||
-    let value = parseFloat(order.get('btc_amount'));
+    // (orders.get('crypto_amount') > config.small_amount_threshhold && (received[1].result >= json.btc_to_ask)) ||
+    let value = parseFloat(order.get('crypto_amount'));
 
     if (value <= received[1].result) {
         // paid ok

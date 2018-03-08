@@ -13,7 +13,7 @@ const moment = require('moment');
 const validate = require('../classes/ParamValidator');
 //Npm Import
 var request = require('request');
-var util = require('util');
+var util = require('../tools/util');
 //Helpers Import
 const tokenHelpers = require('../tools/tokens'); 
 const AuthHelpers = require('../tools/auth_helpers');
@@ -48,7 +48,7 @@ export class BitcoinRouter {
 	  let address = signer.generateNewSegwitAddress()
 	  let invoiceData:any = {
 	    'card_type': 'single',
-	    'currency': req.body.currency ? req.body.currency : 'BTC',
+	    'currency': 'BTC',
 
 	    'message': req.body.message ? req.body.message : '',
 
@@ -56,7 +56,7 @@ export class BitcoinRouter {
 	    'amount': req.body.amount,
 	    'card_amount': req.body.card_amount,
 	    'discount': req.body.discount,
-	    'btc_amount': req.body.btc_amount,
+	    'crypto_amount': req.body.crypto_amount,
 
 	    'WIF': address.WIF,
 	    'address': address.address,
@@ -67,15 +67,16 @@ export class BitcoinRouter {
 	    address: invoiceData.address,
 	    message: req.body.message,
 	    label: 'Btc card',
-	    amount: req.body.btc_amount
+	    amount: req.body.crypto_amount,
+	    currency: 'BTC'
 	  }
 
 	  let answer:any = {
-	    'link': signer.URI(paymentInfo),
-	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
+	    'link': util.URI(paymentInfo),
+	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(util.URI(paymentInfo)),
 	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
 	    'address': invoiceData.address,
-	    'btc_amount': req.body.btc_amount
+	    'crypto_amount': req.body.crypto_amount
 	  };
 
 		(async function () {
@@ -105,7 +106,7 @@ export class BitcoinRouter {
 	  let address = signer.generateNewSegwitAddress()
 	  let invoiceData:any = {
 	    'card_type': 'single',
-	    'currency': req.body.currency ? req.body.currency : 'BTC',
+	    'currency': 'BTC',
 
 	    'message': req.body.message ? req.body.message : '',
 
@@ -113,7 +114,7 @@ export class BitcoinRouter {
 	    'amount': req.body.amount,
 	    'card_amount': req.body.card_amount,
 	    'discount': req.body.discount,
-	    'btc_amount': req.body.btc_amount,
+	    'crypto_amount': req.body.crypto_amount,
 
 	    'WIF': address.WIF,
 	    'address': address.address,
@@ -124,15 +125,16 @@ export class BitcoinRouter {
 	    address: invoiceData.address,
 	    message: req.body.message,
 	    label: 'Btc card',
-	    amount: req.body.btc_amount
+	    amount: req.body.crypto_amount,
+	    currency: 'BTC'
 	  }
 
 	  let answer:any = {
-	    'link': signer.URI(paymentInfo),
-	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(signer.URI(paymentInfo)),
+	    'link': util.URI(paymentInfo),
+	    'qr': process.env.BASE_URL_QR + '/generate_qr/' + encodeURIComponent(util.URI(paymentInfo)),
 	    'qr_simple': process.env.BASE_URL_QR + '/generate_qr/' + invoiceData.address,
 	    'address': invoiceData.address,
-	    'btc_amount': req.body.btc_amount
+	    'crypto_amount': req.body.crypto_amount
 	  };
 
 		let userCreated = false, customerCreated = false;

@@ -4,14 +4,13 @@ export default {
   
   requestSinglePayment: {
     body: Joi.object({
-      currency: Joi.string(),
       message: Joi.string(),
 
       amount: Joi.number().required(),
       exchange_rate: Joi.string().required(),
       card_amount: Joi.string().required(),
       discount: Joi.string().required(),
-      btc_amount: Joi.string().required(),
+      crypto_amount: Joi.string().required(),
 
       customer: Joi.object({
         first_name: Joi.string().required(),
@@ -23,14 +22,13 @@ export default {
 
   requestReloadPayment: {
     body: Joi.object({
-      currency: Joi.string(),
       message: Joi.string(),
 
       amount: Joi.number().required(),
       exchange_rate: Joi.string().required(),
       card_amount: Joi.string().required(),
       discount: Joi.string().required(),
-      btc_amount: Joi.string().required(),
+      crypto_amount: Joi.string().required(),
 
       customer: Joi.object({
         first_name: Joi.string().required(),
