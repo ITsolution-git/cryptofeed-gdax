@@ -48,6 +48,6 @@ for (let command of COMMANDS) {
     };
 }
 
-module.exports.client = (options) => {
+export default (options) => {
     return new Client(options);
 };

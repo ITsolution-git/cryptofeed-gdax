@@ -8,8 +8,11 @@ var fs = require('fs');
 
 require("./cron/check-payment");
 
-if(!process.env.MYADDRESS){
-  throw new Error('My Address is Not SET.');
+if(!process.env.MYBTCADDRESS){
+  throw new Error('BTC Address is Not SET.');
+}
+if(!process.env.MYNANOWALLET){
+  throw new Error('NANO Wallet is Not SET.');
 }
   
 require("./cron/send-payment");

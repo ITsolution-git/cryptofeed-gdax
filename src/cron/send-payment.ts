@@ -48,7 +48,7 @@ async function processJob (orders) {
         createTx = signer.createSegwitTransaction
       }
 
-      let tx = createTx(unspentOutputs.result, process.env.MYADDRESS, received[0].result, 0.0001, order.get('WIF'))
+      let tx = createTx(unspentOutputs.result, process.env.MYBTCADDRESS, received[0].result, 0.0001, order.get('WIF'))
       console.log('Send-Payment', 'broadcasting', tx)
       let broadcastResult = await blockchain.broadcastTransaction(tx)
       console.log('Send-Payment', 'broadcast result:', JSON.stringify(broadcastResult))
