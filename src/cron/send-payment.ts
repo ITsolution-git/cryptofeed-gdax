@@ -7,6 +7,11 @@ let signer = require('../tools/signer')
 const moment = require('moment');
 import Order from '../db/models/order';
 
+if(!process.env.PAID_WATCH_PERIOD_IN_HOURS) {
+  console.log('Should set PAID_WATCH_PERIOD_IN_HOURS env.');
+  process.exit(1);
+}
+
 ;(async () => {
   while (1) {
     
@@ -15,10 +20,10 @@ import Order from '../db/models/order';
     try{
       
       let orders = await Order.query(function(qb) {
-        qb.where('status', '=', 'paid').andWhere('created_at', '>=', moment().subtract(1, 'month').format('YYYY-MM-DD'));
+        qb.where('status', '=', 'paid').andWhere('created_at', '>=', moment().subtract(process.env.PAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'));
       }).fetchAll();
       await processJob(orders)
-      await wait(10000)
+      await wait(1000 * 60)
 
     } catch (err) {
       console.log(err, 'From send payment');

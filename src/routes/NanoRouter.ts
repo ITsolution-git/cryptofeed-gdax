@@ -7,7 +7,7 @@ import Order from '../db/models/order';
 import Customer from '../db/models/customer';
 //Validation Import
 import AuthValidation from '../validations/AuthValidation';
-import BitcoinValidation from '../validations/BitcoinValidation';
+import NanoValidation from '../validations/NanoValidation';
 
 const moment = require('moment');
 const validate = require('../classes/ParamValidator');
@@ -28,7 +28,7 @@ const blockchain = require('../tools/blockchain');
 declare const storage;
 declare const btcAud;
 declare const btcUsd;
-export class BitcoinRouter {
+export class NanoRouter {
   router: Router
 
   /**
@@ -300,8 +300,8 @@ export class BitcoinRouter {
   init() {
     this.router.get('/check_payment/:order_id',  this.check_payment);
 
-		this.router.post('/single_card/request_payment', validate (BitcoinValidation.requestSinglePayment), this.single_request_payment);
-    this.router.post('/reload_card/request_payment', validate (BitcoinValidation.requestReloadPayment), this.reload_request_payment);
+		this.router.post('/single_card/request_payment', validate (NanoValidation.requestSinglePayment), this.single_request_payment);
+    this.router.post('/reload_card/request_payment', validate (NanoValidation.requestReloadPayment), this.reload_request_payment);
     this.router.get('/current_price',  this.current_price);
     
   }
@@ -311,7 +311,7 @@ export class BitcoinRouter {
 
 
 // Create the AuthRouter, and export its configured Express.Router
-const bitcoinRoutes = new BitcoinRouter();
+const bitcoinRoutes = new NanoRouter();
 bitcoinRoutes.init();
 
 export default bitcoinRoutes;

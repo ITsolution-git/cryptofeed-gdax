@@ -1,7 +1,8 @@
 declare module NodeJS {
 	interface Global {
 		btcUsd: any,
-		btcAud: any
+		btcAud: any,
+		nano: any
 	}
   
 }

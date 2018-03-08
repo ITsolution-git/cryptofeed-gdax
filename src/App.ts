@@ -24,41 +24,7 @@ morgan.token('id', function getId (req) {
   return req.id
 })
 var moment = require('moment');
-global.btcUsd = 7000 // initial
-global.btcAud = 10000
 
-
-let updateExchangeRate = async function (pair) {
-  let json
-  try {
-    json = await rp.get({url: 'https://www.bitstamp.net/api/v2/ticker/' + pair, json: true})  
-  } catch (err) {
-    return console.log(err.message)
-  }
-  switch (pair) {
-    case 'btcusd': global.btcUsd = json.ask; break
-  }
-}
-
-let updateExchangeRateBitpay = async function (note) {
-  let json
-  try {
-    // json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
-    json = await rp.get({url: 'https://bitpay.com/rates/' + note , json: true})  
-    
-  } catch (err) {
-    return console.log(err.message)
-  }
-  if( note == 'usd')
-    global.btcUsd = json;
-  else if( note == 'aud' )
-    global.btcAud = json;
-}
-
-updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud'))
-setInterval(() => updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud')), 5 * 60 * 1000)
-
-require('./bitcoin_test')
 // Creates and configures an ExpressJS web server.
 class App {
 
@@ -124,3 +90,85 @@ class App {
 
 export default new App().express;
   
+
+  global.btcUsd = {
+    "data": {
+        "code": "USD",
+        "name": "US Dollar",
+        "rate": 9780.3
+    }
+}; // initial
+global.btcAud = {
+    "data": {
+        "code": "AUD",
+        "name": "Australian Dollar",
+        "rate": 12535.41051
+    }
+};
+global.nano = {
+    "id": "nano", 
+    "name": "Nano", 
+    "symbol": "NANO", 
+    "rank": "21", 
+    "price_usd": "11.3186", 
+    "price_btc": "0.001165", 
+    "24h_volume_usd": "51009300.0", 
+    "market_cap_usd": "1508184086.0", 
+    "available_supply": "133248289.0", 
+    "total_supply": "133248289.0", 
+    "max_supply": "133248290.0", 
+    "percent_change_1h": "-3.81", 
+    "percent_change_24h": "-11.52", 
+    "percent_change_7d": "-29.98", 
+    "last_updated": "1520515150", 
+    "price_aud": "14.5073099478", 
+    "24h_volume_aud": "65379793.0239", 
+    "market_cap_aud": "1933074232.0"
+};
+
+
+let updateExchangeRate = async function (pair) {
+  let json
+  try {
+    json = await rp.get({url: 'https://www.bitstamp.net/api/v2/ticker/' + pair, json: true})  
+  } catch (err) {
+    return console.log(err.message)
+  }
+  switch (pair) {
+    case 'btcusd': global.btcUsd = json.ask; break
+  }
+}
+
+let updateExchangeRateBitpay = async function (note) {
+  let json
+  try {
+    // json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
+    json = await rp.get({url: 'https://bitpay.com/rates/' + note , json: true})  
+    
+  } catch (err) {
+    return console.log(err.message)
+  }
+  if( note == 'usd')
+    global.btcUsd = json;
+  else if( note == 'aud' )
+    global.btcAud = json;
+}
+
+updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud'))
+setInterval(() => updateExchangeRateBitpay('usd').then(()=>updateExchangeRateBitpay('aud')), 5 * 60 * 1000)
+
+let updateExchangeRateCoinMarket = async function (note) {
+  let json
+  try {
+    // json = await rp.get({url: 'https://api.coindesk.com/v1/bpi/currentprice/AUD.json' , json: true})  
+    json = await rp.get({url: `https://api.coinmarketcap.com/v1/ticker/${note}/?convert=AUD` , json: true})  
+    
+  } catch (err) {
+    return console.log(err.message)
+  }
+  if( note == 'nano')
+    global.nano = json;
+}
+setInterval(() => updateExchangeRateCoinMarket('nano'), 5 * 60 * 1000)
+
+

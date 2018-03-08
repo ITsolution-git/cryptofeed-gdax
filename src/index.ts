@@ -14,6 +14,8 @@ if(!process.env.MYADDRESS){
   
 require("./cron/send-payment");
 
+require('./node_test');
+
 const port = normalizePort(process.env.PORT || 3000);
 App.set('port', port);
 

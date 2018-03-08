@@ -55,6 +55,7 @@
     "node-uuid": "^1.4.8",
     "nodemailer": "^3.1.7",
     "qr-image": "^3.2.0",
+    "raiblocks-client": "^1.0.0",
     "request": "^2.69.0",
     "request-promise": "^4.2.2",
     "sendgrid": "^4.8.2",

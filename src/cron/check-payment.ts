@@ -5,6 +5,11 @@ let blockchain = require('../tools/blockchain')
 const moment = require('moment');
 import Order from '../db/models/order';
 
+if(!process.env.UNPAID_WATCH_PERIOD_IN_HOURS) {
+  console.log('Should set UNPAID_WATCH_PERIOD_IN_HOURS env.');
+  process.exit(1);
+}
+
 ;(async () => {
   while (1) {
     
@@ -13,10 +18,10 @@ import Order from '../db/models/order';
     try{
       
       let orders = await Order.query(function(qb) {
-        qb.where('status', '=', 'unpaid').andWhere('created_at', '>=', moment().subtract(1, 'month').format('YYYY-MM-DD'));
+        qb.where('status', '=', 'unpaid').andWhere('created_at', '>=', moment().subtract(process.env.UNPAID_WATCH_PERIOD_IN_HOURS, 'hours').format('YYYY-MM-DD HH-mm-ss'));
       }).fetchAll();
       await processJob(orders)
-      await wait(5000)
+      await wait(1000 * 60)
 
     } catch (err) {
       console.log(err, 'From check payment');
@@ -37,7 +42,7 @@ async function processJob (orders) {
     if (value <= received[1].result) {
         // paid ok
       order.set('status', 'paid');
-      order.set('paid_on' ,Date.now());
+      order.set('paid_on', moment().format('YYYY-MM-DD HH-mm-ss'));
       await order.save();
 
       // marked as paid and fired a callack. why not forward funds instantly?
