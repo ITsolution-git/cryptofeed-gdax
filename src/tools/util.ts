@@ -14,7 +14,7 @@ exports.URI = function (paymentInfo) {
 
     return uri
   } else if (paymentInfo.currency == 'NANO') {
-    let uri = 'bitcoin:'
+    let uri = 'xrb:'
     uri += paymentInfo.address
     uri += '?amount='
     uri += paymentInfo.amount
