@@ -151,8 +151,11 @@ exports.generateNewSegwitAddress = function () {
 }
 
 exports.WIF2segwitAddress = function (WIF) {
+
   let keyPair = bitcoinjs.ECPair.fromWIF(WIF)
   let pubKey = keyPair.getPublicKeyBuffer()
+  let address;
+  
   let witnessScript = bitcoinjs.script.witnessPubKeyHash.output.encode(bitcoinjs.crypto.hash160(pubKey))
   let scriptPubKey = bitcoinjs.script.scriptHash.output.encode(bitcoinjs.crypto.hash160(witnessScript))
   return bitcoinjs.address.fromOutputScript(scriptPubKey)
