@@ -154,11 +154,11 @@ export class CustomerRouter {
    */
   init() {  
     // Routes for /api/v1/user
-    this.router.post('/',  this.postCustomer);
-    this.router.get('/:id', this.getCustomer);
-    this.router.get('/', this.getCustomers);
-    this.router.put('/:id', this.putCustomer);
-    this.router.delete('/:id', this.deleteCustomer);
+    this.router.post('/', toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.postCustomer);
+    this.router.get('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getCustomer);
+    this.router.get('/',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getCustomers);
+    this.router.put('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.putCustomer);
+    this.router.delete('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.deleteCustomer);
   }
 
 }

@@ -15,6 +15,7 @@ import CouponRouter from './routes/CouponRouter';
 import CustomerRouter from './routes/CustomerRouter';
 import OrderRouter from './routes/OrderRouter';
 import NewsRouter from './routes/NewsRouter';
+import AccountRouter from './routes/AccountRouter';
 
 var fileUpload = require('express-fileupload');
 
@@ -87,6 +88,7 @@ class App {
     this.express.use('/api/v1/customers', CustomerRouter.router);
     this.express.use('/api/v1/orders', OrderRouter.router);
     this.express.use('/api/v1/news', NewsRouter.router);
+    this.express.use('/api/v1/account', AccountRouter.router);
 
     this.express.use(function(req, res, next){
       res.status(404).json({error: 'NOT FOUND'});

@@ -136,10 +136,10 @@ export class OrderRouter {
    */
   init() {  
     // Routes for /api/v1/user
-    this.router.get('/:id', this.getOrder);
-    this.router.get('/', this.getOrders);
-    this.router.put('/:id', this.putOrder);
-    this.router.delete('/:id', this.deleteOrder);
+    this.router.get('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getOrder);
+    this.router.get('/',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.getOrders);
+    this.router.put('/:id', toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.putOrder);
+    this.router.delete('/:id',toolHelpers.ensureAuthenticated, toolHelpers.isAdmin, this.deleteOrder);
   }
 
 }
