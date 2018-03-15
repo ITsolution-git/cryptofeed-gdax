@@ -3,6 +3,8 @@ import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
 //Model Import
 import User from '../db/models/user';
+import Customer from '../db/models/customer';
+
 //Validation Import
 import AuthValidation from '../validations/AuthValidation';
 const validate = require('../classes/ParamValidator');
@@ -86,11 +88,32 @@ export class AuthRouter {
       return tokenHelpers.encodeToken(response.id);
     })
     .then((token) => {
-      res.status(200).json({
-        success: 1,
-        token: token,
-        user: req.user
-      });
+
+      if(req.user.get('role') == 'customer'){
+
+        return Customer.where({customer_id:parseInt(req.user.get('customer_id'))})
+        .fetch().then((customer) => {
+
+          res.status(200).json({
+            success: 1,
+            user: User.getSafeUserFromJS(req.user),
+            customer: customer,
+            token: token,
+          });
+        })
+        .catch(function(err){
+          res.status(400).json({
+            success: 0,
+            message: err.message
+          })
+        });
+      } else {
+        res.status(200).json({
+          success: 1,
+          user: User.getSafeUserFromJS(req.user),
+          token: token,
+        });
+      }
     })
     .catch((err) => {
       res.status(401).json({
@@ -126,11 +149,32 @@ export class AuthRouter {
       return tokenHelpers.encodeToken(response.id);
     })
     .then((token) => {
-      res.status(200).json({
-        success: 1,
-        token: token,
-        user: req.user
-      });
+      
+      if(req.user.get('role') == 'customer'){
+
+        return Customer.where({customer_id:parseInt(req.user.get('customer_id'))})
+        .fetch().then((customer) => {
+
+          res.status(200).json({
+            success: 1,
+            user: User.getSafeUserFromJS(req.user),
+            customer: customer,
+            token: token,
+          });
+        })
+        .catch(function(err){
+          res.status(400).json({
+            success: 0,
+            message: err.message
+          })
+        });
+      } else {
+        res.status(200).json({
+          success: 1,
+          user: User.getSafeUserFromJS(req.user),
+          token: token,
+        });
+      }
     })
     .catch((err) => {
       res.status(401).json({
@@ -166,11 +210,32 @@ export class AuthRouter {
       return tokenHelpers.encodeToken(response.id);
     })
     .then((token) => {
-      res.status(200).json({
-        success: 1,
-        token: token,
-        user: req.user
-      });
+      
+      if(req.user.get('role') == 'customer'){
+
+        return Customer.where({customer_id:parseInt(req.user.get('customer_id'))})
+        .fetch().then((customer) => {
+
+          res.status(200).json({
+            success: 1,
+            user: User.getSafeUserFromJS(req.user),
+            customer: customer,
+            token: token,
+          });
+        })
+        .catch(function(err){
+          res.status(400).json({
+            success: 0,
+            message: err.message
+          })
+        });
+      } else {
+        res.status(200).json({
+          success: 1,
+          user: User.getSafeUserFromJS(req.user),
+          token: token,
+        });
+      }
     })
     .catch((err) => {
       res.status(401).json({
