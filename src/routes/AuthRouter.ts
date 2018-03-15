@@ -80,8 +80,7 @@ export class AuthRouter {
       if(!user)
         throw Error("Invalid email address");
       user.authenticate(password);
-      req.user = user.toJSON();
-      delete req.user['password'];
+      req.user = user;
       return user;
     })
     .then((response) => {
