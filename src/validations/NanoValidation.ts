@@ -45,8 +45,8 @@ export default {
         first_name: Joi.string(),
         last_name: Joi.string(),
         google_id: Joi.string(),
-        faceboook_id: Joi.string()
-      }).unknown(false).xor('faceboook_id', 'google_id', 'password')
+        facebook_id: Joi.string()
+      }).unknown(false).xor('facebook_id', 'google_id', 'password')
     }).unknown(true)
   },
   // // POST auth/login
