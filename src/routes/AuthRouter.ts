@@ -40,21 +40,46 @@ export class AuthRouter {
  * TODO: throw error if email or username already exists : Done
  */
   public register(req: IRequest, res: Response, next: NextFunction) {
-    return new User(req.body).save()
+    return new User({...req.body, role: req.body.role ? req.body.role : 'customer'}).save()
     .then((user) => {
       req.user = user;
       return tokenHelpers.encodeToken(req.user.get('user_id'));
     })
     .then((token) => {
-      let filterPassword = req.user.toJSON();
-      delete filterPassword['password'];
-      res.status(200).json({
-        success: 1,
-        user: filterPassword,
-        token: token
-      });
+      let cus = null;
+      if(req.user.get('role') == 'customer'){
+        let bodyForCustomer = req.body;
+        delete bodyForCustomer.password;
+        delete bodyForCustomer.role;
+        delete bodyForCustomer.google_id;
+        delete bodyForCustomer.facebook_id;
+
+        return new Customer(bodyForCustomer).save().then(customer=>{
+          cus = customer;
+          req.user.set('customer_id', customer.get('customer_id'));
+          return req.user.save()
+        }).then((customer)=>{
+
+          res.status(200).json({
+            success: 1,
+            user: User.getSafeUserFromJS(req.user),
+            customer: cus,
+            token: token
+          }); 
+        });
+      } else {
+
+        res.status(200).json({
+          success: 1,
+          user: User.getSafeUserFromJS(req.user),
+          token: token
+        }); 
+      }
     })
     .catch((err) => {
+      if(req.user) {
+        req.user.destroy();
+      }
       res.status(400).json({
         success: 0,
         message: err.message,
@@ -136,10 +161,39 @@ export class AuthRouter {
     const email = req.body.email;
     return User.where({email : email}).fetch()
     .then((user) => {
-      if(!user)
-        throw Error("Invalid email address");
-      if(!user.get('facebook_id'))
-        throw Error("You are log logged in through Facebook.");
+      if(!user){
+        console.log('Creating User from ', req.body);
+
+        return new User({...req.body, role: req.body.role ? req.body.role : 'customer'}).save()
+        .then((user) => {
+          req.user = user;
+          return tokenHelpers.encodeToken(req.user.get('user_id'));
+        })
+        .then((token) => {
+          let cus = null;
+          if(req.user.get('role') == 'customer'){
+            let bodyForCustomer = req.body;
+            delete bodyForCustomer.password;
+            delete bodyForCustomer.role;
+            delete bodyForCustomer.facebook_id;
+            delete bodyForCustomer.google_id;
+
+            return new Customer(bodyForCustomer).save().then(customer=>{
+              cus = customer;
+              req.user.set('customer_id', customer.get('customer_id'));
+              return req.user.save()
+            }).then((customer)=>{
+              return req.user;
+            });
+          } else {
+            return req.user;
+          }
+        })
+      }
+
+      if (!user.get('facebook_id')) {
+        throw new Error('You are not authorized via facebook');
+      }
       req.user = user;
       return user;
     })
@@ -175,6 +229,9 @@ export class AuthRouter {
       }
     })
     .catch((err) => {
+      if(req.user) {
+        req.user.destroy();
+      }
       res.status(401).json({
         success: 0,
         user: {},
@@ -196,10 +253,38 @@ export class AuthRouter {
     const email = req.body.email;
     return User.where({email : email}).fetch()
     .then((user) => {
-      if(!user)
-        throw Error("Invalid email address");
-      if(!user.get('google_id'))
-        throw Error("You are log logged in through Google.");
+      if(!user){
+        console.log('Creating User from ', req.body);
+
+        return new User({...req.body, role: req.body.role ? req.body.role : 'customer'}).save()
+        .then((user) => {
+          req.user = user;
+          return tokenHelpers.encodeToken(req.user.get('user_id'));
+        })
+        .then((token) => {
+          let cus = null;
+          if(req.user.get('role') == 'customer'){
+            let bodyForCustomer = req.body;
+            delete bodyForCustomer.password;
+            delete bodyForCustomer.role;
+            delete bodyForCustomer.facebook_id;
+            delete bodyForCustomer.google_id;
+
+            return new Customer(bodyForCustomer).save().then(customer=>{
+              cus = customer;
+              req.user.set('customer_id', customer.get('customer_id'));
+              return req.user.save()
+            }).then((customer)=>{
+              return req.user;
+            });
+          } else {
+            return req.user;
+          }
+        })
+      }
+      if (!user.get('google_id')) {
+        throw new Error('You are not authorized via google');
+      }
       req.user = user;
       return user;
     })
@@ -235,6 +320,9 @@ export class AuthRouter {
       }
     })
     .catch((err) => {
+      if(req.user) {
+        req.user.destroy();
+      }
       res.status(401).json({
         success: 0,
         user: {},
