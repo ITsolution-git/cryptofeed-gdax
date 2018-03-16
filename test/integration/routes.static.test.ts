@@ -1,24 +1,69 @@
-// /* global describe, it, beforeEach, afterEach */
+process.env.NODE_ENV = 'test';
 
-// let reRequire = function (module) {
-//   delete require.cache[require.resolve(module)]
-//   return require(module)
-// }
-// let request = reRequire('supertest')
-// let should = reRequire('chai').should() // actually call the function
-// let path = require('path')
+import * as mocha from 'mocha';
+import * as chai from 'chai';
+import app from '../../src/App';
 
-// describe('acceptance - loading express', function () {
-//   this.timeout(5000)
-//   let server
+let reRequire = function (module) {
+  delete require.cache[require.resolve(module)]
+  return require(module)
+}
+let should = reRequire('chai').should() // actually call the function
+let expect = reRequire('chai').expect
+let path = require('path')
 
-//   beforeEach(function () {
-//     server = reRequire('../../cashier-btc')
-//   })
+// const knex = require('../../src/db/connection');
 
-//   afterEach(function (done) {
-//     server.close(done)
-//   })
+const chaiHttp = require('chai-http');
+chai.use(chaiHttp);
+
+describe('********* routes : api root *********', () => {
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+
+  });
+	it('responds to /', function (done) {
+    chai.request(app)
+    .get('/')
+    .end(function(res){
+    	done()
+    })
+
+  })
+
+  it('responds to /generate_qr/ and qr image is actually generated', function (done) {
+    reRequire('fs').accessSync(path.join(__dirname, '/../../qr'), reRequire('fs').W_OK, function (err) {
+      should.not.exist(err)
+    })
+
+    let filename = +new Date()
+    chai.request(app)
+      .get('/generate_qr/' + filename)
+      .end(function (res) {
+        should.exist(res.headers.location)
+        reRequire('fs').accessSync(path.join(__dirname, '/../..'), reRequire('fs').W_OK, function (err) {
+          should.not.exist(err)
+        })
+      })
+  })
+
+  it('404 everything else', function (done) {
+    chai.request(app)
+    .get('/foo/bar')
+    .end(function(res){ done() })
+  })
+
+  it('404 everything else', function (done) {
+    chai.request(app)
+      .get('/foobar')
+      .end(function(res){done()})
+  })
+});
+
 
 //   it('responds to /', function (done) {
 //     request(server)

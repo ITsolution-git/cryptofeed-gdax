@@ -67,8 +67,8 @@ describe('********* routes : auth *********', function(){
       chai.request(app)
       .post('/api/v1/auth/login')
       .send({
-        email: 'newuser@test.net',
-        password: 'password',
+        email: 'admin@btccard.com.au',
+        password: 'letmein',
       })
       .end((err, res) => {
         should.not.exist(err);

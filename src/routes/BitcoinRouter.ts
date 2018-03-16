@@ -302,7 +302,7 @@ export class BitcoinRouter {
   init() {
     this.router.get('/check_payment/:order_id',  this.check_payment);
 
-		this.router.post('/single_card/request_payment', validate (BitcoinValidation.requestSinglePayment), this.single_request_payment);
+	this.router.post('/single_card/request_payment', validate (BitcoinValidation.requestSinglePayment), this.single_request_payment);
     this.router.post('/reload_card/request_payment', validate (BitcoinValidation.requestReloadPayment), this.reload_request_payment);
     this.router.get('/current_price',  this.current_price);
     
