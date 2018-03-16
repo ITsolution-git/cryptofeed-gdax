@@ -140,8 +140,7 @@ export class AuthRouter {
         throw Error("Invalid email address");
       if(!user.get('facebook_id'))
         throw Error("You are log logged in through Facebook.");
-      req.user = user.toJSON();
-      delete req.user['password'];
+      req.user = user;
       return user;
     })
     .then((response) => {
@@ -201,8 +200,7 @@ export class AuthRouter {
         throw Error("Invalid email address");
       if(!user.get('google_id'))
         throw Error("You are log logged in through Google.");
-      req.user = user.toJSON();
-      delete req.user['password'];
+      req.user = user;
       return user;
     })
     .then((response) => {
