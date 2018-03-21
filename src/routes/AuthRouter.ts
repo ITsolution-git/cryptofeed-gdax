@@ -158,8 +158,8 @@ export class AuthRouter {
   * @return 200 JSON of user object and auth token
   */
   public loginFacebook(req: IRequest, res: Response, next: NextFunction) {
-    const email = req.body.email;
-    return User.where({email : email}).fetch()
+    const facebook_id = req.body.facebook_id;
+    return User.where({facebook_id : facebook_id}).fetch()
     .then((user) => {
       if(!user){
         console.log('Creating User from ', req.body);
@@ -250,8 +250,8 @@ export class AuthRouter {
   * @return 200 JSON of user object and auth token
   */
   public loginGoogle(req: IRequest, res: Response, next: NextFunction) {
-    const email = req.body.email;
-    return User.where({email : email}).fetch()
+    const google_id = req.body.google_id;
+    return User.where({google_id : google_id}).fetch()
     .then((user) => {
       if(!user){
         console.log('Creating User from ', req.body);
