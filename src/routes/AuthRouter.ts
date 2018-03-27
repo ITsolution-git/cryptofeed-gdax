@@ -39,6 +39,40 @@ export class AuthRouter {
  * @return 200 JSON of user object
  * TODO: throw error if email or username already exists : Done
  */
+  public checkEmailDuplication(req: IRequest, res: Response, next: NextFunction) {
+
+    return User.where({email: req.body.email}).fetch()
+    .then((user) => {
+      if(user) {
+        res.status(200).json({
+          success: 1,
+          isExist: true,
+          message: 'Already Exists.'
+        }); 
+      } else {
+        res.status(200).json({
+          success: 1,
+          isExist: false,
+          message: 'No Duplication.'
+        }); 
+      }
+    })
+    .catch((err) => {
+      res.status(400).json({
+        success: 0,
+        message: err.message
+      });
+    });
+  }
+
+/**
+ * Creates new user record in database
+ * @param  req Request object
+ * @param  res Response object
+ * @param  next NextFunction that is called
+ * @return 200 JSON of user object
+ * TODO: throw error if email or username already exists : Done
+ */
   public register(req: IRequest, res: Response, next: NextFunction) {
     return new User({...req.body, role: req.body.role ? req.body.role : 'customer'}).save()
     .then((user) => {
@@ -342,7 +376,8 @@ export class AuthRouter {
     this.router.post('/login', validate(AuthValidation.login), this.login);
     this.router.post('/facebook/login', validate(AuthValidation.loginFacebook), this.loginFacebook);
     this.router.post('/google/login', validate(AuthValidation.loginGoogle), this.loginGoogle);
-    
+    this.router.post('/check-email-duplication', validate(AuthValidation.checkEmailDuplication), this.checkEmailDuplication);
+     
   }
 
 }

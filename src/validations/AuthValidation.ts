@@ -22,6 +22,12 @@ export default {
     }).unknown(false)
   },
 
+  checkEmailDuplication: {
+    body: Joi.object({
+      email: Joi.string().email().required()
+    }).unknown(false)
+  },
+
   // POST auth/facebook/login
   loginFacebook: {
     body: Joi.object({
