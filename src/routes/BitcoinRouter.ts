@@ -156,6 +156,7 @@ export class BitcoinRouter {
 				
 			} else {
 				user = await User.where({user_id: token.user_id}).fetch();
+				user = await user.save(req.body.user);
 			}
 
 			answer.user = User.getSafeUserFromJS(user);
@@ -163,7 +164,8 @@ export class BitcoinRouter {
 			if(user.get('customer_id')) { //Which mean user has customer fill in
 				invoiceData.customer_id = user.get('customer_id');
 				customer = await Customer.where({customer_id: user.get('customer_id')}).fetch();
-				answer.customer = customer;
+
+				customer = await customer.save(req.body.customer);
 			} else {
 				customer = await new Customer(req.body.customer).save();
 				customerCreated = true;
@@ -171,9 +173,9 @@ export class BitcoinRouter {
 				user = await user.save();
 
 				invoiceData.customer_id = customer.get('customer_id');
-				answer.customer = customer;
 			}
 
+			answer.customer = customer;
 	    console.log(req.id, 'created address', invoiceData.address)
 
 	    let order = await new Order(invoiceData).save()
