@@ -79,9 +79,10 @@ async function runTradeCronForBittrex (){
         let responses = await Promise.all(promises);
 
         let tradesToAdd = [];
-        for (var j = 0; j < markets.result.length; j += 40) {
+        for (var j = 0; j < markets.result.length; j += 10) {
           tradesToAdd = [];
-          markets.result.slice(j, j+40).map((item, index)=>{
+          responses.slice(j, j+10).map((item, index)=>{
+            
             if(item.result)
               item.result.map(item=>{
                 
