@@ -1,12 +1,12 @@
 import bookshelf from '../bookshelf';
 
 import bluebird from 'bluebird';
-import Order from './order';
+import Trade from './trade';
 
 export default bookshelf.Model.extend({
-  tableName: 'order',
+  tableName: 'trades',
   hasTimestamps: true,
-  idAttribute: 'order_id',
+  idAttribute: 'trade_id',
 
   initialize: function() {
   },

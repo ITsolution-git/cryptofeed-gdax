@@ -8,7 +8,7 @@ exports.seed = (knex, Promise) => {
     return Promise.join(
       knex('user').insert({
         user_id: 1,
-        email: 'admin@btccard.com.au',
+        email: 'admin',
         password: hash,
         first_name: 'Admin',
         last_name: 'User',

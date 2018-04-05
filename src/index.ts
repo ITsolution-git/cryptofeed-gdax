@@ -6,18 +6,7 @@ import App from './App';
 
 var fs = require('fs');
 
-require("./cron/check-payment");
-
-if(!process.env.MYBTCADDRESS){
-  throw new Error('BTC Address is Not SET.');
-}
-if(!process.env.MYNANOWALLET){
-  throw new Error('NANO Wallet is Not SET.');
-}
-  
-require("./cron/send-payment");
-
-require('./node_test')
+require("./cron/get-remotedata");
 
 const port = normalizePort(process.env.PORT || 3000);
 App.set('port', port);
