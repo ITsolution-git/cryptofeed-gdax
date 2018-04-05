@@ -3,7 +3,8 @@ import {Router, Request, Response, NextFunction} from 'express';
 import {IRequest} from '../classes/IRequest';
 //Model Import
 import User from '../db/models/user';
-import Trade from '../db/models/trade';
+import IdexTrade from '../db/models/idex_trade';
+import BittrexTrade from '../db/models/bittrex_trade';
 //Validation Import
 import TradeValidation from '../validations/TradeValidation';
 
@@ -32,7 +33,7 @@ export class TradeRouter {
     this.init();
   }
 
-  public getMarkets(req: IRequest, res: Response, next: NextFunction) {
+  public getIdexMarkets(req: IRequest, res: Response, next: NextFunction) {
 		(async function () {
 
       var options = {
@@ -49,10 +50,10 @@ export class TradeRouter {
 			res.status(400).send({success: 0, error: error.message})
 	  })
 	}
-  public getTrades(req: IRequest, res: Response, next: NextFunction) {
+  public getIdexTrades(req: IRequest, res: Response, next: NextFunction) {
 		(async function () {
 
-	    let trades = await Trade.query(function(qb) {
+	    let trades = await IdexTrade.query(function(qb) {
 	      if(req.query.market) qb.where('market', '=', req.query.market)
 	      if(req.query.start) qb.where('timestamp', '>=', req.query.start)
 	      if(req.query.end) qb.where('timestamp', '<=', req.query.end)
@@ -65,6 +66,35 @@ export class TradeRouter {
 	  })
 	}
 
+
+
+
+  public getBittrexMarkets(req: IRequest, res: Response, next: NextFunction) {
+    (async function () {
+
+      var options = {
+        method: 'POST',
+        uri: 'https://api.idex.market/returnTicker',
+        body: {
+        },
+        json: true // Automatically stringifies the body to JSON
+      };
+      let markets = await rp(options);
+      // let count = await Trade.count('id as count');
+      res.send({markets:Object.keys(markets)});
+    })().catch((error) => {
+      res.status(400).send({success: 0, error: error.message})
+    })
+  }
+  public getBittrexTrades(req: IRequest, res: Response, next: NextFunction) {
+    (async function () {
+
+      let trades = await BittrexTrade.where({}).fetchAll();
+      res.send(trades)
+    })().catch((error) => {
+      res.status(400).send({success: 0, error: error.message})
+    })
+  }
 
   public getCronStatus(req: IRequest, res: Response, next: NextFunction) {
 		res.status(200).send({success: 1, tradeCron: global.tradeCron})
@@ -83,8 +113,11 @@ export class TradeRouter {
   init() {
     this.router.get('/getCronStatus',  this.getCronStatus);
     this.router.get('/setCronStatus',  this.setCronStatus);
-    this.router.get('/markets',  this.getMarkets);
-    this.router.get('/',  this.getTrades);
+    this.router.get('/idex/markets',  this.getIdexMarkets);
+    this.router.get('/idex/trades',  this.getIdexTrades);
+    
+    this.router.get('/bittrex/markets',  this.getBittrexMarkets);
+    this.router.get('/bittrex/trades',  this.getBittrexTrades);
 
     
   }

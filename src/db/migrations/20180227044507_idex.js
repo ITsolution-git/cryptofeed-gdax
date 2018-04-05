@@ -1,8 +1,8 @@
 
 exports.up = function(knex, Promise) {
   
-  return knex.schema.createTable('trades', (table) => {
-    table.increments('trade_id');
+  return knex.schema.createTable('idex_trades', (table) => {
+    table.increments('idex_trade_id');
 
     table.dateTime('date').defaultTo();
     table.text('amount').defaultTo('');
@@ -29,5 +29,5 @@ exports.up = function(knex, Promise) {
 
 exports.down = function(knex, Promise) {
   
-  return knex.schema.dropTable('trades');
+  return knex.schema.dropTable('idex_trades');
 };

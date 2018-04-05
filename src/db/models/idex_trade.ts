@@ -1,12 +1,12 @@
 import bookshelf from '../bookshelf';
 
 import bluebird from 'bluebird';
-import Trade from './trade';
+import IdexTrade from './idex_trade';
 
 export default bookshelf.Model.extend({
-  tableName: 'trades',
+  tableName: 'idex_trades',
   hasTimestamps: true,
-  idAttribute: 'trade_id',
+  idAttribute: 'idex_trade_id',
 
   initialize: function() {
   },
