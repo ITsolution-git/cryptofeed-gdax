@@ -74,7 +74,7 @@ async function runTradeCronForBittrex (){
         
 
         let currentTrades = await BittrexTrade.where({}).fetchAll();
-        currentTrades = currentTrades.toJSON().map(trade=>trade['Id'])
+        currentTrades = currentTrades.toJSON().map(trade=>trade['Quantity'])
         
         let responses = await Promise.all(promises);
 
@@ -86,7 +86,7 @@ async function runTradeCronForBittrex (){
             if(item.result)
               item.result.map(item=>{
                 
-                if(currentTrades.indexOf(item['Id']) == -1)
+                if(currentTrades.indexOf(item['Quantity']) == -1)
                   tradesToAdd.push(new BittrexTrade(Object.assign(item, {market: markets.result[j+index].MarketName})).save() );
               })
           })
@@ -102,7 +102,7 @@ async function runTradeCronForBittrex (){
     } else {
       console.log('Cancelled');
     } 
-    await wait(1000 * 30)
+    await wait(1000 * 60 * 5)
   }
 }
 
