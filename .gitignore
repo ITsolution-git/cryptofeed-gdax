@@ -1,5 +1,5 @@
 #Ignore Folders
-dist/
+
 node_modules/
 public/uploads/*
 cert/
