@@ -1,16 +1,14 @@
 import bookshelf from '../bookshelf';
 
 import bluebird from 'bluebird';
-import BittrexTrade from './bittrex_trade';
+import Quotelog from './quotelog';
 
 export default bookshelf.Model.extend({
-  tableName: 'bittrex_trades',
-  hasTimestamps: true,
-  idAttribute: 'bittrex_trade_id',
+  tableName: 'quotelog',
+  idAttribute: 'priceid',
 
   initialize: function() {
   },
-
 
 }, {
 

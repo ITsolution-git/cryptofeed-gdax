@@ -1,16 +1,14 @@
 import bookshelf from '../bookshelf';
 
 import bluebird from 'bluebird';
-import IdexTrade from './idex_trade';
+import Quote from './quote';
 
 export default bookshelf.Model.extend({
-  tableName: 'idex_trades',
-  hasTimestamps: true,
-  idAttribute: 'idex_trade_id',
+  tableName: 'quote',
+  idAttribute: 'symbol',
 
   initialize: function() {
   },
-
 
 }, {
 

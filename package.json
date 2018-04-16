@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p .",
-    "start": "tsc; node dist/index.js",
+    "start": "tsc; node dist/streamer.js",
     "test": "mocha --reporter spec --compilers ts:ts-node/register test/**/*.test.ts"
   },
   "keywords": [],
@@ -29,36 +29,24 @@
     "typescript": "2.1.6"
   },
   "dependencies": {
-    "bcryptjs": "^2.3.0",
-    "bitcoinjs-lib": "^3.3.2",
-    "bitcore-lib": "^0.15.0",
+    
     "body-parser": "^1.15.2",
     "bookshelf": "^0.10.3",
     "bookshelf-validate": "^2.0.3",
     "bookshelf-validator": "^0.2.2",
-    "checkit": "^0.7.0",
-    "csv-string": "^2.3.2",
+    
     "debug": "^2.2.0",
     "dotenv": "^2.0.0",
-    "express": "^4.14.0",
-    "express-fileupload": "0.0.7",
-    "express-validation": "^1.0.1",
-    "generator-galvanize-express": "^1.2.4",
+    
     "jayson": "^2.0.5",
-    "joi": "9.0.4",
-    "jwt-simple": "^0.5.1",
     "knex": "^0.12.6",
     "moment": "^2.17.1",
     "morgan": "^1.9.0",
     "mysql": "^2.12.0",
     "node-env-file": "^0.1.8",
-    "node-uuid": "^1.4.8",
-    "nodemailer": "^3.1.7",
-    "qr-image": "^3.2.0",
-    "raiblocks-client": "^1.0.0",
     "request": "^2.69.0",
     "request-promise": "^4.2.2",
-    "sendgrid": "^4.8.2",
-    "yo": "^1.8.5"
+    "socket.io": "^2.1.0",
+    "socket.io-client": "^2.1.0"
   }
 }
