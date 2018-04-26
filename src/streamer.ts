@@ -35,7 +35,7 @@ var saveData = async function(current) {
 			low: current.LOW24HOUR,
 			open: current.OPENHOUR,
 			prev_close: current.OPENHOUR,
-			time: new Date(),
+			time: new Date(current.LASTUPDATE * 1000),
 		}
 		
 		if(quote)
@@ -47,7 +47,7 @@ var saveData = async function(current) {
 			qb.where('time', '<=', moment().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'))
 		}).destroy();
 
-		new Quotelog({...value, symbol: symbol, timestamp: new Date().getTime() / 1000}).save(null, {method: 'insert'});
+		new Quotelog({...value, symbol: symbol}).save(null, {method: 'insert'});
 		
 
 	} catch(err) {
