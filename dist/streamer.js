@@ -51,7 +51,7 @@ var saveData = function (current) {
                 low: current.LOW24HOUR,
                 open: current.OPENHOUR,
                 prev_close: current.OPENHOUR,
-                time: new Date(),
+                time: new Date(current.LASTUPDATE * 1000),
             };
             if (quote)
                 quote.save(value);
@@ -60,7 +60,7 @@ var saveData = function (current) {
             let quotelogs = quotelog_1.default.query(function (qb) {
                 qb.where('time', '<=', moment().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'));
             }).destroy();
-            new quotelog_1.default(__assign({}, value, { symbol: symbol, timestamp: new Date().getTime() / 1000 })).save(null, { method: 'insert' });
+            new quotelog_1.default(__assign({}, value, { symbol: symbol })).save(null, { method: 'insert' });
         }
         catch (err) {
             console.log('Error: ', err);
