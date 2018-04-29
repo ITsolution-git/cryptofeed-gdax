@@ -1,12 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -20,7 +12,6 @@ const io = require('socket.io-client');
 var dotenv = require('dotenv').load();
 const moment = require('moment');
 const quote_1 = require("./db/models/quote");
-const quotelog_1 = require("./db/models/quotelog");
 var currentPrice = {};
 var socket = io.connect('https://streamer.cryptocompare.com/');
 //Format: {SubscriptionId}~{ExchangeName}~{FromSymbol}~{ToSymbol}
@@ -42,25 +33,41 @@ var saveData = function (current) {
         try {
             let symbol = current.FROMSYMBOL + '-' + current.TOSYMBOL;
             let quote = yield quote_1.default.where({ symbol: symbol }).fetch();
-            let value = {
-                bid: 0,
-                last: current.PRICE,
-                ask: 0,
-                change: current.CHANGE24HOUR,
-                high: current.HIGH24HOUR,
-                low: current.LOW24HOUR,
-                open: current.OPENHOUR,
-                prev_close: current.OPENHOUR,
-                time: moment.utc().format()
-            };
-            if (quote)
-                quote.save(value);
-            else
-                new quote_1.default(__assign({}, value, { symbol: symbol })).save(null, { method: 'insert' });
-            let quotelogs = quotelog_1.default.query(function (qb) {
-                qb.where('timestamp', '<=', moment.utc().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'));
-            }).destroy();
-            new quotelog_1.default(__assign({}, value, { symbol: symbol })).save(null, { method: 'insert' });
+            var Bookshelf = require('./db/bookshelf');
+            let query = `update quote SET bid=0, last=${current.PRICE}, ask=0,  \`change\`=${current.CHANGE24HOUR.slice(2)},
+		 high=${current.HIGH24HOUR}, low=${current.LOW24HOUR}, 
+			open=${current.OPENHOUR} , prev_close=${current.OPENHOUR}, time=NOW() 
+			where symbol='${symbol}'`;
+            Bookshelf.knex.raw(query).then(() => { });
+            // let value = {
+            // 	bid: 0,
+            // 	last: current.PRICE,
+            // 	ask: 0,
+            // 	change: current.CHANGE24HOUR,
+            // 	high: current.HIGH24HOUR,
+            // 	low: current.LOW24HOUR,
+            // 	open: current.OPENHOUR,
+            // 	prev_close: current.OPENHOUR,
+            // 	time: moment.utc().format()
+            // }
+            // if(quote)
+            // 	quote.save(value);
+            // else
+            // 	new Quote({...value, symbol: symbol}).save(null, {method: 'insert'});
+            Bookshelf.knex.raw(`select priceid from quotelog where timestamp < (UNIX_TIMESTAMP() - 30 * 60)`)
+                .then(res => {
+                if (res[0].length > 0) {
+                    res[0].map(str => {
+                        let q = `DELETE FROM quotelog WHERE priceid=${str.priceid}`;
+                        Bookshelf.knex.raw(q).then(console.log);
+                    });
+                }
+            });
+            let queryquotelog = `insert into quotelog (symbol,bid,last,ask,\`change\`,high,low,open,prev_close,time,timestamp)
+		values('${symbol}',0,${current.PRICE},0,${current.CHANGE24HOUR.slice(2)},${current.HIGH24HOUR},${current.LOW24HOUR},
+		${current.OPENHOUR},${current.OPENHOUR},NOW(),UNIX_TIMESTAMP())`;
+            Bookshelf.knex.raw(queryquotelog).then(res => {
+            });
         }
         catch (err) {
             console.log('Error: ', err);

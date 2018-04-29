@@ -26,30 +26,48 @@ var saveData = async function(current) {
 	try {
 		let symbol = current.FROMSYMBOL + '-' + current.TOSYMBOL;
 		let quote = await Quote.where({symbol: symbol}).fetch();
-		let value = {
-			bid: 0,
-			last: current.PRICE,
-			ask: 0,
-			change: current.CHANGE24HOUR,
-			high: current.HIGH24HOUR,
-			low: current.LOW24HOUR,
-			open: current.OPENHOUR,
-			prev_close: current.OPENHOUR,
-			time: moment.utc().format()
-		}
-		
-		if(quote)
-			quote.save(value);
-		else
-			new Quote({...value, symbol: symbol}).save(null, {method: 'insert'});
-		
-		let quotelogs = Quotelog.query(function(qb) {
-			qb.where('timestamp', '<=', moment.utc().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'))
-		}).destroy();
+		var Bookshelf = require('./db/bookshelf');
 
-		new Quotelog({...value, symbol: symbol}).save(null, {method: 'insert'});
-		
+		let query =`update quote SET bid=0, last=${current.PRICE}, ask=0,  \`change\`=${current.CHANGE24HOUR.slice(2)},
+		 high=${current.HIGH24HOUR}, low=${current.LOW24HOUR}, 
+			open=${current.OPENHOUR} , prev_close=${current.OPENHOUR}, time=NOW() 
+			where symbol='${symbol}'`
 
+		Bookshelf.knex.raw(query).then(()=>{});
+		// let value = {
+		// 	bid: 0,
+		// 	last: current.PRICE,
+		// 	ask: 0,
+		// 	change: current.CHANGE24HOUR,
+		// 	high: current.HIGH24HOUR,
+		// 	low: current.LOW24HOUR,
+		// 	open: current.OPENHOUR,
+		// 	prev_close: current.OPENHOUR,
+		// 	time: moment.utc().format()
+		// }
+		
+		// if(quote)
+		// 	quote.save(value);
+		// else
+		// 	new Quote({...value, symbol: symbol}).save(null, {method: 'insert'});
+		
+		Bookshelf.knex.raw(`select priceid from quotelog where timestamp < (UNIX_TIMESTAMP() - 30 * 60)`)
+		.then(res=>{
+			if(res[0].length > 0){
+				res[0].map(str=>{
+					let q = `DELETE FROM quotelog WHERE priceid=${str.priceid}`;
+					Bookshelf.knex.raw(q).then(console.log);
+				})
+			}
+		})
+
+		let queryquotelog =`insert into quotelog (symbol,bid,last,ask,\`change\`,high,low,open,prev_close,time,timestamp)
+		values('${symbol}',0,${current.PRICE},0,${current.CHANGE24HOUR.slice(2)},${current.HIGH24HOUR},${current.LOW24HOUR},
+		${current.OPENHOUR},${current.OPENHOUR},NOW(),UNIX_TIMESTAMP())`
+
+		Bookshelf.knex.raw(queryquotelog).then(res=>{
+		});
+		
 	} catch(err) {
 		console.log('Error: ', err);
 	}
