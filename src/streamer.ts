@@ -35,6 +35,7 @@ var saveData = async function(current) {
 			low: current.LOW24HOUR,
 			open: current.OPENHOUR,
 			prev_close: current.OPENHOUR,
+			time: moment.utc().format()
 		}
 		
 		if(quote)
@@ -43,7 +44,7 @@ var saveData = async function(current) {
 			new Quote({...value, symbol: symbol}).save(null, {method: 'insert'});
 		
 		let quotelogs = Quotelog.query(function(qb) {
-			qb.where('time', '<=', moment().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'))
+			qb.where('timestamp', '<=', moment.utc().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'))
 		}).destroy();
 
 		new Quotelog({...value, symbol: symbol}).save(null, {method: 'insert'});

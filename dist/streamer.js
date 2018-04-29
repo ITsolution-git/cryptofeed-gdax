@@ -51,13 +51,14 @@ var saveData = function (current) {
                 low: current.LOW24HOUR,
                 open: current.OPENHOUR,
                 prev_close: current.OPENHOUR,
+                time: moment.utc().format()
             };
             if (quote)
                 quote.save(value);
             else
                 new quote_1.default(__assign({}, value, { symbol: symbol })).save(null, { method: 'insert' });
             let quotelogs = quotelog_1.default.query(function (qb) {
-                qb.where('time', '<=', moment().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'));
+                qb.where('timestamp', '<=', moment.utc().subtract(30, 'minutes').format('YYYY-MM-DD HH-mm-ss'));
             }).destroy();
             new quotelog_1.default(__assign({}, value, { symbol: symbol })).save(null, { method: 'insert' });
         }
