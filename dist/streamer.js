@@ -51,7 +51,6 @@ var saveData = function (current) {
                 low: current.LOW24HOUR,
                 open: current.OPENHOUR,
                 prev_close: current.OPENHOUR,
-                time: new Date(current.LASTUPDATE * 1000),
             };
             if (quote)
                 quote.save(value);
