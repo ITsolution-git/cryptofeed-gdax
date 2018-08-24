@@ -1,56 +1,87 @@
-import CCC from './streamer_utilities';
-const io = require('socket.io-client');
+const Gdax = require('../gdax');
+const publicClient = new Gdax.PublicClient();
+
 var dotenv = require('dotenv').load();
 const moment = require('moment');
 import Quote from './db/models/quote';
 import Quotelog from './db/models/quotelog';
 
-var currentPrice = {};
-var socket = io.connect('https://streamer.cryptocompare.com/');
-//Format: {SubscriptionId}~{ExchangeName}~{FromSymbol}~{ToSymbol}
-//Use SubscriptionId 0 for TRADE, 2 for CURRENT and 5 for CURRENTAGG
-//For aggregate quote updates use CCCAGG as market
-// , '5~CCCAGG~DASH~USD', '5~CCCAGG~XRP~USD'
-var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD', '5~CCCAGG~DASH~USD', '5~CCCAGG~BCH~USD', '5~CCCAGG~LTC~USD', '5~CCCAGG~BTG~USD', '5~CCCAGG~XRP~USD', '5~CCCAGG~ETC~USD'];
-socket.emit('SubAdd', { subs: subscription });
-socket.on("m", function(message) {
-	var messageType = message.substring(0, message.indexOf("~"));
-	var res = {};
-	if (messageType == CCC.STATIC.TYPE.CURRENTAGG) {
-		res = CCC.CURRENT.unpack(message);
-		dataUnpack(res);
-	}
+// const websocket = new Gdax.WebsocketClient(
+//   ['BTC-USD', 'ETH-USD' ,'DASH~USD', 'BCH-USD', 'LTC-USD', 'BTG-USD', 'XRP-USD', 'ETC-USD'],
+//   'wss://ws-feed-public.sandbox.gdax.com',
+//   { channels: ['ticker'] });
+ 
+// websocket.on('message', data => {
+// 	console.log(data);
+// });
+// websocket.on('error', err => {
+//   	console.log(err, 'err');
+// });
+
+// websocket.on('close', (err) => {
+//   	console.log(err);
+// });
+const BFX = require('bitfinex-api-node')
+const bfx = new BFX({
+
+})
+const ws = bfx.ws(2, { transform: true })
+
+ws.on('open', () => {
+	ws.subscribeTicker('tBTCUSD')
+	ws.subscribeTicker('tETHUSD')
+	// ws.subscribeTicker('tDASHUSD')
+	ws.subscribeTicker('tBCHUSD')
+	ws.subscribeTicker('tLTCUSD')
+	ws.subscribeTicker('tBTGUSD')
+	ws.subscribeTicker('tXRPUSD')
+	ws.subscribeTicker('tETCUSD')
 });
 
+ws.on('ticker', (pair, ticker) => {
+	let symbol = '';
+	switch(pair) {
+		case 'tBTCUSD':
+			symbol = 'BTC-USD';
+			break;
+		case 'tETHUSD':
+			symbol = 'ETH-USD';
+			break;
+		case 'tDASHUSD':
+			symbol = 'DASH-USD';
+			break;
+		case 'tBCHUSD':
+			symbol = 'BCH-USD';
+			break;
+		case 'tLTCUSD':
+			symbol = 'LTC-USD';
+			break;
+		case 'tBTGUSD':
+			symbol = 'BTG-USD';
+			break;
+		case 'tXRPUSD':
+			symbol = 'XRP-USD';
+			break;
+		case 'tETCUSD':
+			symbol = 'ETC-USD';
+			break;
+	}
+	if (symbol)
+		saveData({symbol: symbol, ...ticker})
+})
+ws.open();
 var saveData = async function(current) {
 	try {
-		let symbol = current.FROMSYMBOL + '-' + current.TOSYMBOL;
+		let symbol = current.symbol;
 		let quote = await Quote.where({symbol: symbol}).fetch();
 		var Bookshelf = require('./db/bookshelf');
 
-		let query =`update quote SET bid=0, last=${current.PRICE}, ask=0,  \`change\`=${current.CHANGE24HOUR.slice(2)},
-		 high=${current.HIGH24HOUR}, low=${current.LOW24HOUR}, 
-			open=${current.OPENHOUR} , prev_close=${current.OPENHOUR}, time=NOW() 
+		let query =`update quote SET bid=${current.bid}, last=${current.lastPrice}, ask=${current.ask},  \`change\`=${current.dailyChange},
+		 high=${current.high}, low=${current.low}, 
+			open=0 , prev_close=0, time=NOW() 
 			where symbol='${symbol}'`
 
 		Bookshelf.knex.raw(query).then(()=>{});
-		// let value = {
-		// 	bid: 0,
-		// 	last: current.PRICE,
-		// 	ask: 0,
-		// 	change: current.CHANGE24HOUR,
-		// 	high: current.HIGH24HOUR,
-		// 	low: current.LOW24HOUR,
-		// 	open: current.OPENHOUR,
-		// 	prev_close: current.OPENHOUR,
-		// 	time: moment.utc().format()
-		// }
-		
-		// if(quote)
-		// 	quote.save(value);
-		// else
-		// 	new Quote({...value, symbol: symbol}).save(null, {method: 'insert'});
-		
 		Bookshelf.knex.raw(`select priceid from quotelog where timestamp < (UNIX_TIMESTAMP() - 30 * 60)`)
 		.then(res=>{
 			if(res[0].length > 0){
@@ -62,9 +93,8 @@ var saveData = async function(current) {
 		})
 
 		let queryquotelog =`insert into quotelog (symbol,bid,last,ask,\`change\`,high,low,open,prev_close,time,timestamp)
-		values('${symbol}',0,${current.PRICE},0,${current.CHANGE24HOUR.slice(2)},${current.HIGH24HOUR},${current.LOW24HOUR},
-		${current.OPENHOUR},${current.OPENHOUR},NOW(),UNIX_TIMESTAMP())`
-
+		values('${symbol}',${current.bid},${current.lastPrice},${current.ask},${current.dailyChange},${current.high},${current.low},0,0,NOW(),UNIX_TIMESTAMP())`
+		
 		Bookshelf.knex.raw(queryquotelog).then(res=>{
 		});
 		

@@ -1,0 +1,112 @@
+{
+  "_from": "gdax",
+  "_id": "gdax@0.8.0",
+  "_inBundle": false,
+  "_integrity": "sha512-vBIjEk1q8IyulEOcjewcuPA5Aob25T1xUPUKLtQIrj4g1cxvdxCob7uoJbGZ4B1YVTnx1pvOaVY8Zu6ncL5YnA==",
+  "_location": "/gdax",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "gdax",
+    "name": "gdax",
+    "escapedName": "gdax",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/gdax/-/gdax-0.8.0.tgz",
+  "_shasum": "1f6a82c4be608c24189afd66ad4ab0c13fae722a",
+  "_spec": "gdax",
+  "_where": "/home/pioneer/work/work/gregory/cryptofeed-gdax",
+  "author": {
+    "name": "Coinbase"
+  },
+  "bugs": {
+    "url": "https://github.com/coinbase/gdax-node/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Peter Downs",
+      "email": "peterldowns@gmail.com",
+      "url": "http://peterdowns.com"
+    },
+    {
+      "name": "Maksim Stepanenko",
+      "email": "maksimus16@gmail.com",
+      "url": "http://maksim.ms"
+    },
+    {
+      "name": "Miha Rebernik",
+      "email": "miha@rebernik.info",
+      "url": "http://miha.rebernik.info"
+    }
+  ],
+  "dependencies": {
+    "@types/request": "2.47.0",
+    "bignumber.js": "^6.0.0",
+    "bintrees": "^1.0.1",
+    "request": "^2.81.0",
+    "ws": "^4.0.0"
+  },
+  "deprecated": false,
+  "description": "Client for the GDAX API",
+  "devDependencies": {
+    "eslint": "^4.0.0",
+    "husky": "^0.13.4",
+    "lint-staged": "^3.6.1",
+    "mocha": "^5.0.0",
+    "nock": "^9.0.13",
+    "prettier": "^1.9.2"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "homepage": "https://github.com/coinbase/gdax-node",
+  "keywords": [
+    "API",
+    "bitcoin",
+    "coinbase",
+    "exchange",
+    "real-time",
+    "trading",
+    "websockets",
+    "gdax",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{json,md}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "main": "index.js",
+  "name": "gdax",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/coinbase/gdax-node.git"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "precommit": "lint-staged",
+    "prettier": "prettier -l README.md *.js **/*.js",
+    "prettier-write": "npm run prettier -- --write",
+    "test": "mocha --full-trace --ui tdd --bail --reporter spec tests/*.js"
+  },
+  "types": "index.d.ts",
+  "version": "0.8.0"
+}
