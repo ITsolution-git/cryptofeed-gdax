@@ -74,9 +74,10 @@ ws.on('ticker', (pair, ticker) => {
             symbol = 'ETC-USD';
             break;
     }
-    console.log(ticker);
-    if (symbol)
-        saveData(__assign({ symbol: symbol }, ticker));
+    if (symbol) {
+        saveData(__assign({}, ticker, { symbol: symbol }));
+        console.log(__assign({}, ticker, { symbol: symbol }));
+    }
 });
 ws.open();
 var saveData = function (current) {
@@ -101,7 +102,6 @@ var saveData = function (current) {
             });
             let queryquotelog = `insert into quotelog (symbol,bid,last,ask,\`change\`,high,low,open,prev_close,time,timestamp)
 		values('${symbol}',${current.bid},${current.lastPrice},${current.ask},${current.dailyChange},${current.high},${current.low},0,0,NOW(),UNIX_TIMESTAMP())`;
-            console.log(query, queryquotelog);
             Bookshelf.knex.raw(queryquotelog).then(res => {
             });
         }

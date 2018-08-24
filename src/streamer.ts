@@ -66,8 +66,10 @@ ws.on('ticker', (pair, ticker) => {
 			symbol = 'ETC-USD';
 			break;
 	}
-	if (symbol)
-		saveData({symbol: symbol, ...ticker})
+	if (symbol) {
+		saveData({...ticker, symbol: symbol})
+		console.log({...ticker, symbol: symbol});		
+	}
 })
 ws.open();
 var saveData = async function(current) {
