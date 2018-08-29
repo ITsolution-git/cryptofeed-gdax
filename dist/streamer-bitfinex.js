@@ -33,30 +33,6 @@ const quote_1 = require("./db/models/quote");
 // websocket.on('close', (err) => {
 //   	console.log(err);
 // });
-const bittrex = require('./bittrex-wrapper');
-bittrex.options({
-    'verbose': true,
-});
-bittrex.options({
-    verbose: true,
-    websockets: {
-        onConnect: function () {
-            console.log('onConnect fired', bittrex.websockets.subscribeTicker);
-            bittrex.websockets.listen(function (data, client) {
-                if (data && data.A && data.A[0].Deltas) {
-                    data.A[0].Deltas.map(item => {
-                        if (item.MarketName == 'USDT-DASH')
-                            saveData({ bid: item.Bid, lastPrice: item.Last, ask: item.Ask, dailyChange: 0, high: item.High, low: item.Low, open: 0, prev_close: 0, symbol: 'DASH-USD' });
-                    });
-                }
-            });
-        },
-    }
-});
-console.log('Connecting ....');
-bittrex.websockets.client(function (client) {
-    console.log('Connected');
-});
 const BFX = require('bitfinex-api-node');
 const bfx = new BFX({});
 const ws = bfx.ws(2, { transform: true });
@@ -100,6 +76,7 @@ ws.on('ticker', (pair, ticker) => {
     }
     if (symbol) {
         saveData(__assign({}, ticker, { symbol: symbol }));
+        console.log(__assign({}, ticker, { symbol: symbol }));
     }
 });
 ws.open();
@@ -153,4 +130,4 @@ var dataUnpack = function (data) {
     ;
     saveData(currentPrice[pair]);
 };
-//# sourceMappingURL=streamer.js.map
+//# sourceMappingURL=streamer-bitfinex.js.map
